@@ -9,8 +9,8 @@ class ConfigurationBaseDeDonnees {
         'nomHote' => '162.38.222.142',
         'nomBaseDeDonnees' => 'iut',
         'port' => '5673',
-        'login' => 'a_completer',
-        'motDePasse' => 'a_completer'
+        'login' => 'dumeniaudk',
+        'motDePasse' => 'K+0aDZfVK#Z8t_O*6_1NIgUaf+xu*$ea'
     );
 
     static public function getLogin() : string {
