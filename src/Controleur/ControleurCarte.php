@@ -10,6 +10,9 @@ use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurCarte extends ControleurGenerique
 {
@@ -18,13 +21,14 @@ class ControleurCarte extends ControleurGenerique
         parent::afficherErreur($messageErreur, "carte");
     }
 
-    public static function supprimerCarte(): void {
+    #[Route(path: '/carte/{idCarte}/suppression', name:'supprimer_carte', methods:["GET"])]
+    public static function supprimerCarte(string $idCarte): RedirectResponse {
         if(!ConnexionUtilisateur::estConnecte()) {
-            ControleurCarte::redirection("utilisateur", "afficherFormulaireConnexion");
+            return self::rediriger("connexion");
         }
         if(!ControleurCarte::issetAndNotNull(["idCarte"])) {
             MessageFlash::ajouter("warning", "Code de carte manquant");
-            ControleurCarte::redirection("base", "accueil");
+            return self::rediriger("accueil");
         }
         $carteRepository = new CarteRepository();
         $idCarte = $_REQUEST["idCarte"];
@@ -57,6 +61,7 @@ class ControleurCarte extends ControleurGenerique
         }
     }
 
+    #[Route(path: '/carte/creation', name:'creation_carte', methods:["GET"])]
     public static function afficherFormulaireCreationCarte(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurCarte::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -88,6 +93,7 @@ class ControleurCarte extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: '/carte/creation', name:'creer_carte', methods:["POST"])]
     public static function creerCarte(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurCarte::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -146,7 +152,8 @@ class ControleurCarte extends ControleurGenerique
         ControleurCarte::redirection("tableau", "afficherTableau", ["codeTableau" => $tableau->getCodeTableau()]);
     }
 
-    public static function afficherFormulaireMiseAJourCarte(): void {
+    #[Route(path: '/carte/{idCarte}/mise-a-jour', name:'mise_a_jour_carte', methods:["GET"])]
+    public static function afficherFormulaireMiseAJourCarte(string $idCarte): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurCarte::redirection("utilisateur", "afficherFormulaireConnexion");
         }
@@ -178,7 +185,8 @@ class ControleurCarte extends ControleurGenerique
         ]);
     }
 
-    public static function mettreAJourCarte(): void {
+    #[Route(path: '/carte/{idCarte}/mettre_a_jour', name:'mettre_a_jour_carte', methods:["POST"])]
+    public static function mettreAJourCarte(string $idCarte): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurCarte::redirection("utilisateur", "afficherFormulaireConnexion");
         }

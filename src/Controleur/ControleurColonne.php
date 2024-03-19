@@ -10,6 +10,7 @@ use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
+use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurColonne extends ControleurGenerique
 {
@@ -18,6 +19,7 @@ class ControleurColonne extends ControleurGenerique
         parent::afficherErreur($messageErreur, "colonne");
     }
 
+    #[Route(path: '/colonne/{idColonne}/supprimer', name:'supprimer_colonne', methods:["GET"])]
     public static function supprimerColonne(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurColonne::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -58,6 +60,7 @@ class ControleurColonne extends ControleurGenerique
         ControleurCarte::redirection("tableau", "afficherListeMesTableaux");
     }
 
+    #[Route(path: '/colonne/creation', name:'creation_colonne', methods:["GET"])]
     public static function afficherFormulaireCreationColonne(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurColonne::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -86,6 +89,7 @@ class ControleurColonne extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: '/colonne/creation', name:'creer_colonne', methods:["POST"])]
     public static function creerColonne(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurColonne::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -130,6 +134,7 @@ class ControleurColonne extends ControleurGenerique
         ControleurColonne::redirection("tableau", "afficherTableau", ["codeTableau" => $tableau->getCodeTableau()]);
     }
 
+    #[Route(path: '/colonne/{idColonne}/mise-a-jour', name:'mise_a_jour_colonne', methods:["GET"])]
     public static function afficherFormulaireMiseAJourColonne(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurColonne::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -160,6 +165,7 @@ class ControleurColonne extends ControleurGenerique
         ]);
     }
 
+    #[Route(path: '/colonne/{idColonne}/mise_a_jour', name:'mettre_a_jour_colonne', methods:["POST"])]
     public static function mettreAJourColonne(): void {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurColonne::redirection("utilisateur", "afficherFormulaireConnexion");
