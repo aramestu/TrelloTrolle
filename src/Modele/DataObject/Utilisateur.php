@@ -10,7 +10,6 @@ class Utilisateur extends AbstractDataObject
         private string $prenom,
         private string $email,
         private string $mdpHache,
-        private string $mdp,
     )
     {}
 
@@ -21,7 +20,6 @@ class Utilisateur extends AbstractDataObject
             $objetFormatTableau["prenom"],
             $objetFormatTableau["email"],
             $objetFormatTableau["mdphache"],
-            $objetFormatTableau["mdp"],
         );
     }
 
@@ -77,17 +75,6 @@ class Utilisateur extends AbstractDataObject
         $this->mdpHache = $mdpHache;
     }
 
-    public function getMdp(): string
-    {
-        return $this->mdp;
-    }
-
-
-    public function setMdp(string $mdp): void
-    {
-        $this->mdp = $mdp;
-    }
-
     public function getEmail(): string
     {
         return $this->email;
@@ -105,7 +92,6 @@ class Utilisateur extends AbstractDataObject
             "prenom" => $this->prenom,
             "email" => $this->email,
             "mdphache" => $this->mdpHache,
-            "mdp" => $this->mdp
         ];
     }
 
@@ -125,7 +111,6 @@ class Utilisateur extends AbstractDataObject
             "prenomTag" => $this->prenom,
             "emailTag" => $this->email,
             "mdphacheTag" => $this->mdpHache,
-            "mdpTag" => $this->mdp,
         );
     }
 }

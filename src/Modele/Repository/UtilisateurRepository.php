@@ -11,7 +11,7 @@ class UtilisateurRepository extends AbstractRepository
 
     protected function getNomTable(): string
     {
-        return "app_db";
+        return "Utilisateurs";
     }
 
     protected function getNomCle(): string
@@ -21,7 +21,7 @@ class UtilisateurRepository extends AbstractRepository
 
     protected function getNomsColonnes(): array
     {
-        return ["login", "nom", "prenom", "email", "mdphache", "mdp"];
+        return ["login", "nom", "prenom", "email", "mdphache"];
     }
 
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
