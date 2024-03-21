@@ -12,13 +12,14 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurTableau extends ControleurGenerique
 {
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
-        parent::afficherErreur($messageErreur, "tableau");
+        return parent::afficherErreur($messageErreur, "tableau");
     }
 
     #[Route(path: '/tableau/{codeTableau}/afficher', name:'afficher_tableau', methods:["GET"])]

@@ -20,9 +20,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class ControleurUtilisateur extends ControleurGenerique
 {
 
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
-        parent::afficherErreur($messageErreur, "utilisateur");
+        return parent::afficherErreur($messageErreur, "utilisateur");
     }
 
     #[Route(path: '/utilisateur/details', name:'detail_utilisateur', methods:["GET"])]

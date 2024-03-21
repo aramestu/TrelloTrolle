@@ -48,7 +48,7 @@ class ControleurGenerique {
         exit();
     }
 
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
         $messageErreurVue = "Problème";
         if ($controleur !== "")
@@ -56,7 +56,7 @@ class ControleurGenerique {
         if ($messageErreur !== "")
             $messageErreurVue .= " : $messageErreur";
 
-        ControleurGenerique::afficherVue('vueGenerale.php', [
+        return ControleurGenerique::afficherVue('vueGenerale.php', [
             "pagetitle" => "Problème",
             "cheminVueBody" => "erreur.php",
             "messageErreur" => $messageErreurVue
