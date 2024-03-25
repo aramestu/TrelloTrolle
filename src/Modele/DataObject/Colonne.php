@@ -5,7 +5,7 @@ namespace App\Trellotrolle\Modele\DataObject;
 class Colonne extends AbstractDataObject
 {
     public function __construct(
-        private Tableau $tableau,
+        private int $idTableau,
         private int $idColonne,
         private string $titreColonne
     )
@@ -13,20 +13,20 @@ class Colonne extends AbstractDataObject
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Colonne {
         return new Colonne(
-            Tableau::construireDepuisTableau($objetFormatTableau),
+            $objetFormatTableau["idTableau"],
             $objetFormatTableau["idcolonne"],
             $objetFormatTableau["titrecolonne"],
         );
     }
 
-    public function getTableau(): Tableau
+    public function getTableau(): int
     {
-        return $this->tableau;
+        return $this->idTableau;
     }
 
-    public function setTableau(Tableau $tableau): void
+    public function setTableau(int $tableau): void
     {
-        $this->tableau = $tableau;
+        $this->idTableau = $tableau;
     }
 
     public function getIdColonne(): ?int
@@ -51,12 +51,10 @@ class Colonne extends AbstractDataObject
 
     public function formatTableau(): array
     {
-        return array_merge(
-            $this->tableau->formatTableau(),
-            array(
-                "idcolonneTag" => $this->idColonne,
-                "titrecolonneTag" => $this->titreColonne,
-            ),
-        );
+        return array(
+                "idColonneTag" => $this->idColonne,
+                "titreColonneTag" => $this->titreColonne,
+                "idTableauTag" => $this->idTableau
+            );
     }
 }
