@@ -1,0 +1,53 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Nouvelle carte{% endblock %}
+
+{% set tableau = colonne.tableau %}
+{% set proprietaire = tableau.proprietaire %}
+
+{% block page_content %}
+    <div>
+        <form method="post" action="{{ route('creer_carte') }}">
+            <fieldset>
+                <h3>Création d'une carte :</h3>
+                <p>
+                    <label for="titreCarte">Titre de la carte&#42;</label> :
+                    <input type="text" placeholder="Ma super tâche" name="titreCarte" id="titreCarte" minlength="1" maxlength="50" required>
+                </p>
+                <p>
+                    <label for="descriptifCarte">Description de la carte&#42;</label> :
+                    <div>
+                        <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte" required></textarea>
+                    </div>
+                </p>
+                <p>
+                    <label for="couleurCarte">Couleur de la carte&#42;</label> :
+                    <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte" required>
+                </p>
+                <p>
+                    <label for="idColonne">Colonne de la carte&#42;</label> :
+                    <select name="idColonne" id="idColonne">
+                        {% for optColonne in colonnes %}
+                            <option {{ (optColonne.idColonne === colonne.idColonne) ? "selected" : "" }}
+                                    value="{{ optColonne.idColonne }}">{{ colonneOption.titreColonne }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <p>
+                    <label for="affectationsCarte">Membres affectés :</label>
+                    <div>
+                        <select multiple name="affectationsCarte[]" id="affectationsCarte">
+                            <option value="{{ proprietaire.login }}">{{ proprietaire.prenom }} {{ proprietaire.nom }} ({{ proprietaire.login }})</option>
+                            {% for membre in tableau.participants %}
+                                <option value="{{ membre.login }}">{{ membre.prenom }} {{ membre.nom }} ({{ membre.login }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </p>
+                <p>
+                    <input type="submit" value="Créer la carte">
+                </p>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}

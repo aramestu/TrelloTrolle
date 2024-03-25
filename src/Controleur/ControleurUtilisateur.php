@@ -32,7 +32,7 @@ class ControleurUtilisateur extends ControleurGenerique
             return self::rediriger("connexion");
         }
         $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire(ConnexionUtilisateur::getLoginUtilisateurConnecte());
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "utilisateur" => $utilisateur,
             "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}",
             "cheminVueBody" => "utilisateur/detail.php"
@@ -45,7 +45,7 @@ class ControleurUtilisateur extends ControleurGenerique
         if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Création d'un utilisateur",
             "cheminVueBody" => "utilisateur/formulaireCreation.php"
         ]);
@@ -180,7 +180,7 @@ class ControleurUtilisateur extends ControleurGenerique
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
         $repository = new UtilisateurRepository();
         $utilisateur = $repository->recupererParClePrimaire($login);
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Mise à jour du profil",
             "cheminVueBody" => "utilisateur/formulaireMiseAJour.php",
             "utilisateur" => $utilisateur,
@@ -304,7 +304,7 @@ class ControleurUtilisateur extends ControleurGenerique
         if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Formulaire de connexion",
             "cheminVueBody" => "utilisateur/formulaireConnexion.php"
         ]);
@@ -358,7 +358,7 @@ class ControleurUtilisateur extends ControleurGenerique
         if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Récupérer mon compte",
             "cheminVueBody" => "utilisateur/resetCompte.php"
         ]);
@@ -379,7 +379,7 @@ class ControleurUtilisateur extends ControleurGenerique
             MessageFlash::ajouter("warning", "Aucun compte associé à cette adresse email");
             return $this->rediriger("connexion");
         }
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Récupérer mon compte",
             "cheminVueBody" => "utilisateur/resultatResetCompte.php",
             "utilisateurs" => $utilisateurs
