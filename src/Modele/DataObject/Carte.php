@@ -2,35 +2,37 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
+use App\Trellotrolle\Modele\Repository\CarteRepository;
+
 class Carte extends AbstractDataObject
 {
     public function __construct(
-        private Colonne $colonne,
         private int $idCarte,
         private string $titreCarte,
         private string $descriptifCarte,
         private string $couleurCarte,
+        private int $idColonne,
         private array $affectationsCarte,
     )
     {}
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Carte {
         return new Carte(
-            Colonne::construireDepuisTableau($objetFormatTableau),
             $objetFormatTableau["idcarte"],
             $objetFormatTableau["titrecarte"],
             $objetFormatTableau["descriptifcarte"],
             $objetFormatTableau["couleurcarte"],
-            Utilisateur::construireUtilisateursDepuisJson($objetFormatTableau["affectationscarte"])
+            $objetFormatTableau["idcolonne"],
+            CarteRepository::recupererAffectationsCartes($objetFormatTableau["idcarte"])
         );
     }
 
-    public function getColonne(): Colonne
+    public function getColonne(): int
     {
         return $this->colonne;
     }
 
-    public function setColonne(Colonne $colonne): void
+    public function setColonne(int $colonne): void
     {
         $this->colonne = $colonne;
     }
@@ -87,16 +89,13 @@ class Carte extends AbstractDataObject
 
     public function formatTableau(): array
     {
-        return array_merge(
-            $this->colonne->formatTableau(),
-            array(
+            return array(
                 "idcarteTag" => $this->idCarte,
                 "titrecarteTag" => $this->titreCarte,
                 "descriptifcarteTag" => $this->descriptifCarte,
                 "couleurcarteTag" => $this->couleurCarte,
-                "affectationscarteTag" => Utilisateur::formatJsonListeUtilisateurs($this->affectationsCarte)
-            ),
-        );
+                "idColonneTag" => $this->idColonne
+            );
     }
 
 }

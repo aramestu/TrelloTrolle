@@ -11,21 +11,18 @@ class CarteRepository extends AbstractRepository
 
     protected function getNomTable(): string
     {
-        return "app_db";
+        return "Cartes";
     }
 
     protected function getNomCle(): string
     {
-        return "idcarte";
+        return "idCarte";
     }
 
     protected function getNomsColonnes(): array
     {
         return [
-            "login", "nom", "prenom", "email", "mdphache",
-            "mdp", "idtableau", "codetableau", "titretableau",
-            "participants", "idcolonne", "titrecolonne",
-            "idcarte", "titrecarte", "descriptifcarte", "couleurcarte", "affectationscarte"
+            "idCarte", "titreCarte", "descriptifCarte", "couleurCarte", "idColonne"
         ];
     }
 
@@ -35,13 +32,17 @@ class CarteRepository extends AbstractRepository
     }
 
     public function recupererCartesColonne(int $idcolonne): array {
-        return $this->recupererPlusieursPar("idcolonne", $idcolonne);
+        return $this->recupererPlusieursPar("idColonne", $idcolonne);
     }
 
+
+    //Cette fonction ne va surement pas fonctionner avec la nouvelle BD
     public function recupererCartesTableau(int $idTableau): array {
         return $this->recupererPlusieursPar("idtableau", $idTableau);
     }
 
+
+    //Cette fonction ne va surement pas fonctionner avec la nouvelle BD
     /**
      * @return Carte[]
      */
@@ -61,14 +62,21 @@ class CarteRepository extends AbstractRepository
     }
 
     public function getNombreCartesTotalUtilisateur(string $login) : int {
-        $query = "SELECT COUNT(*) FROM app_db WHERE login=:login";
+        $query = "SELECT COUNT(*) FROM Affecter WHERE login=:login";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
         $pdoStatement->execute(["login" => $login]);
         $obj = $pdoStatement->fetch();
         return $obj[0];
     }
 
+    public static function recupererAffectationsCartes(string $idCarte): array {
+        $sql = "SELECT login FROM Affecter WHERE idCarte=:idCarte";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement->execute(["idCarte" => $idCarte]);
+        return $pdoStatement->fetch();
+    }
+
     public function getNextIdCarte() : int {
-        return $this->getNextId("idcarte");
+        return $this->getNextId("idCarte");
     }
 }
