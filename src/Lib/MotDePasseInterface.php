@@ -13,5 +13,5 @@ interface MotDePasseInterface
     /**
      * @throws Exception
      */
-    public function genererChaineAleatoire(int $nbCaracteres = 22): string;
+    public function genererChaineAleatoire(int $nbCaracteres): string;
 }

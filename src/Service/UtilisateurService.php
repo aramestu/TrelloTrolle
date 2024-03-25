@@ -19,8 +19,11 @@ class UtilisateurService implements UtilisateurServiceInterface
      */
     public function getUtilisateur(?int $idUtilisateurConnecte) :?Utilisateur{
         if(is_null($idUtilisateurConnecte)){
-            throw new ServiceException( "L'identifiant n'est pas renseigné", Response::HTTP_NOT_FOUND);
+            throw new ServiceException( "L'identifiant n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
+        /**
+         * @var Utilisateur $utilisateur
+         */
         $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire($idUtilisateurConnecte);
 
         if(is_null($utilisateur)){
@@ -55,10 +58,7 @@ class UtilisateurService implements UtilisateurServiceInterface
      */
     private function verifierMotDePasseClair($mdp) : void{
         if (!preg_match("#^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,20}$#", $mdp)) {
-            throw new ServiceException( "Mot de passe invalide!", Response::HTTP_BAD_REQUEST);
-        }
-        if(strlen($mdp) > 256){
-            throw new ServiceException( "Le mot de passe ne doit pas faire plus de 256 caractères", Response::HTTP_BAD_REQUEST);
+            throw new ServiceException( "Le mot de passe doit avoir une minuscule, majuscule, un nombre et faire entre 8 et 20 caractères!", Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -66,7 +66,9 @@ class UtilisateurService implements UtilisateurServiceInterface
      * @throws ServiceException
      */
     private function verifierNomEtPrenomCorrecte($nom, $prenom): void{
-        if(strlen($nom) > 32 || strlen($prenom) > 32){
+        $nbNom = strlen($nom);
+        $nbPrenom = strlen($prenom);
+        if($nbNom > 32 || $nbPrenom > 32 || $nbNom < 2 || $nbPrenom < 2){
             throw new ServiceException( "Le nom et le prénom ne doivent pas faire plus de 32 caractères", Response::HTTP_BAD_REQUEST);
         }
     }
@@ -97,7 +99,7 @@ class UtilisateurService implements UtilisateurServiceInterface
      */
     public function creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2): void{
         if(is_null($login) || is_null($mdp) || is_null($email) || is_null($nom) || is_null($prenom) || is_null($mdp2)){
-            throw new ServiceException("le login ou le mdp ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_NOT_FOUND);
+            throw new ServiceException("le login ou le mdp ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
 
         // Throw une erreur si une donnée n'est pas correcte
@@ -115,7 +117,7 @@ class UtilisateurService implements UtilisateurServiceInterface
 
         $mdpHache = $this->motDePasse->hacher($mdp);
 
-        $utilisateur = Utilisateur::construireDepuisTableau($login, $nom, $prenom, $email, $mdpHache);
+        $utilisateur = new Utilisateur($login, $nom, $prenom, $email, $mdpHache);
         $this->utilisateurRepository->ajouter($utilisateur);
     }
 
@@ -159,6 +161,7 @@ class UtilisateurService implements UtilisateurServiceInterface
         if(is_null($loginUtilisateurConnecte)){
             throw new ServiceException("le login n'a pas été renseigné", Response::HTTP_NOT_FOUND);
         }
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
         // TODO: Redéfinir la méthode supprimer dans le repository pour supprimer le tableau de tous les Tableaux, Participer et Affecter sinon on pourra pas le Delete
         // TODO: A moins que ce soit le service qui le fasse ? JSP, les 2 semblent pas mal surtout la première option à mon avis
