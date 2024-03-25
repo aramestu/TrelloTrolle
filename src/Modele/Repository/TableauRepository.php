@@ -7,7 +7,7 @@ use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use Exception;
 
-class TableauRepository extends AbstractRepository
+class TableauRepository extends AbstractRepository implements TableauRepositoryInterface
 {
     protected function getNomTable(): string
     {

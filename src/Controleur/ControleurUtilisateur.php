@@ -14,20 +14,39 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use App\Trellotrolle\Service\Exception\ServiceException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\Trellotrolle\Lib\ConnexionUtilisateurInterface;
+use App\Trellotrolle\Service\PublicationServiceInterface;
+use App\Trellotrolle\Service\UtilisateurServiceInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
+
+    public function __construct(ContainerInterface $container,
+                                private UtilisateurServiceInterface $serviceUtilisateur,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurSession,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT,
+    ){
+        parent::__construct($container);
+    }
     public static function afficherErreur($messageErreur = "", $controleur = ""): void
     {
         parent::afficherErreur($messageErreur, "utilisateur");
     }
 
-    public static function afficherDetail(): void
+    public function afficherDetail(): Response
     {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
         }
-        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire(ConnexionUtilisateur::getLoginUtilisateurConnecte());
+        try{
+            $utilisateur = $this->serviceUtilisateur->afficherDetail($this->connexionUtilisateurSession->getLoginUtilisateurConnecte());
+        }catch (ServiceException $e){
+            MessageFlash::ajouter("error", $e->getMessage());
+            return $this->rediriger("afficherFormulaireConnexion");
+        }
         ControleurUtilisateur::afficherVue('vueGenerale.php', [
             "utilisateur" => $utilisateur,
             "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}",
@@ -35,7 +54,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    public static function afficherFormulaireCreation(): void
+    public function afficherFormulaireCreation(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
@@ -46,7 +65,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    public static function creerDepuisFormulaire(): void
+    public function creerDepuisFormulaire(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
@@ -165,7 +184,7 @@ class ControleurUtilisateur extends ControleurGenerique
         }
     }
 
-    public static function afficherFormulaireMiseAJour(): void
+    public function afficherFormulaireMiseAJour(): void
     {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -180,7 +199,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    public static function mettreAJour(): void
+    public function mettreAJour(): void
     {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -252,7 +271,7 @@ class ControleurUtilisateur extends ControleurGenerique
         }
     }
 
-    public static function supprimer(): void
+    public function supprimer(): void
     {
         if(!ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
@@ -289,7 +308,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
     }
 
-    public static function afficherFormulaireConnexion(): void
+    public function afficherFormulaireConnexion(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
@@ -300,7 +319,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    public static function connecter(): void
+    public function connecter(): void
     {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
@@ -330,7 +349,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ControleurUtilisateur::redirection("tableau", "afficherListeMesTableaux");
     }
 
-    public static function deconnecter(): void
+    public function deconnecter(): void
     {
         if (!ConnexionUtilisateur::estConnecte()) {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
@@ -341,7 +360,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ControleurUtilisateur::redirection("base", "accueil");
     }
 
-    public static function afficherFormulaireRecuperationCompte(): void {
+    public function afficherFormulaireRecuperationCompte(): void {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
         }
@@ -351,7 +370,7 @@ class ControleurUtilisateur extends ControleurGenerique
         ]);
     }
 
-    public static function recupererCompte(): void {
+    public function recupererCompte(): void {
         if(ConnexionUtilisateur::estConnecte()) {
             ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
         }
