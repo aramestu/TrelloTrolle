@@ -11,17 +11,17 @@ class TableauRepository extends AbstractRepository
 {
     protected function getNomTable(): string
     {
-        return "app_db";
+        return "Tableaux";
     }
 
     protected function getNomCle(): string
     {
-        return "idtableau";
+        return "idTableau";
     }
 
     protected function getNomsColonnes(): array
     {
-        return ["login", "nom", "prenom", "email", "mdphache", "mdp", "idtableau", "codetableau", "titretableau", "participants"];
+        return ["idTableau", "codeTableau", "titreTableau", "proprietaireTableau"];
     }
 
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
@@ -45,37 +45,18 @@ class TableauRepository extends AbstractRepository
         throw new Exception("Impossible d'ajouter seulement un tableau...");
     }
 
-    /**
-     * @return Tableau[]
-     */
-    public function recupererTableauxOuUtilisateurEstMembre(string $login): array
-    {
-        $sql = "SELECT DISTINCT {$this->formatNomsColonnes()}
-                from app_db 
-                WHERE login='$login' OR participants @> :json";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
-        $values = array(
-            "json" => json_encode(["utilisateurs" => [["login" => $login]]])
-        );
-        $pdoStatement->execute($values);
-        $objets = [];
-        foreach ($pdoStatement as $objetFormatTableau) {
-            $objets[] = $this->construireDepuisTableau($objetFormatTableau);
-        }
-        return $objets;
-    }
 
     /**
      * @return Tableau[]
      */
     public function recupererTableauxParticipeUtilisateur(string $login): array
     {
-        $sql = "SELECT DISTINCT {$this->formatNomsColonnes()}
-                from app_db 
-                WHERE participants @> :json";
+        $sql = "SELECT DISTINCT (idTableau)
+                from Participer
+                WHERE login= :login";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
         $values = array(
-            "json" => json_encode(["utilisateurs" => [["login" => $login]]])
+            "login" => $login
         );
         $pdoStatement->execute($values);
         $objets = [];
@@ -85,12 +66,8 @@ class TableauRepository extends AbstractRepository
         return $objets;
     }
 
-    public function getNextIdTableau() : int {
-        return $this->getNextId("idtableau");
-    }
-
     public function getNombreTableauxTotalUtilisateur(string $login) : int {
-        $query = "SELECT COUNT(DISTINCT idtableau) FROM app_db WHERE login=:login";
+        $query = "SELECT COUNT(DISTINCT idTableau) FROM Participer WHERE login=:login";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
         $pdoStatement->execute(["login" => $login]);
         $obj = $pdoStatement->fetch();
