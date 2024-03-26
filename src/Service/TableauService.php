@@ -10,7 +10,7 @@ use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
-class TableauService
+class TableauService implements TableauServiceInterface
 {
     public function __construct(private TableauRepositoryInterface $tableauRepository,
                                 private UtilisateurRepositoryInterface $utilisateurRepository,
