@@ -2,7 +2,7 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
-class Utilisateur extends AbstractDataObject
+class Utilisateur extends AbstractDataObject implements \JsonSerializable
 {
     public function __construct(
         private string $login,
@@ -16,10 +16,10 @@ class Utilisateur extends AbstractDataObject
     public static function construireDepuisTableau(array $objetFormatTableau) : Utilisateur {
         return new Utilisateur(
             $objetFormatTableau["login"],
-            $objetFormatTableau["nom"],
-            $objetFormatTableau["prenom"],
-            $objetFormatTableau["email"],
-            $objetFormatTableau["mdphache"],
+            $objetFormatTableau["nomUtilisateur"],
+            $objetFormatTableau["prenomUtilisateur"],
+            $objetFormatTableau["emailUtilisateur"],
+            $objetFormatTableau["mdpHache"],
         );
     }
 
@@ -85,16 +85,6 @@ class Utilisateur extends AbstractDataObject
         $this->email = $email;
     }
 
-    public function formatTablleauUtilisateurPourJson() : array {
-        return [
-            "login" => $this->login,
-            "nom" => $this->nom,
-            "prenom" => $this->prenom,
-            "email" => $this->email,
-            "mdphache" => $this->mdpHache,
-        ];
-    }
-
     public static function formatJsonListeUtilisateurs($utilisateurs) : string {
         $utilisateursToJson = [];
         foreach ($utilisateurs as $utilisateur) {
@@ -110,7 +100,18 @@ class Utilisateur extends AbstractDataObject
             "nomTag" => $this->nom,
             "prenomTag" => $this->prenom,
             "emailTag" => $this->email,
-            "mdphacheTag" => $this->mdpHache,
+            "mdpHacheTag" => $this->mdpHache,
         );
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "login" => $this->login,
+            "nom" => $this->nom,
+            "prenom" => $this->prenom,
+            "email" => $this->email,
+            "mdpHache" => $this->mdpHache,
+        ];
     }
 }
