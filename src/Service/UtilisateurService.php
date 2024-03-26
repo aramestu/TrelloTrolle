@@ -2,7 +2,9 @@
 
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
 use App\Trellotrolle\Lib\MotDePasse;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
+use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Lib\MotDePasseInterface;
@@ -12,6 +14,7 @@ use App\Trellotrolle\Service\Exception\ServiceException;
 class UtilisateurService implements UtilisateurServiceInterface
 {
     public function __construct(private UtilisateurRepositoryInterface $utilisateurRepository,
+                                private TableauRepositoryInterface $tableauRepository,
                                 private MotDePasseInterface  $motDePasse) {}
 
     /**
@@ -157,9 +160,9 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function supprimer($loginUtilisateurConnecte) : void{
-        if(is_null($loginUtilisateurConnecte)){
-            throw new ServiceException("le login n'a pas été renseigné", Response::HTTP_NOT_FOUND);
+    public function supprimer(?string $loginUtilisateurConnecte) : void{
+        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0){
+            throw new ServiceException("le login n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
@@ -169,4 +172,25 @@ class UtilisateurService implements UtilisateurServiceInterface
     }
 
     //TODO : Rajouter un système pour récupérer le mdp via l'email (mot de passe perdu)
+
+
+    /**
+     * @throws ServiceException
+     */
+    public function getUtilisateursPasMembreOuPasProprioTableau(?int $idTableau): array{
+        if(is_null($idTableau)){
+            throw new ServiceException("L'idTableau n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
+        }
+
+        /**
+         * @var Tableau $tableau
+         */
+        $tableau = $this->tableauRepository->recupererParClePrimaire($idTableau);
+
+        if(is_null($tableau)){
+            throw new ServiceException("Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
+        }
+
+        return $this->utilisateurRepository->recupererUtilisateursPasMembreOuPasProprio($idTableau); // TODO : ajouter cette fonction dans le Repository
+    }
 }

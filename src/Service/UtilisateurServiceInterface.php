@@ -24,5 +24,5 @@ interface UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function supprimer($loginUtilisateurConnecte): void;
+    public function supprimer(?string $loginUtilisateurConnecte): void;
 }
