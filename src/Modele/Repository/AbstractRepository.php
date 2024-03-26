@@ -43,9 +43,8 @@ abstract class AbstractRepository
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM :nomTableTag ORDER BY :attributsTexteTag :sensTag");
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable ORDER BY :attributsTexteTag :sensTag");
         $values = [
-            "nomTableTag" => $nomTable,
             "attributsTexteTag" => $attributsTexte,
             "sensTag" => $sens
         ];
