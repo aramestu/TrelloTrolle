@@ -21,10 +21,17 @@ class TableauService
     /**
      * @throws ServiceException
      */
-    public function getByCodeTableau(?string $codeTableau): ?Tableau{
+    private function verifierCodeTableauCorrect(?string $codeTableau): void{
         if(is_null($codeTableau) || strlen($codeTableau) == 0){
             throw new ServiceException( "Le tableau n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function getByCodeTableau(?string $codeTableau): Tableau{
+        $this->verifierCodeTableauCorrect($codeTableau);
         /**
          * @var Tableau $tableau
          */
@@ -39,10 +46,17 @@ class TableauService
     /**
      * @throws ServiceException
      */
-    public function getByIdTableau(?int $idTableau): ?Tableau{
+    private function verifierIdTableauCorrect(?int $idTableau): void{
         if(is_null($idTableau)){
             throw new ServiceException( "L'idTableau n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function getByIdTableau(?int $idTableau): Tableau{
+        $this->verifierIdTableauCorrect($idTableau);
         /**
          * @var Tableau $tableau
          */
@@ -59,11 +73,18 @@ class TableauService
      */
     private function verifierNomTableauCorrect(?string $nomTableau): void{
         $nb = strlen($nomTableau);
-        if(is_null($nomTableau) || $nb == 0){
-            throw new ServiceException( "Le nom du tableau ne peut pas être vide", Response::HTTP_BAD_REQUEST);
+        if(is_null($nomTableau) || $nb == 0 || $nb > 64){
+            throw new ServiceException( "Le nom du tableau ne peut pas être vide et ne doit pas faire plus de 64 caractères", Response::HTTP_BAD_REQUEST);
         }
-        if($nb > 64){
-            throw new ServiceException( "Le nom du tableau ne doit pas faire plus de 64 caractères", Response::HTTP_BAD_REQUEST);
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    private function verifierLoginCorrect(?string $login){
+        $nb = strlen($login);
+        if(is_null($login) || $nb < 4 || $nb > 32){
+            throw new ServiceException( "Le login ne peut pas être vide, et doit daire entre 4 et 32 caractères", Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -74,9 +95,7 @@ class TableauService
     public function creerTableau(?string $loginUtilisateurConnecte, ?string $nomTableau): void{
         $this->verifierNomTableauCorrect($nomTableau);
 
-        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0){
-            throw new ServiceException( "Le login ne peut pas être vide", Response::HTTP_BAD_REQUEST);
-        }
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
         /**
          * @var Utilisateur $utilisateur
@@ -89,7 +108,7 @@ class TableauService
 
         $codeTableauHache = $this->motDePasse->genererChaineAleatoire(64);
 
-        $tableau = new Tableau($codeTableauHache,$nomTableau,$utilisateur); // A revoir Ici pour l'user et voir si la requête au dessus est vrm nécessaire
+        $tableau = new Tableau($codeTableauHache,$nomTableau,$utilisateur); // TODO: A revoir Ici pour l'user et voir si la requête au dessus est vrm nécessaire (idUtilisateur plutôt que Utilisateur)
         $this->tableauRepository->ajouter($tableau);
     }
 
@@ -97,12 +116,9 @@ class TableauService
      * @throws ServiceException
      */
     public function metterAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void{
-        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0 || is_null($idTableau) || is_null($nomtableau) || strlen($nomtableau) == 0){
-            throw new ServiceException( "Le login ou l'idTableau ou le nom du tableau ne peut pas être vide", Response::HTTP_BAD_REQUEST);
-        }
-        if(strlen($nomtableau) > 64){
-            throw new ServiceException( "Le nom du tableau ne peut pas faire plus de 64 caractères", Response::HTTP_BAD_REQUEST);
-        }
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $this->verifierIdTableauCorrect($idTableau);
+        $this->verifierNomTableauCorrect($nomtableau);
 
         /**
          * @var Tableau $tableau
@@ -112,7 +128,7 @@ class TableauService
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if($loginUtilisateurConnecte != $tableau->getUtilisateur()){
+        if($tableau->estProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Seul le propriétaire du tableau peut mettre à jour le tableau", Response::HTTP_UNAUTHORIZED);
         }
         $tableau->setTitreTableau($nomtableau);
@@ -123,10 +139,9 @@ class TableauService
      * @throws ServiceException
      */
     public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau){
-        if(is_null($idTableau) ||is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0 || is_null($loginUtilisateurNouveau) || strlen($loginUtilisateurNouveau) == 0){
-            throw new ServiceException( "L'idTableau ou le login de l'user connecté ou le login a ajouté ne peut pas être vide", Response::HTTP_BAD_REQUEST);
-        }
-
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $this->verifierLoginCorrect($loginUtilisateurNouveau);
+        $this->verifierIdTableauCorrect($idTableau);
         /**
          * @var Tableau $tableau
          */
@@ -201,16 +216,8 @@ class TableauService
     /**
      * @throws ServiceException
      */
-    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte){
-        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0){
-            throw new ServiceException( "Le login de l'user connecté ne peut pas être vide", Response::HTTP_BAD_REQUEST);
-        }
-
-        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
-
-        if(is_null($utilisateur)){
-            throw new ServiceException( "L'utilisateur n'existe pas", Response::HTTP_NOT_FOUND);
-        }
+    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array{
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
         return $this->tableauRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte);
     }
@@ -218,15 +225,21 @@ class TableauService
     /**
      * @throws ServiceException
      */
-    public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau){
-        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0 || is_null($idTableau)){
-            throw new ServiceException( "L'idTableau ou le login de l'user connecté ne peut pas être vide", Response::HTTP_BAD_REQUEST);
+    public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau): void
+    {
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $this->verifierIdTableauCorrect($idTableau);
+
+        /**
+         * @var Tableau $tableau
+         */
+        $tableau = $this->tableauRepository->recupererParClePrimaire($idTableau);
+
+        if(is_null($tableau)){
+            throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-
-        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
-
-        if(is_null($utilisateur)){
-            throw new ServiceException( "L'utilisateur n'existe pas", Response::HTTP_NOT_FOUND);
+        if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
+            throw new ServiceException( "Vous ne pouvez pas supprimer le tableau où vous n'êtes pas propriétaire", Response::HTTP_NOT_FOUND);
         }
 
         $this->carteRepository->supprimerCartesTableau($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?

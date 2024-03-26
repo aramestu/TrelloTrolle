@@ -161,13 +161,12 @@ class UtilisateurService implements UtilisateurServiceInterface
      * @throws ServiceException
      */
     public function supprimer(?string $loginUtilisateurConnecte) : void{
-        if(is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0){
+        if(is_null($loginUtilisateurConnecte)){
             throw new ServiceException("le login n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
-        // TODO: Redéfinir la méthode supprimer dans le repository pour supprimer le tableau de tous les Tableaux, Participer et Affecter sinon on pourra pas le Delete
-        // TODO: A moins que ce soit le service qui le fasse ? JSP, les 2 semblent pas mal surtout la première option à mon avis
+        //TODO : Redéfinir la méthode supprimer dans UtilisateurRepository pour qu'elle appelle supprimer de TableauRep
         $this->utilisateurRepository->supprimer($loginUtilisateurConnecte);
     }
 
@@ -180,15 +179,6 @@ class UtilisateurService implements UtilisateurServiceInterface
     public function getUtilisateursPasMembreOuPasProprioTableau(?int $idTableau): array{
         if(is_null($idTableau)){
             throw new ServiceException("L'idTableau n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
-        }
-
-        /**
-         * @var Tableau $tableau
-         */
-        $tableau = $this->tableauRepository->recupererParClePrimaire($idTableau);
-
-        if(is_null($tableau)){
-            throw new ServiceException("Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
 
         return $this->utilisateurRepository->recupererUtilisateursPasMembreOuPasProprio($idTableau); // TODO : ajouter cette fonction dans le Repository
