@@ -3,15 +3,29 @@
 namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\MessageFlash;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ControleurGenerique {
 
-    protected static function afficherVue(string $cheminVue, array $parametres = []): void
-    {
+    public function __construct(private ContainerInterface $container)
+    {}
+
+    protected function afficherVue(string $cheminVue, array $parametres = []): Response {
         extract($parametres);
-//        $messagesFlash = $_REQUEST["messagesFlash"] ?? [];
         $messagesFlash = MessageFlash::lireTousMessages();
-        require __DIR__ . "/../vue/$cheminVue";
+        ob_start();
+        require $this->container->getParameter('project_root'). "/src/vue/$cheminVue";
+        $corpsReponse = ob_get_clean();
+        return new Response($corpsReponse);
+    }
+
+    protected function rediriger(string $routeName, array $parameters = []) : RedirectResponse
+    {
+        $generateurUrl = $this->container->get("url_generator");
+        $url = $generateurUrl->generate($routeName, $parameters);
+        return new RedirectResponse($url);
     }
 
     // https://stackoverflow.com/questions/768431/how-do-i-make-a-redirect-in-php
@@ -34,7 +48,7 @@ class ControleurGenerique {
         exit();
     }
 
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
         $messageErreurVue = "Problème";
         if ($controleur !== "")
@@ -42,7 +56,7 @@ class ControleurGenerique {
         if ($messageErreur !== "")
             $messageErreurVue .= " : $messageErreur";
 
-        ControleurGenerique::afficherVue('vueGenerale.php', [
+        return ControleurGenerique::afficherVue('vueGenerale.php', [
             "pagetitle" => "Problème",
             "cheminVueBody" => "erreur.php",
             "messageErreur" => $messageErreurVue
