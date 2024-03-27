@@ -4,7 +4,7 @@ use App\Trellotrolle\Lib\ConnexionUtilisateur;
 
 ?>
 
-<div><p>Bienvenue sur <strong>Trello-Trollé</strong>!</p></div>
+<div id="test" draggable="true"><p>Bienvenue sur <strong>Trello-Trollé</strong>!</p></div>
 <div>
     <?php if (ConnexionUtilisateur::estConnecte()) { ?>
         <span><a href="controleurFrontal.php?action=afficherListeMesTableaux&controleur=tableau">Consulter mes tableaux</a></span>
