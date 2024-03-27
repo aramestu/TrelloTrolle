@@ -256,7 +256,7 @@ class ControleurUtilisateur extends ControleurGenerique
             return $this->rediriger("mes_tableaux");
         } else {
             MessageFlash::ajouter("danger", "Login, nom, prenom, email ou mot de passe manquant.");
-            $this->rediriger("mise_a_jour_utilisateur");
+            return $this->rediriger("mise_a_jour_utilisateur");
         }
     }
 
