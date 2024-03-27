@@ -77,7 +77,7 @@ class Tableau extends AbstractDataObject implements \JsonSerializable
 
     public function getParticipants(): array
     {
-        return array_slice($this->participants, 0, sizeof($this->participants));
+        return array_slice($this->participants, 0);
     }
 
     public function formatTableau(): array

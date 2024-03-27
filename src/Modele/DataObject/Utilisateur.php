@@ -4,17 +4,25 @@ namespace App\Trellotrolle\Modele\DataObject;
 
 class Utilisateur extends AbstractDataObject implements \JsonSerializable
 {
-    public function __construct(
-        private string $login,
-        private string $nom,
-        private string $prenom,
-        private string $email,
-        private string $mdpHache,
-    )
-    {}
+    private string $login;
+    private string $nom;
+    private string $prenom;
+    private string $email;
+    private string $mdpHache;
+    public function __construct(){}
+
+    public static function create(string $login, string $nom, string $prenom, string $email, string $mdpHache) : Utilisateur {
+        $u = new Utilisateur();
+        $u->login = $login;
+        $u->nom = $nom;
+        $u->prenom = $prenom;
+        $u->email = $email;
+        $u->mdpHache = $mdpHache;
+        return $u;
+    }
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Utilisateur {
-        return new Utilisateur(
+        return Utilisateur::create(
             $objetFormatTableau["login"],
             $objetFormatTableau["nomutilisateur"],
             $objetFormatTableau["prenomutilisateur"],
@@ -104,7 +112,7 @@ class Utilisateur extends AbstractDataObject implements \JsonSerializable
         );
     }
 
-    public function jsonSerialize()
+    public function jsonSerialize() : array
     {
         return [
             "login" => $this->login,
