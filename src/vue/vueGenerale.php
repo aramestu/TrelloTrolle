@@ -13,7 +13,6 @@ use App\Trellotrolle\Lib\ConnexionUtilisateur;
     <title><?= $pagetitle ?></title>
     <link rel="stylesheet" href="../ressources/css/navstyle.css">
     <link rel="stylesheet" href="../ressources/css/trellostyle.css">
-    <script type="module" src="../ressources/js/script.js" defer></script>
 
 </head>
 <body>
