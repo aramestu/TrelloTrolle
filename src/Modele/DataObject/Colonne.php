@@ -2,31 +2,37 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
-class Colonne extends AbstractDataObject
+class Colonne extends AbstractDataObject implements \JsonSerializable
 {
-    public function __construct(
-        private int $idTableau,
-        private int $idColonne,
-        private string $titreColonne
-    )
-    {}
+    private int $idColonne;
+    private string $titreColonne;
+    private Tableau $tableau;
+
+    public function __construct(){}
+
+    public static function create(string $titreColonne, Tableau $tableau): Colonne{
+        $c = new Colonne();
+        $c->titreColonne = $titreColonne;
+        $c->tableau = $tableau;
+        return $c;
+    }
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Colonne {
-        return new Colonne(
-            $objetFormatTableau["idTableau"],
-            $objetFormatTableau["idcolonne"],
+        $t = new Tableau();
+        $t->setIdTableau($objetFormatTableau["idTableau"]);
+
+        $c = Colonne::create(
             $objetFormatTableau["titrecolonne"],
+            $t
         );
+        $c->idColonne = $objetFormatTableau["idcolonne"];
+
+        return $c;
     }
 
-    public function getTableau(): int
+    public function getTableau(): Tableau
     {
-        return $this->idTableau;
-    }
-
-    public function setTableau(int $tableau): void
-    {
-        $this->idTableau = $tableau;
+        return $this->tableau;
     }
 
     public function getIdColonne(): ?int
@@ -54,7 +60,16 @@ class Colonne extends AbstractDataObject
         return array(
                 "idColonneTag" => $this->idColonne,
                 "titreColonneTag" => $this->titreColonne,
-                "idTableauTag" => $this->idTableau
+                "idTableauTag" => $this->tableau->getIdTableau()
             );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            "idColonne" => $this->idColonne,
+            "titreColonne" => $this->titreColonne,
+            "tableau" => $this->tableau->jsonSerialize()
+        ];
     }
 }

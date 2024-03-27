@@ -2,33 +2,53 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
-class Tableau extends AbstractDataObject
-{
-    public function __construct(
-        private int $idTableau,
-        private string $codeTableau,
-        private string $titreTableau,
-        private string $proprietaireTableau,
-    )
-    {}
+use JsonSerializable;
 
-    public static function construireDepuisTableau(array $objetFormatTableau) : Tableau {
-        return new Tableau(
-            $objetFormatTableau["idtableau"],
-            $objetFormatTableau["codetableau"],
-            $objetFormatTableau["titretableau"],
-            $objetFormatTableau["proprietaireTableau"]
-        );
+class Tableau extends AbstractDataObject implements JsonSerializable
+{
+    private int $idTableau;
+    private string $codeTableau;
+    private string $titreTableau;
+    private Utilisateur $proprietaireTableau;
+    private array $participants;
+
+    public function __construct(){}
+
+    public static function create(string $codeTableau, string $titreTableau, Utilisateur $proprietaireTableau, array $participants): Tableau{
+        $t = new Tableau();
+        $t->codeTableau = $codeTableau;
+        $t->titreTableau = $titreTableau;
+        $t->proprietaireTableau = $proprietaireTableau;
+        $t->participants = $participants;
+        return $t;
     }
 
-    public function getProprietaire(): string
+    public static function construireDepuisTableau(array $objetFormatTableau) : Tableau {
+        $proprio = new Utilisateur();
+        $proprio->setLogin($objetFormatTableau["proprietaireTableau"]);
+
+        $t = Tableau::create(
+            $objetFormatTableau["codetableau"],
+            $objetFormatTableau["titretableau"],
+            $proprio,
+            $objetFormatTableau["participants"] ??= []
+        );
+        $t->idTableau = $objetFormatTableau["idtableau"];
+        return $t;
+    }
+
+    public function getParticipants(): array
+    {
+        return array_slice($this->participants, 0);
+    }
+
+    public function getProprietaire(): Utilisateur
     {
         return $this->proprietaireTableau;
     }
 
-    public function setProprietaire(string $proprietaire): void
-    {
-        $this->utilisateur = $proprietaire;
+    public function estProprietaire(string $login): bool{
+        return $this->proprietaireTableau == $login;
     }
 
     public function getIdTableau(): ?int
@@ -67,7 +87,22 @@ class Tableau extends AbstractDataObject
                 "idtableauTag" => $this->idTableau,
                 "codetableauTag" => $this->codeTableau,
                 "titretableauTag" => $this->titreTableau,
-                "proprietaireTableauTag" => $this->proprietaireTableau
+                "proprietaireTableauTag" => $this->proprietaireTableau,
             );
+    }
+
+    public function jsonSerialize(): array
+    {
+        $tabParticipants = [];
+        foreach ($this->participants as $user) {
+            $tabParticipants[] = $user->jsonSerialize();
+        }
+        return [
+            "idTableau" => $this->idTableau,
+            "codeTableau" => $this->codeTableau,
+            "titreTableau" => $this->titreTableau,
+            "proprietaireTableau" => $this->proprietaireTableau,
+            "participants" => $tabParticipants
+        ];
     }
 }
