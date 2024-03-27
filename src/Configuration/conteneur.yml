@@ -1,0 +1,72 @@
+parameters:
+
+services:
+  #Twig
+  twig_loader:
+    class: Twig\Loader\FilesystemLoader
+    arguments: [ '%project_root%/src/vue/' ]
+  twig:
+    class: Twig\Environment
+    arguments:
+      $loader: '@twig_loader'
+      $options:
+        autoescape: 'html'
+        strict_variables: true
+
+
+  configuration_bdd_my_sql:
+    class: App\TrelloTrolle\Configuration\ConfigurationBaseDeDonnees
+
+  connexion_base_de_donnees:
+    class: App\TrelloTrolle\Modele\Repository\ConnexionBaseDeDonnees
+    arguments: ['@configuration_bdd_my_sql']
+
+  #Repositories
+
+
+  #Services
+  request_stack:
+    class: Symfony\Component\HttpFoundation\RequestStack
+
+  url_generator:
+    class: Symfony\Component\Routing\Generator\UrlGenerator
+    arguments:
+      routes: '@routes'
+      context: '@request_context'
+
+  url_helper:
+    class: Symfony\Component\HttpFoundation\UrlHelper
+    arguments:
+      requestStack: '@request_stack'
+      requestContext: '@request_context'
+
+  #Controleurs
+  controleur_generique:
+    class: App\TrelloTrolle\Controleur\ControleurGenerique
+    arguments:
+      container: '@container'
+
+  controleur_base:
+    class: App\TrelloTrolle\Controleur\ControleurBase
+    arguments:
+      container: '@container'
+
+  controleur_carte:
+    class: App\TrelloTrolle\Controleur\ControleurCarte
+    arguments:
+      container: '@container'
+
+  controleur_colonne:
+    class: App\TrelloTrolle\Controleur\ControleurColonne
+    arguments:
+      container: '@container'
+
+  controleur_tableau:
+    class: App\TrelloTrolle\Controleur\ControleurTableau
+    arguments:
+      container: '@container'
+
+  controleur_utilisateur:
+    class: App\TrelloTrolle\Controleur\ControleurUtilisateur
+    arguments:
+      container: '@container'
