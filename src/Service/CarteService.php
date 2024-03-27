@@ -72,5 +72,6 @@ class CarteService
         if(is_null($couleurCarte) || $nb == 0 || $nb > 7){
             throw new ServiceException( "La couleur de la carte ne peut pas faire plus de 7 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
         }
+    }
 
 }
