@@ -14,7 +14,9 @@ class CarteService
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
                                 private ColonneRepositoryInterface $colonneRepository,
-                                private TableauRepositoryInterface $tableauRepository) {}
+                                private TableauRepositoryInterface $tableauRepository,
+                                private ColonneServiceInterface $colonneService,
+                                private \TableauServiceInterface $tableauService) {}
 
     /**
      * @throws ServiceException
@@ -74,4 +76,21 @@ class CarteService
         }
     }
 
+    /**
+     * @throws ServiceException
+     */
+    public function supprimerCarte(?int $idCarte, ?string $loginUtilisateurConnecte) {
+        $this->verifierIdCarteCorrect($idCarte);
+
+        $carte = $this->getCarte($idCarte);
+        $colonne = $this->colonneService->getColonne($carte->getColonne());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+
+        if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
+            throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $this->carteRepository->supprimer($idCarte);
+
+    }
 }

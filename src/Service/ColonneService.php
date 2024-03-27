@@ -10,7 +10,7 @@ use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use TableauServiceInterface;
 
-class ColonneService
+class ColonneService implements ColonneServiceInterface
 {
     public function __construct(private ColonneRepositoryInterface  $colonneRepository,
                                 private TableauServiceInterface $tableauService) {}
