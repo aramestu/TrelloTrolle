@@ -34,4 +34,43 @@ class CarteService
         }
         return $carte;
     }
+
+    /**
+     * @throws ServiceException
+     */
+    private function verifierIdCarte(?int $idTableau): void{
+        if(is_null($idTableau)){
+            throw new ServiceException( "La carte n'est pas renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierNomCarteCorecte(?string $titreCarte) {
+        $nb = strlen($titreCarte);
+        if(is_null($titreCarte) || $nb == 0 || $nb > 64){
+            throw new ServiceException( "Le nom de la carte ne peut pas faire plus de 64 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierDescriptifCarteCorecte(?string $descriptifCarte) {
+        $nb = strlen($descriptifCarte);
+        if(is_null($descriptifCarte) || $nb == 0){
+            throw new ServiceException( "La description de la carte doit être renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierCouleurCarteCorecte(?string $couleurCarte) {
+        $nb = strlen($couleurCarte);
+        if(is_null($couleurCarte) || $nb == 0 || $nb > 7){
+            throw new ServiceException( "La couleur de la carte ne peut pas faire plus de 7 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
 }
