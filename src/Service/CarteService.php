@@ -6,12 +6,15 @@ use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
+use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
 class CarteService
 {
-    public function __construct(private CarteRepositoryInterface  $carteRepository) {}
+    public function __construct(private CarteRepositoryInterface  $carteRepository,
+                                private ColonneRepositoryInterface $colonneRepository,
+                                private TableauRepositoryInterface $tableauRepository) {}
 
     /**
      * @throws ServiceException
