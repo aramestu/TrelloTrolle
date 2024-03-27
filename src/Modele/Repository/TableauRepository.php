@@ -5,6 +5,7 @@ namespace App\Trellotrolle\Modele\Repository;
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Tableau;
+use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use Exception;
 
 class TableauRepository extends AbstractRepository
@@ -26,6 +27,8 @@ class TableauRepository extends AbstractRepository
 
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
+        $objetFormatTableau["participants"] = $this->recupererParticipantsTableau($objetFormatTableau["idtableau"]);
+        $objetFormatTableau["proprietairetableau"] = (new UtilisateurRepository())->recupererParClePrimaire($objetFormatTableau["proprietairetableau"]);
         return Tableau::construireDepuisTableau($objetFormatTableau);
     }
 
@@ -63,6 +66,31 @@ class TableauRepository extends AbstractRepository
         foreach ($pdoStatement as $objetFormatTableau) {
             $objets[] = $this->construireDepuisTableau($objetFormatTableau);
         }
+        return $objets;
+    }
+
+    /**
+     * @return Utilisateur[]
+     */
+    public function recupererParticipantsTableau(string $idTableau): array
+    {
+        $utilisateurRepository = new UtilisateurRepository();
+        $nomColonne = $utilisateurRepository->formatNomsColonnes();
+        $sql = "SELECT p.$nomColonne
+                FROM Participer p
+                JOIN Utilisateurs u ON p.login = u.login
+                WHERE idTableau= :idTableauTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = array(
+            "idTableauTag" => $idTableau
+        );
+        $pdoStatement->execute($values);
+        $objets = [];
+        foreach ($pdoStatement as $objetFormatTableau) {
+            $objets[] = $utilisateurRepository->construireDepuisTableau($objetFormatTableau);
+        }
+        $pdoStatement->execute($values);
+
         return $objets;
     }
 
