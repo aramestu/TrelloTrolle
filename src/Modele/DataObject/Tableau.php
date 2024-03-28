@@ -83,21 +83,21 @@ class Tableau extends AbstractDataObject implements \JsonSerializable
     public function formatTableau(): array
     {
            return array(
-                "idtableauTag" => $this->idTableau,
-                "codetableauTag" => $this->codeTableau,
-                "titretableauTag" => $this->titreTableau,
-                "proprietaireTableauTag" => $this->proprietaireTableau->getLogin()
+                "idtableauTag" => $this->idTableau ?? null,
+                "codetableauTag" => $this->codeTableau ?? null,
+                "titretableauTag" => $this->titreTableau ?? null,
+                "proprietaireTableauTag" => $this->proprietaireTableau->getLogin() ?? null
             );
     }
 
     public function jsonSerialize(): mixed
     {
         return array(
-            "idTableau" => $this->idTableau,
-            "codeTableau" => $this->codeTableau,
-            "titreTableau" => $this->titreTableau,
-            "proprietaireTableau" => $this->proprietaireTableau,
-            "participants" => $this->participants
+            "idTableau" => $this->idTableau ?? null,
+            "codeTableau" => $this->codeTableau ?? null,
+            "titreTableau" => $this->titreTableau ?? null,
+            "proprietaireTableau" => $this->proprietaireTableau ?? null,
+            "participants" => $this->participants ?? null
         );
     }
 }

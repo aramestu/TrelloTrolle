@@ -55,18 +55,18 @@ class Colonne extends AbstractDataObject implements \JsonSerializable
     public function formatTableau(): array
     {
         return array(
-                "idColonneTag" => $this->idColonne,
-                "titreColonneTag" => $this->titreColonne,
-                "idTableauTag" => $this->tableau->getIdTableau()
+                "idColonneTag" => $this->idColonne ??null,
+                "titreColonneTag" => $this->titreColonne ?? null,
+                "idTableauTag" => $this->tableau->getIdTableau() ?? null
             );
     }
 
     public function jsonSerialize(): array
     {
         return [
-            "idColonne" => $this->idColonne,
-            "titreColonne" => $this->titreColonne,
-            "tableau" => $this->tableau->jsonSerialize()
+            "idColonne" => $this->idColonne ?? null,
+            "titreColonne" => $this->titreColonne ?? null,
+            "idtableau" => $this->tableau->getIdTableau() ?? null
         ];
     }
 }

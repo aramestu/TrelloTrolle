@@ -104,20 +104,20 @@ class Utilisateur extends AbstractDataObject implements \JsonSerializable
     public function formatTableau(): array
     {
         return array(
-            "loginTag" => $this->login,
-            "nomTag" => $this->nom,
-            "prenomTag" => $this->prenom,
-            "emailTag" => $this->email,
-            "mdpHacheTag" => $this->mdpHache,
+            "loginTag" => $this->login ?? null,
+            "nomTag" => $this->nom ?? null,
+            "prenomTag" => $this->prenom ?? null,
+            "emailTag" => $this->email ?? null,
+            "mdpHacheTag" => $this->mdpHache ?? null,
         );
     }
 
     public function jsonSerialize() : array
     {
         return [
-            "login" => $this->login,
-            "nom" => $this->nom,
-            "prenom" => $this->prenom
+            "login" => $this->login ?? null,
+            "nom" => $this->nom ?? null,
+            "prenom" => $this->prenom ?? null
         ];
     }
 }
