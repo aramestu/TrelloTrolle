@@ -6,18 +6,31 @@ use App\Trellotrolle\Lib\MessageFlash;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 class ControleurGenerique {
 
-    public function __construct(private ContainerInterface $container)
-    {}
+    private ContainerInterface $container;
 
-    protected function afficherVue(string $cheminVue, array $parametres = []): Response {
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    protected function afficherVuePHP(string $cheminVue, array $parametres = []): Response {
         extract($parametres);
         $messagesFlash = MessageFlash::lireTousMessages();
         ob_start();
         require $this->container->getParameter('project_root'). "/src/vue/$cheminVue";
         $corpsReponse = ob_get_clean();
+        return new Response($corpsReponse);
+    }
+
+    public function afficherVue(string $cheminVue, array $parametres = []): Response
+    {
+        /** @var Environment $twig */
+        $twig = $this->container->get("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
         return new Response($corpsReponse);
     }
 
@@ -48,18 +61,10 @@ class ControleurGenerique {
         exit();
     }
 
-    public function afficherErreur($messageErreur = "", $controleur = ""): Response
+    public function afficherErreur($messageErreur = ""): Response
     {
-        $messageErreurVue = "Problème";
-        if ($controleur !== "")
-            $messageErreurVue .= " avec le contrôleur $controleur";
-        if ($messageErreur !== "")
-            $messageErreurVue .= " : $messageErreur";
-
-        return ControleurGenerique::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Problème",
-            "cheminVueBody" => "erreur.php",
-            "messageErreur" => $messageErreurVue
+        return ControleurGenerique::afficherVue('erreur.html.twig', [
+            "messageErreur" => $messageErreur
         ]);
     }
 
@@ -71,4 +76,5 @@ class ControleurGenerique {
         }
         return true;
     }
+
 }

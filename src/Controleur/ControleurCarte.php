@@ -76,7 +76,7 @@ class ControleurCarte extends ControleurGenerique
             return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
         }
         $colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Création d'une carte",
             "cheminVueBody" => "carte/formulaireCreationCarte.php",
             "colonne" => $colonne,
@@ -168,7 +168,7 @@ class ControleurCarte extends ControleurGenerique
         }
         $colonneRepository = new ColonneRepository();
         $colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Modification d'une carte",
             "cheminVueBody" => "carte/formulaireMiseAJourCarte.php",
             "carte" => $carte,
