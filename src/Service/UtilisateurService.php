@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Trellotrolle\Service;
+
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
 use App\Trellotrolle\Lib\MotDePasse;
 use App\Trellotrolle\Modele\DataObject\Tableau;

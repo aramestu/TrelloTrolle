@@ -24,6 +24,16 @@ services:
   #Repositories
 
 
+  #Sercices
+  utilisateur_service:
+    class: App\TrelloTrolle\Service\UtilisateurService
+    arguments: ['%dossier_photo_profil%', '@utilisateur_repository' ]
+
+  utilisateur_service:
+    class: App\TrelloTrolle\Service\UtilisateurService
+    arguments: [ '@file_moving_service', '%dossier_photo_profil%', '@utilisateur_repository' ]
+
+
   #Services
   request_stack:
     class: Symfony\Component\HttpFoundation\RequestStack
@@ -70,3 +80,10 @@ services:
     class: App\TrelloTrolle\Controleur\ControleurUtilisateur
     arguments:
       container: '@container'
+
+  #Connexion utilisateur
+  connexion_utilisateur_session:
+    class: App\TrelloTrolle\Lib\ConnexionUtilisateurSession
+
+  connexion_utilisateur_jwt:
+    class: App\TrelloTrolle\Lib\ConnexionUtilisateurJWT

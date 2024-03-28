@@ -16,7 +16,7 @@ class CarteService
                                 private ColonneRepositoryInterface $colonneRepository,
                                 private TableauRepositoryInterface $tableauRepository,
                                 private ColonneServiceInterface $colonneService,
-                                private \TableauServiceInterface $tableauService) {}
+                                private TableauServiceInterface $tableauService) {}
 
     /**
      * @throws ServiceException

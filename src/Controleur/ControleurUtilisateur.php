@@ -17,12 +17,12 @@ use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use UtilisateurServiceInterface;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
     public function __construct(ContainerInterface $container,
                                 private UtilisateurServiceInterface $serviceUtilisateur,
-                                private PublicationServiceInterface $servicePublication,
                                 private readonly ConnexionUtilisateurInterface $connexionUtilisateurSession,
                                 private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT,
     ){

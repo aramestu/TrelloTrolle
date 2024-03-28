@@ -8,7 +8,7 @@ use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Exception;
 use Symfony\Component\HttpFoundation\Response;
-use TableauServiceInterface;
+use App\Trellotrolle\Service\TableauServiceInterface;
 
 class ColonneService implements ColonneServiceInterface
 {
