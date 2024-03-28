@@ -7,7 +7,7 @@ use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use Exception;
 
-class ColonneRepository extends AbstractRepository
+class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
 {
 
     protected function getNomTable(): string

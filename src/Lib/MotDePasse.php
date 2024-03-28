@@ -4,24 +4,24 @@ namespace App\Trellotrolle\Lib;
 
 use Exception;
 
-class MotDePasse
+class MotDePasse implements MotDePasseInterface
 {
-    private static string $poivre = "5QcWU25xA5XriYkC4HzgVN";
+    private string $poivre = "5QcWU25xA5XriYkC4HzgVN";
 
-    public static function hacher(string $mdpClair): string
+    public function hacher(string $mdpClair): string
     {
-        return MotDePasse::$poivre.hash('sha256', $mdpClair);
+        return $this->poivre.hash('sha256', $mdpClair);
     }
 
-    public static function verifier(string $mdpClair, string $mdpHache): bool
+    public function verifier(string $mdpClair, string $mdpHache): bool
     {
-        return MotDePasse::hacher($mdpClair) === $mdpHache;
+        return $this->hacher($mdpClair) === $mdpHache;
     }
 
     /**
      * @throws Exception
      */
-    public static function genererChaineAleatoire(int $nbCaracteres = 22): string
+    public function genererChaineAleatoire(int $nbCaracteres = 22): string
     {
         // 22 caractères par défaut pour avoir au moins 128 bits aléatoires
         $octetsAleatoires = random_bytes(ceil($nbCaracteres * 6 / 8));

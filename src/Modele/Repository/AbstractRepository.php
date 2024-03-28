@@ -5,7 +5,7 @@ namespace App\Trellotrolle\Modele\Repository;
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use PDOException;
 
-abstract class AbstractRepository
+abstract class AbstractRepository implements AbstractRepositoryInterface
 {
     protected abstract function getNomTable(): string;
     protected abstract function getNomCle(): string;
