@@ -16,4 +16,7 @@ interface UtilisateurRepositoryInterface extends AbstractRepositoryInterface
     public function recupererUtilisateursParEmail(string $email): array;
 
     public function recupererUtilisateursOrderedPrenomNom(): array;
+
+    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array;
+
 }

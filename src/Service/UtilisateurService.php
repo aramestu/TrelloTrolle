@@ -40,6 +40,15 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
+    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array{
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+
+        return $this->utilisateurRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte); // TODO
+    }
+
+    /**
+     * @throws ServiceException
+     */
     private function verifierLoginCorrect($login) : void{
         if (strlen($login) < 4 || strlen($login) > 32) {
             throw new ServiceException( "Le login doit être compris entre 4 et 32 caractères!", Response::HTTP_BAD_REQUEST);

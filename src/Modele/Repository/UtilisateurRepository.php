@@ -41,4 +41,10 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
     public function recupererUtilisateursOrderedPrenomNom() : array {
         return $this->recupererOrdonne(["prenomUtilisateur", "nomUtilisateur"]);
     }
+
+    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array
+    {
+        return [];
+        // TODO: Implement recupererTableauxOuUtilisateurEstMembre() method.
+    }
 }

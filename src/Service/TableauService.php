@@ -216,15 +216,6 @@ class TableauService implements TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array{
-        $this->verifierLoginCorrect($loginUtilisateurConnecte);
-
-        return $this->tableauRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte);
-    }
-
-    /**
-     * @throws ServiceException
-     */
     public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau): void
     {
         $this->verifierLoginCorrect($loginUtilisateurConnecte);

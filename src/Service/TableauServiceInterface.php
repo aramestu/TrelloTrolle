@@ -38,10 +38,5 @@ interface TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array;
-
-    /**
-     * @throws ServiceException
-     */
     public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau): void;
 }

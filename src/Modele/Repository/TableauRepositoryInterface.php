@@ -20,14 +20,8 @@ interface TableauRepositoryInterface extends AbstractRepositoryInterface
     /**
      * @return Tableau[]
      */
-    public function recupererTableauxOuUtilisateurEstMembre(string $login): array;
-
-    /**
-     * @return Tableau[]
-     */
     public function recupererTableauxParticipeUtilisateur(string $login): array;
 
-    public function getNextIdTableau(): int;
 
     public function getNombreTableauxTotalUtilisateur(string $login): int;
 }
