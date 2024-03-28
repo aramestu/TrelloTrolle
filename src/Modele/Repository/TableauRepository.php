@@ -46,15 +46,6 @@ class TableauRepository extends AbstractRepository
     }
 
     /**
-     * @throws Exception
-     */
-    public function ajouter(AbstractDataObject $object): bool
-    {
-        throw new Exception("Impossible d'ajouter seulement un tableau...");
-    }
-
-
-    /**
      * @return Tableau[]
      */
     public function recupererTableauxParticipeUtilisateur(string $login): array

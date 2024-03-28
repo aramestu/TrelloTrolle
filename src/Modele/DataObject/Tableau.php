@@ -5,7 +5,7 @@ namespace App\Trellotrolle\Modele\DataObject;
 class Tableau extends AbstractDataObject implements \JsonSerializable
 {
 
-    private string $idTableau;
+    private int $idTableau;
     private string $codeTableau;
     private string $titreTableau;
     private Utilisateur $proprietaireTableau;
@@ -14,7 +14,7 @@ class Tableau extends AbstractDataObject implements \JsonSerializable
     public function __construct()
     {}
 
-    public static function create(string $idTableau, string $codeTableau, string $titreTableau, Utilisateur $proprietaireTableau, array $membres)
+    public static function create(int $idTableau, string $codeTableau, string $titreTableau, Utilisateur $proprietaireTableau, array $membres)
     {
         $tableau = new Tableau();
         $tableau->idTableau = $idTableau;

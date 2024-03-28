@@ -6,7 +6,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 
 class Carte extends AbstractDataObject implements \JsonSerializable
 {
-    private $idCarte;
+    private int $idCarte;
     private string $titreCarte;
     private string $descriptifCarte;
     private string $couleurCarte;
@@ -15,7 +15,7 @@ class Carte extends AbstractDataObject implements \JsonSerializable
 
     public function __construct(){}
 
-    public static function create(string $idCarte,string $titreCarte, string $descriptifCarte, string $couleurCarte, Colonne $colonne, array $affectationsCarte): Carte{
+    public static function create(int $idCarte,string $titreCarte, string $descriptifCarte, string $couleurCarte, Colonne $colonne, array $affectationsCarte): Carte{
         $carte = new Carte();
         $carte->idCarte = $idCarte;
         $carte->titreCarte = $titreCarte;

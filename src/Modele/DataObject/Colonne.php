@@ -4,13 +4,13 @@ namespace App\Trellotrolle\Modele\DataObject;
 
 class Colonne extends AbstractDataObject implements \JsonSerializable
 {
-    private string $idColonne;
+    private int $idColonne;
     private string $titreColonne;
     private Tableau $tableau;
 
     public function __construct(){}
 
-    public static function create(string $idColonne, string $titreColonne, Tableau $tableau): Colonne{
+    public static function create(int $idColonne, string $titreColonne, Tableau $tableau): Colonne{
         $colonne = new Colonne();
         $colonne->idColonne = $idColonne;
         $colonne->titreColonne = $titreColonne;
@@ -30,6 +30,11 @@ class Colonne extends AbstractDataObject implements \JsonSerializable
     public function getTableau(): Tableau
     {
         return $this->tableau;
+    }
+
+    public function setTableau(Tableau $tableau): void
+    {
+        $this->tableau = $tableau;
     }
 
     public function getIdColonne(): ?int
