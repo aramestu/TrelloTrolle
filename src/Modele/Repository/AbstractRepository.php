@@ -173,12 +173,10 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $valueString = '(' . join(', ', $partiesValues) . ')';
 
         $sql = "INSERT INTO $nomTable $insertString VALUES $valueString";
-        echo $sql;
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
 
         $objetFormatTableau = $object->formatTableau();
         if ($this->estAutoIncremente()) unset($objetFormatTableau[$this->getNomCle() . "Tag"]);
-        var_dump($objetFormatTableau);
         try {
             $pdoStatement->execute($objetFormatTableau);
             return true;
