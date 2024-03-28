@@ -42,9 +42,23 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
         return $this->recupererOrdonne(["prenomUtilisateur", "nomUtilisateur"]);
     }
 
-    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array
+    public function recupererTableauxOuUtilisateurEstMembre(string $login): array
     {
-        return [];
-        // TODO: Implement recupererTableauxOuUtilisateurEstMembre() method.
+        $tableauRepository =  new TableauRepository();
+        $nomColonnes = $tableauRepository->formatNomsColonnes();
+        $sql = "SELECT DISTINCT  t.$nomColonnes FROM Tableaux t
+                LEFT JOIN participer p ON t.idTableau = p.idtableau
+                WHERE p.login = :loginTag
+                OR t.proprietairetableau = :loginTag
+                ";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = ["loginTag" => $login];
+        $pdoStatement->execute($values);
+        $objets = [];
+        foreach ($pdoStatement as $objetFormatTableau) {
+            $objets[] = $tableauRepository->construireDepuisTableau($objetFormatTableau);
+        }
+
+        return $objets;
     }
 }
