@@ -1,6 +1,7 @@
 <?php
 namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Service\Exception\ServiceException;
+use Exception;
 
 interface TableauServiceInterface
 {

@@ -10,6 +10,7 @@ use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Lib\MotDePasseInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use App\Trellotrolle\Service\Exception\ServiceException;
 
@@ -22,14 +23,14 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function getUtilisateur(?int $idUtilisateurConnecte) :?Utilisateur{
-        if(is_null($idUtilisateurConnecte)){
-            throw new ServiceException( "L'identifiant n'est pas renseigné", Response::HTTP_BAD_REQUEST);
+    public function getUtilisateur(?string $loginUtilisateurConnecte) :?Utilisateur{
+        if(is_null($loginUtilisateurConnecte)){
+            throw new ServiceException( "Le login n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
         /**
          * @var Utilisateur $utilisateur
          */
-        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire($idUtilisateurConnecte);
+        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire($loginUtilisateurConnecte);
 
         if(is_null($utilisateur)){
             throw new ServiceException( "L'utilisateur n'existe pas", Response::HTTP_NOT_FOUND);
@@ -110,6 +111,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      * @throws Exception
+     *
      */
     public function creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2): void{
         if(is_null($login) || is_null($mdp) || is_null($email) || is_null($nom) || is_null($prenom) || is_null($mdp2)){

@@ -9,7 +9,7 @@ interface UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function getUtilisateur(?int $idUtilisateurConnecte): ?Utilisateur;
+    public function getUtilisateur(?string $loginUtilisateurConnecte): ?Utilisateur;
 
     /**
      * @throws ServiceException

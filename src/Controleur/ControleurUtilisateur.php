@@ -15,10 +15,14 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\UtilisateurServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
@@ -35,11 +39,24 @@ class ControleurUtilisateur extends ControleurGenerique
         return parent::afficherErreur($messageErreur, "utilisateur");
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     #[Route(path: '/utilisateur/details', name:'detail_utilisateur', methods:["GET"])]
     public function afficherDetail(): Response
     {
+        try{
+            $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+        } catch (ServiceException $e){
+            MessageFlash::ajouter("error", $e->getMessage());
+            return $this->rediriger("connexion");
+        }
+        return self::afficherTwig("utilisateur/detail.html.twig", ["utilisateur" => $utilisateur, "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}"]);
 
-        if(!ConnexionUtilisateur::estConnecte()) {
+
+        /*if(!ConnexionUtilisateur::estConnecte()) {
             return self::rediriger("connexion");
         }
         $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire(ConnexionUtilisateur::getLoginUtilisateurConnecte());
@@ -47,28 +64,45 @@ class ControleurUtilisateur extends ControleurGenerique
             "utilisateur" => $utilisateur,
             "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}",
             "cheminVueBody" => "utilisateur/detail.php"
-        ]);
+        ]);*/
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     #[Route(path: 'utilisateur/inscription', name:'inscription', methods:["GET"])]
     public function afficherFormulaireCreation(): Response
     {
         if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
+        return self::afficherTwig("utilisateur/formulaireCreation.html.twig");
+        /*if(ConnexionUtilisateur::estConnecte()) {
+            return $this->rediriger("mes_tableaux");
+        }
         return $this->afficherVue('vueGenerale.php', [
             "pagetitle" => "Création d'un utilisateur",
             "cheminVueBody" => "utilisateur/formulaireCreation.php"
-        ]);
+        ]);*/
     }
 
     #[Route(path: 'utilisateur/inscription', name:'inscrire', methods:["POST"])]
     public function creerDepuisFormulaire(): Response
     {
-        if(ConnexionUtilisateur::estConnecte()) {
+        if($this->connexionUtilisateurSession->estConnecte() || $this->connexionUtilisateurJWT->estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
-        if (ControleurUtilisateur::issetAndNotNull(["login", "prenom", "nom", "mdp", "mdp2", "email"])) {
+        try{
+            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["prenom"], $_POST["nom"], $_POST["mdp"], $_POST["mdp2"], $_POST["email"]);
+        }catch (\Exception $e){
+            MessageFlash::ajouter("error", $e->getMessage());
+            return $this->rediriger("inscription");
+        }
+        return $this->rediriger("connexion");
+
+        /*if (ControleurUtilisateur::issetAndNotNull(["login", "prenom", "nom", "mdp", "mdp2", "email"])) {
             if ($_REQUEST["mdp"] !== $_REQUEST["mdp2"]) {
                 MessageFlash::ajouter("warning", "Mots de passe distincts.");
                 return $this->rediriger("inscription");
@@ -179,13 +213,24 @@ class ControleurUtilisateur extends ControleurGenerique
         } else {
             MessageFlash::ajouter("danger", "Login, nom, prenom, email ou mot de passe manquant.");
             return $this->rediriger("inscription");
-        }
+        }*/
     }
 
     #[Route(path: '/utilisateur/mise-a-jour', name:'mise_a_jour_utilisateur', methods:["GET"])]
     public function afficherFormulaireMiseAJour(): Response
     {
-        if(!ConnexionUtilisateur::estConnecte()) {
+        if(! $this->connexionUtilisateurSession->estConnecte() || ! $this->connexionUtilisateurJWT->estConnecte()) {
+            return $this->rediriger("connexion");
+        }
+        try{
+            $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+        }catch (\Exception $e){
+            MessageFlash::ajouter("error", $e->getMessage());
+            return $this->rediriger("connexion");
+        }
+        return $this->rediriger("connexion");
+
+        /*if(!ConnexionUtilisateur::estConnecte()) {
             $this->rediriger("connexion");
         }
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
@@ -195,7 +240,7 @@ class ControleurUtilisateur extends ControleurGenerique
             "pagetitle" => "Mise à jour du profil",
             "cheminVueBody" => "utilisateur/formulaireMiseAJour.php",
             "utilisateur" => $utilisateur,
-        ]);
+        ]);*/
     }
 
     #[Route(path: '/utilisateur/mise-a-jour', name:'mettre_a_jour_utilisateur', methods:["POST"])]
