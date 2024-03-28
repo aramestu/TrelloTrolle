@@ -6,7 +6,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 
 class Carte extends AbstractDataObject implements \JsonSerializable
 {
-    private int $idCarte;
+    private string $idCarte;
     private string $titreCarte;
     private string $descriptifCarte;
     private string $couleurCarte;
@@ -15,29 +15,27 @@ class Carte extends AbstractDataObject implements \JsonSerializable
 
     public function __construct(){}
 
-    public static function create(string $titreCarte, string $descriptifCarte, string $couleurCarte, Colonne $colonne, array $affectationsCarte): Carte{
-        $c = new Carte();
-        $c->titreCarte = $titreCarte;
-        $c->descriptifCarte = $descriptifCarte;
-        $c->couleurCarte = $couleurCarte;
-        $c->colonne = $colonne;
-        $c->affectationsCarte = $affectationsCarte;
-        return $c;
+    public static function create(string $idCarte,string $titreCarte, string $descriptifCarte, string $couleurCarte, Colonne $colonne, array $affectationsCarte): Carte{
+        $carte = new Carte();
+        $carte->idCarte = $idCarte;
+        $carte->titreCarte = $titreCarte;
+        $carte->descriptifCarte = $descriptifCarte;
+        $carte->couleurCarte = $couleurCarte;
+        $carte->colonne = $colonne;
+        $carte->affectationsCarte = $affectationsCarte;
+        return $carte;
     }
     public static function construireDepuisTableau(array $objetFormatTableau) : Carte {
-        $col = new Colonne();
-        $col->setIdColonne($objetFormatTableau["idcolonne"]);
-
-        $c = Carte::create(
+          $carte = Carte::create(
+            $objetFormatTableau["idcarte"],
             $objetFormatTableau["titrecarte"],
             $objetFormatTableau["descriptifcarte"],
             $objetFormatTableau["couleurcarte"],
-            $col,
-            $objetFormatTableau["affectationsCarte"]
+            $objetFormatTableau["colonne"],
+            $objetFormatTableau["affectationscarte"]
         );
 
-        $c->idCarte = $objetFormatTableau["idcarte"];
-        return $c;
+        return $carte;
     }
 
     public function getColonne(): Colonne
@@ -108,17 +106,13 @@ class Carte extends AbstractDataObject implements \JsonSerializable
 
     public function jsonSerialize(): array
     {
-        $tabAffectation = [];
-        foreach ($this->affectationsCarte as $user) {
-            $tabAffectation[] = $user->jsonSerialize();
-        }
         return [
-            "idCarte" => $this->idCarte,
-            "titreCarte" => $this->titreCarte,
-            "descriptifCarte" => $this->descriptifCarte,
-            "couleurCarte" => $this->couleurCarte,
-            "colonne" => $this->colonne->jsonSerialize(),
-            "affectationsCarte" => $tabAffectation,
+            "idCarte" => $this->idCarte ?? null,
+            "titreCarte" => $this->titreCarte ?? null,
+            "descriptifCarte" => $this->descriptifCarte ?? null,
+            "couleurCarte" => $this->couleurCarte ?? null,
+            "idColonne" => (isset($this->colonne)) ? $this->colonne->getIdColonne() : null,
+            "affectationsCarte" => $this->affectationsCarte ?? null,
         ];
     }
 }

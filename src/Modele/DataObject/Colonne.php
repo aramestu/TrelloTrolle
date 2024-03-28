@@ -66,7 +66,7 @@ class Colonne extends AbstractDataObject implements \JsonSerializable
         return [
             "idColonne" => $this->idColonne ?? null,
             "titreColonne" => $this->titreColonne ?? null,
-            "idtableau" => $this->tableau->getIdTableau() ?? null
+            "idtableau" => (isset($this->tableau)) ? $this->tableau->getIdTableau() : null
         ];
     }
 }
