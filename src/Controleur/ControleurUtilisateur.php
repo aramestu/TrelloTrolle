@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
+use App\Trellotrolle\Lib\ConnexionUtilisateurInterface;
 use App\Trellotrolle\Lib\MessageFlash;
 use App\Trellotrolle\Lib\MotDePasse;
 use App\Trellotrolle\Modele\DataObject\Carte;
@@ -14,10 +15,10 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use App\Trellotrolle\Service\UtilisateurServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use UtilisateurServiceInterface;
 
 class ControleurUtilisateur extends ControleurGenerique
 {

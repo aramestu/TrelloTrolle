@@ -2,6 +2,7 @@
 namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Service\Exception\ServiceException;
+use Exception;
 
 interface UtilisateurServiceInterface
 {

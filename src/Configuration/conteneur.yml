@@ -93,7 +93,7 @@ services:
   controleur_utilisateur:
     class: App\TrelloTrolle\Controleur\ControleurUtilisateur
     arguments:
-      container: '@container'
+      container: ['@container', '@utilisateur_service', '@connexion_utilisateur_session', '@connexion_utilisateur_jwt']
 
   #Connexion utilisateur
   connexion_utilisateur_session:
