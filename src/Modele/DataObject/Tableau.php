@@ -28,7 +28,11 @@ class Tableau extends AbstractDataObject
 
     public function setProprietaire(string $proprietaire): void
     {
-        $this->utilisateur = $proprietaire;
+        $this->proprietaireTableau = $proprietaire;
+    }
+
+    public function estProprietaire(string $proprietaire): bool{
+        return $this->proprietaireTableau == $proprietaire;
     }
 
     public function getIdTableau(): ?int
