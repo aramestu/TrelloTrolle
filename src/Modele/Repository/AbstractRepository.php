@@ -11,6 +11,7 @@ abstract class AbstractRepository
     protected abstract function getNomCle(): string;
     protected abstract function getNomsColonnes(): array;
     protected abstract function construireDepuisTableau(array $objetFormatTableau) : AbstractDataObject;
+    protected abstract function estAutoIncremente(): bool;
 
 
 
@@ -162,6 +163,8 @@ abstract class AbstractRepository
         $nomTable = $this->getNomTable();
         $nomsColonnes = $this->getNomsColonnes();
 
+        if ($this->estAutoIncremente()) unset($nomsColonnes[array_search($this->getNomCle(), $nomsColonnes)]);
+
         $insertString = '(' . join(', ', $nomsColonnes) . ')';
 
         $partiesValues = array_map(function ($nomcolonne) {
@@ -170,10 +173,12 @@ abstract class AbstractRepository
         $valueString = '(' . join(', ', $partiesValues) . ')';
 
         $sql = "INSERT INTO $nomTable $insertString VALUES $valueString";
+        echo $sql;
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
 
         $objetFormatTableau = $object->formatTableau();
-
+        if ($this->estAutoIncremente()) unset($objetFormatTableau[$this->getNomCle() . "Tag"]);
+        var_dump($objetFormatTableau);
         try {
             $pdoStatement->execute($objetFormatTableau);
             return true;

@@ -27,6 +27,11 @@ class ColonneRepository extends AbstractRepository
         ];
     }
 
+    protected function estAutoIncremente():bool
+    {
+        return true;
+    }
+
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
         $tableau = new Tableau();

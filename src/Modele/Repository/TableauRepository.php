@@ -25,6 +25,11 @@ class TableauRepository extends AbstractRepository
         return ["idTableau", "codeTableau", "titreTableau", "proprietaireTableau"];
     }
 
+    protected function estAutoIncremente():bool
+    {
+        return true;
+    }
+
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
         $objetFormatTableau["participants"] = $this->recupererParticipantsTableau($objetFormatTableau["idtableau"]);

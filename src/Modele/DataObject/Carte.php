@@ -6,7 +6,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 
 class Carte extends AbstractDataObject implements \JsonSerializable
 {
-    private string $idCarte;
+    private $idCarte;
     private string $titreCarte;
     private string $descriptifCarte;
     private string $couleurCarte;
@@ -41,6 +41,11 @@ class Carte extends AbstractDataObject implements \JsonSerializable
     public function getColonne(): Colonne
     {
         return $this->colonne;
+    }
+
+    public function setColonne(Colonne $colonne): void
+    {
+        $this->colonne = $colonne;
     }
 
     public function getIdCarte(): ?int
@@ -85,22 +90,17 @@ class Carte extends AbstractDataObject implements \JsonSerializable
 
     public function getAffectationsCarte(): ?array
     {
-        return $this->affectationsCarte;
-    }
-
-    public function setAffectationsCarte(?array $affectationsCarte): void
-    {
-        $this->affectationsCarte = $affectationsCarte;
+        return array_slice($this->affectationsCarte, 0);
     }
 
     public function formatTableau(): array
     {
             return array(
-                "idcarteTag" => $this->idCarte,
-                "titrecarteTag" => $this->titreCarte,
-                "descriptifcarteTag" => $this->descriptifCarte,
-                "couleurcarteTag" => $this->couleurCarte,
-                "idColonneTag" => $this->colonne->getIdColonne()
+                "idCarteTag" => $this->idCarte ?? null,
+                "titreCarteTag" => $this->titreCarte ?? null,
+                "descriptifCarteTag" => $this->descriptifCarte ?? null,
+                "couleurCarteTag" => $this->couleurCarte ?? null,
+                "idColonneTag" => (isset($this->colonne)) ? $this->colonne->getIdColonne() : null
             );
     }
 

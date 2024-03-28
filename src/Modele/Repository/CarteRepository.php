@@ -27,6 +27,11 @@ class CarteRepository extends AbstractRepository
         ];
     }
 
+    protected function estAutoIncremente():bool
+    {
+        return true;
+    }
+
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
         $colonne = new Colonne();
