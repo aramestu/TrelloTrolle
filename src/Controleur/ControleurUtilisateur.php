@@ -14,11 +14,20 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurUtilisateur extends ControleurGenerique
 {
+    public function __construct(ContainerInterface $container,
+                                private UtilisateurServiceInterface $serviceUtilisateur,
+                                private PublicationServiceInterface $servicePublication,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurSession,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT,
+    ){
+        parent::__construct($container);
+    }
 
     public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
@@ -28,6 +37,7 @@ class ControleurUtilisateur extends ControleurGenerique
     #[Route(path: '/utilisateur/details', name:'detail_utilisateur', methods:["GET"])]
     public function afficherDetail(): Response
     {
+
         if(!ConnexionUtilisateur::estConnecte()) {
             return self::rediriger("connexion");
         }
