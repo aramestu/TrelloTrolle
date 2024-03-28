@@ -4,6 +4,7 @@ namespace App\Trellotrolle\Modele\Repository;
 
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Carte;
+use App\Trellotrolle\Modele\DataObject\Colonne;
 use Exception;
 
 class CarteRepository extends AbstractRepository implements CarteRepositoryInterface
@@ -26,8 +27,20 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         ];
     }
 
+    protected function estAutoIncremente():bool
+    {
+        return true;
+    }
+
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
+        $colonne = new Colonne();
+        $colonne->setIdColonne($objetFormatTableau["idcolonne"]);
+        $objetFormatTableau["colonne"] = $colonne;
+
+        $affectations = self::recupererAffectationsCartes($objetFormatTableau["idcarte"]);
+        $objetFormatTableau["affectationscarte"] = $affectations;
+
         return Carte::construireDepuisTableau($objetFormatTableau);
     }
 
@@ -70,10 +83,19 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     }
 
     public static function recupererAffectationsCartes(string $idCarte): array {
-        $sql = "SELECT login FROM Affecter WHERE idCarte=:idCarte";
+        $utilisateurRepository = new UtilisateurRepository();
+        $nomColonnnes = $utilisateurRepository->formatNomsColonnes();
+
+        $sql = "SELECT a.$nomColonnnes FROM Affecter a
+             JOIN Utilisateurs u ON u.login = a.login
+             WHERE idCarte=:idCarteTag";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
-        $pdoStatement->execute(["idCarte" => $idCarte]);
-        return $pdoStatement->fetch();
+        $pdoStatement->execute(["idCarteTag" => $idCarte]);
+        $objets = [];
+        foreach ($pdoStatement as $objetFormatTableau) {
+            $objets[] = $utilisateurRepository->construireDepuisTableau($objetFormatTableau);
+        }
+        return $objets;
     }
 
     public function getNextIdCarte() : int {

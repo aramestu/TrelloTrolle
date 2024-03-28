@@ -2,31 +2,39 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
-class Colonne extends AbstractDataObject
+class Colonne extends AbstractDataObject implements \JsonSerializable
 {
-    public function __construct(
-        private int $idTableau,
-        private int $idColonne,
-        private string $titreColonne
-    )
-    {}
+    private int $idColonne;
+    private string $titreColonne;
+    private Tableau $tableau;
+
+    public function __construct(){}
+
+    public static function create(int $idColonne, string $titreColonne, Tableau $tableau): Colonne{
+        $colonne = new Colonne();
+        $colonne->idColonne = $idColonne;
+        $colonne->titreColonne = $titreColonne;
+        $colonne->tableau = $tableau;
+        return $colonne;
+    }
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Colonne {
-        return new Colonne(
-            $objetFormatTableau["idTableau"],
+
+        return self::create(
             $objetFormatTableau["idcolonne"],
             $objetFormatTableau["titrecolonne"],
+            $objetFormatTableau['tableau']
         );
     }
 
-    public function getTableau(): int
+    public function getTableau(): Tableau
     {
-        return $this->idTableau;
+        return $this->tableau;
     }
 
-    public function setTableau(int $tableau): void
+    public function setTableau(Tableau $tableau): void
     {
-        $this->idTableau = $tableau;
+        $this->tableau = $tableau;
     }
 
     public function getIdColonne(): ?int
@@ -52,9 +60,18 @@ class Colonne extends AbstractDataObject
     public function formatTableau(): array
     {
         return array(
-                "idColonneTag" => $this->idColonne,
-                "titreColonneTag" => $this->titreColonne,
-                "idTableauTag" => $this->idTableau
+                "idColonneTag" => $this->idColonne ??null,
+                "titreColonneTag" => $this->titreColonne ?? null,
+                "idTableauTag" => $this->tableau->getIdTableau() ?? null
             );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            "idColonne" => $this->idColonne ?? null,
+            "titreColonne" => $this->titreColonne ?? null,
+            "idTableau" => (isset($this->tableau)) ? $this->tableau->getIdTableau() : null
+        ];
     }
 }

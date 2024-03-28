@@ -4,6 +4,7 @@ namespace App\Trellotrolle\Modele\Repository;
 
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Colonne;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use Exception;
 
 class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
@@ -26,8 +27,16 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
         ];
     }
 
+    protected function estAutoIncremente():bool
+    {
+        return true;
+    }
+
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
+        $tableau = new Tableau();
+        $tableau->setIdTableau($objetFormatTableau["idtableau"]);
+        $objetFormatTableau["tableau"] = $tableau;
         return Colonne::construireDepuisTableau($objetFormatTableau);
     }
 
