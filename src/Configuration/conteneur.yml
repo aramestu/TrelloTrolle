@@ -24,14 +24,28 @@ services:
   #Repositories
 
 
+
+  #Lib
+  mot_de_passe:
+    class: App\TrelloTrolle\Lib\MotDePasse
+
   #Sercices
   utilisateur_service:
     class: App\TrelloTrolle\Service\UtilisateurService
-    arguments: ['%dossier_photo_profil%', '@utilisateur_repository' ]
+    arguments: ['@utilisateur_repository', '@tableau_repository', '@mot_de_passe' ]
 
-  utilisateur_service:
-    class: App\TrelloTrolle\Service\UtilisateurService
-    arguments: [ '@file_moving_service', '%dossier_photo_profil%', '@utilisateur_repository' ]
+  colonne_service:
+    class: App\TrelloTrolle\Service\ColonneService
+    arguments: [ '@colonne_repository', '@tableau_repository']
+
+  tableau_service:
+    class: App\TrelloTrolle\Service\TableauService
+    arguments: [ '@tableau_repository', '@utilisateur_repository' ,'@carte_repository', '@colonne_repository', '@mot_de_passe' ]
+
+  carte_service:
+    class: App\TrelloTrolle\Service\TableauService
+    arguments: [ '@carte_repository', '@colonne_repository', '@tableau_repository', '@colonne_service' ,  '@tableau_service' ]
+
 
 
   #Services
