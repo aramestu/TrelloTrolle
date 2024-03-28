@@ -12,23 +12,19 @@ class Colonne extends AbstractDataObject implements \JsonSerializable
 
     public static function create(string $idColonne, string $titreColonne, Tableau $tableau): Colonne{
         $colonne = new Colonne();
-        $colonne->
-        $c->titreColonne = $titreColonne;
-        $c->tableau = $tableau;
-        return $c;
+        $colonne->idColonne = $idColonne;
+        $colonne->titreColonne = $titreColonne;
+        $colonne->tableau = $tableau;
+        return $colonne;
     }
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Colonne {
-        $t = new Tableau();
-        $t->setIdTableau($objetFormatTableau["idTableau"]);
 
-        $c = Colonne::create(
+        return self::create(
+            $objetFormatTableau["idcolonne"],
             $objetFormatTableau["titrecolonne"],
-            $t
+            $objetFormatTableau['tableau']
         );
-        $c->idColonne = $objetFormatTableau["idcolonne"];
-
-        return $c;
     }
 
     public function getTableau(): Tableau
