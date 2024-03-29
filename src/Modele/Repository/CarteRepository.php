@@ -141,7 +141,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     public function supprimer(string $valeurClePrimaire): bool
     {
         $this->supprimerToutesAffectations("idCarte", $valeurClePrimaire);
-        parent::supprimer($valeurClePrimaire);
+        return parent::supprimer($valeurClePrimaire);
     }
 
 }
