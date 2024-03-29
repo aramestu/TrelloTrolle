@@ -88,10 +88,8 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM :nomTableTag WHERE :nomAttributTag = :valeurTag ORDER BY :attributsTexteTag :sensTag ");
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag ORDER BY :attributsTexteTag :sensTag ");
         $values = array(
-            "nomTableTag" => $nomTable,
-            "nomAttributTag" => $nomAttribut,
             "valeurTag" => $valeur,
             "attributsTexteTag" => $attributsTexte,
             "sensTag" => $sens
@@ -190,11 +188,34 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         }
     }
 
-    protected function getNextId(string $type) : int {
-        $query = ConnexionBaseDeDonnees::getPdo()->query("SELECT MAX($type) FROM app_db");
-        $query->execute();
-        $obj = $query->fetch();
-        return $obj[0] === null ? 0 : $obj[0] + 1;
+    public function supprimerToutesAffectations(string $nomColonne, string $valeurColonne): bool
+    {
+        $sql = "DELETE FROM Affecter 
+                WHERE $nomColonne = :valeurTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "valeurTag" => $valeurColonne
+        ];
+        $pdoStatement->execute($values);
+        $deleteCount = $pdoStatement->rowCount();
+
+        return ($deleteCount > 0);
+    }
+
+    public function supprimerToutesParticipation(string $nomColonne, string $valeurColonne): bool
+    {
+        $nomTag = $nomColonne . "Tag";
+
+        $sql = "DELETE FROM Participer 
+                WHERE $nomColonne = :valeurTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "valeurTag" => $valeurColonne
+        ];
+        $pdoStatement->execute($values);
+        $deleteCount = $pdoStatement->rowCount();
+
+        return ($deleteCount > 0);
     }
 
 }

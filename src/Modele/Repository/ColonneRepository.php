@@ -52,5 +52,13 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
         return $obj[0];
     }
 
-
+    public function supprimer(string $valeurClePrimaire): bool
+    {
+        $carteRepository = new CarteRepository();
+        $cartes = $carteRepository->recupererPlusieursParOrdonne("idColonne", $valeurClePrimaire, ["idColonne"]);
+        foreach ($cartes as $carte){
+            $carteRepository->supprimer($carte->getIdCarte());
+        }
+        parent::supprimer($valeurClePrimaire);
+    }
 }

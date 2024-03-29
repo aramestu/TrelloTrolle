@@ -61,4 +61,17 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
 
         return $objets;
     }
+
+    public function supprimer(string $valeurClePrimaire): bool
+    {
+        $this->supprimerToutesAffectations("login", $valeurClePrimaire);
+        $this->supprimerToutesParticipation("login", $valeurClePrimaire);
+
+        $tableaux = $this->recupererTableauxOuUtilisateurEstMembre($valeurClePrimaire);
+        $tableauRepository = new TableauRepository();
+        foreach ($tableaux as $tableau){
+            $tableauRepository->supprimer($tableau->getIdTableau());
+        }
+        return parent::supprimer($valeurClePrimaire);
+    }
 }

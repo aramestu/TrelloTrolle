@@ -138,4 +138,15 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
         return ($deleteCount > 0);
     }
 
+    public function supprimer(string $valeurClePrimaire): bool
+    {
+        $this->supprimerToutesParticipation("idTableau", $valeurClePrimaire);
+        $colonnes = $this->recupererPlusieursParOrdonne("idTableau", $valeurClePrimaire, ["idTableau"]);
+        $colonneRepository = new ColonneRepository();
+        foreach ($colonnes as $colonne){
+            $colonneRepository->supprimer($colonne->getIdColonne());
+        }
+        parent::supprimer($valeurClePrimaire);
+    }
+
 }
