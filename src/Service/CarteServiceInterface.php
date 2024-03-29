@@ -5,7 +5,7 @@ namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Service\Exception\ServiceException;
 
-interface CarteServiceInterface
+interface CarteServiceService
 {
     /**
      * @throws ServiceException
@@ -26,4 +26,6 @@ interface CarteServiceInterface
      * @throws ServiceException
      */
     public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations);
+
+    public function getCartesParIdColonne(?int $idColonne): ?array;
 }

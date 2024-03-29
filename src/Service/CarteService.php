@@ -7,7 +7,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
-class CarteService implements CarteServiceInterface
+class CarteService implements CarteServiceInterface, CarteServiceService
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
                                 private ColonneServiceInterface $colonneService,
@@ -167,5 +167,13 @@ class CarteService implements CarteServiceInterface
         $carte->setAffectationsCartes($affectations);
 
         $this->carteRepository->mettreAJour($carte);
+    }
+
+    public function getCartesParIdColonne(?int $idColonne): ?array{
+        $this->verifierIdColonneCorrect($idColonne);
+
+        $cartes = $this->carteRepository->recupererCartesColonne($idColonne);
+
+        return $cartes;
     }
 }
