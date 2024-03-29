@@ -173,6 +173,23 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
+    public function verifierIdentifiantUtilisateur($login, $mdp): void
+    {
+        if (is_null($login) || is_null($mdp)) {
+            throw new ServiceException( "Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST);
+        }
+
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getUtilisateur($login);
+
+        if (!$this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())) {
+            throw new ServiceException( "Mot de passe incorrect.", Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
     public function supprimer(?string $loginUtilisateurConnecte) : void{
         if(is_null($loginUtilisateurConnecte)){
             throw new ServiceException("le login n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
