@@ -2,6 +2,9 @@
 
 namespace App\Trellotrolle\Configuration;
 
+use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees;
+use PDO;
+
 class ConfigurationBaseDeDonnees {
 
 	//Informations de connexion pour le serveur PostgreSQL SAE de l'IUT
@@ -31,6 +34,16 @@ class ConfigurationBaseDeDonnees {
 
     static public function getMotDePasse() : string {
         return ConfigurationBaseDeDonnees::$configurationBaseDeDonnees['motDePasse'];
+    }
+
+    public function getDSN() : string{
+        return "pgsql:host={".ConfigurationBaseDeDonnees::getNomHote()."};port={".ConfigurationBaseDeDonnees::getPort()."};dbname".ConfigurationBaseDeDonnees::getNomBaseDeDonnees();
+    }
+    public function getOptions() : array {
+        // Option pour que toutes les chaines de caractères
+        return array(
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
+        );
     }
 
 }
