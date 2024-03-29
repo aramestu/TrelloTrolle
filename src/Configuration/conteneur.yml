@@ -22,8 +22,19 @@ services:
     arguments: ['@configuration_bdd_my_sql']
 
   #Repositories
+  #TODO : ajouter les argument quand on aura injecter la base de données comme dans le td
 
+  carte_repository:
+    class: App\TrelloTrolle\Repository\CarteRepository
 
+  colonne_repository:
+    class: App\TrelloTrolle\Repository\ColonneRepository
+
+  tableau_repository:
+    class: App\TrelloTrolle\Repository\TableauRepository
+
+  utilisateur_repository:
+    class: App\TrelloTrolle\Repository\UtilisateurRepository
 
   #Lib
   mot_de_passe:
