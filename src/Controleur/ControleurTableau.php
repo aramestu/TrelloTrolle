@@ -49,7 +49,10 @@ class ControleurTableau extends ControleurGenerique
         $participant = [];
 
         foreach ($colonnes as $colonne){
-            //$cartes = $this->carteService->getCarte()
+            $cartes = $this->carteService->getCartesParIdColonne($colonne->getIdColonne());
+            foreach ($cartes as $carte){
+                //foreach ($carte->get) TODO: a finir
+            }
         }
 
         return new Response();
