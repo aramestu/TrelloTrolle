@@ -25,16 +25,16 @@ services:
   #TODO : ajouter les argument quand on aura injecter la base de données comme dans le td
 
   carte_repository:
-    class: App\TrelloTrolle\Repository\CarteRepository
+    class: App\Trellotrolle\Modele\Repository\CarteRepository
 
   colonne_repository:
-    class: App\TrelloTrolle\Repository\ColonneRepository
+    class: App\Trellotrolle\Modele\Repository\ColonneRepository
 
   tableau_repository:
-    class: App\TrelloTrolle\Repository\TableauRepository
+    class: App\Trellotrolle\Modele\Repository\TableauRepository
 
   utilisateur_repository:
-    class: App\TrelloTrolle\Repository\UtilisateurRepository
+    class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
 
   #Lib
   mot_de_passe:
