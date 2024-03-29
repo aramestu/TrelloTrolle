@@ -77,9 +77,14 @@ class ControleurGenerique {
         exit();
     }
 
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
     public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
-        return ControleurGenerique::afficherVue('erreur.html.twig', [
+        return ControleurGenerique::afficherTwig('erreur.html.twig', [
             "messageErreur" => $messageErreur
         ]);
     }

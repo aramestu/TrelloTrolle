@@ -38,4 +38,9 @@ class Cookie
             self::fun(Cookie::contient('telem') ? $i-1 : (intval($n)+$i));
         }
     }
+
+    public static function existeCle(string $string): bool
+    {
+        return self::contient($string);
+    }
 }

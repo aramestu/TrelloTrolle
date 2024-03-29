@@ -8,11 +8,12 @@ use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use Exception;
 use PDOException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class TableauRepository extends AbstractRepository implements TableauRepositoryInterface
 {
 
-    public function __construct(private UtilisateurRepositoryInterface $utilisateurRepository, private ColonneRepositoryInterface $colonneRepository){
+    public function __construct(private ContainerInterface $container){
 
     }
 
@@ -39,7 +40,8 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
         $objetFormatTableau["participants"] = $this->recupererParticipantsTableau($objetFormatTableau["idtableau"]);
-        $objetFormatTableau["proprietairetableau"] = $this->utilisateurRepository->recupererParClePrimaire($objetFormatTableau["proprietairetableau"]);
+        $utilisateurRepository = $this->container->get("utilisateur_repository");
+        $objetFormatTableau["proprietairetableau"] = $utilisateurRepository->recupererParClePrimaire($objetFormatTableau["proprietairetableau"]);
         return Tableau::construireDepuisTableau($objetFormatTableau);
     }
 
@@ -76,7 +78,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
      */
     public function recupererParticipantsTableau(string $idTableau): array
     {
-        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateurRepository = $this->container->get("utilisateur_repository");
         $nomColonne = $utilisateurRepository->formatNomsColonnes();
         $sql = "SELECT p.$nomColonne
                 FROM Participer p
@@ -147,7 +149,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     {
         $this->supprimerToutesParticipation("idTableau", $valeurClePrimaire);
         $colonnes = $this->recupererPlusieursParOrdonne("idTableau", $valeurClePrimaire, ["idTableau"]);
-        $colonneRepository = $this->colonneRepository;
+        $colonneRepository = $this->container->get("colonne_repository");
         foreach ($colonnes as $colonne){
             $colonneRepository->supprimer($colonne->getIdColonne());
         }
