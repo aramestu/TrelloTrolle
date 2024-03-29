@@ -80,6 +80,24 @@ class Tableau extends AbstractDataObject implements \JsonSerializable
         return array_slice($this->participants, 0);
     }
 
+    public function estProprietaire(string $login):bool
+    {
+        return $this->proprietaireTableau->getLogin() == $login;
+    }
+
+    public function estParticipant(string $login): bool
+    {
+        foreach ($this->participants as $participant){
+            if($participant->getLogin() == $login) return true;
+        }
+        return false;
+    }
+
+    public function estParticipantOuProprietaire(string $login): bool
+    {
+        return $this->estParticipant($login) || $this->estParticipant($login);
+    }
+
     public function formatTableau(): array
     {
            return array(

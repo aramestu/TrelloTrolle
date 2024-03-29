@@ -44,7 +44,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array{
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
-        return $this->utilisateurRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte); // TODO
+        return $this->utilisateurRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte);
     }
 
     /**

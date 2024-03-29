@@ -6,6 +6,7 @@ use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use Exception;
+use PDOException;
 
 class CarteRepository extends AbstractRepository implements CarteRepositoryInterface
 {
@@ -38,7 +39,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         $colonne->setIdColonne($objetFormatTableau["idcolonne"]);
         $objetFormatTableau["colonne"] = $colonne;
 
-        $affectations = self::recupererAffectationsCartes($objetFormatTableau["idcarte"]);
+        $affectations = $this->recupererAffectationsCartes($objetFormatTableau["idcarte"]);
         $objetFormatTableau["affectationscarte"] = $affectations;
 
         return Carte::construireDepuisTableau($objetFormatTableau);
@@ -82,7 +83,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         return $obj[0];
     }
 
-    public static function recupererAffectationsCartes(string $idCarte): array {
+    public function recupererAffectationsCartes(string $idCarte): array {
         $utilisateurRepository = new UtilisateurRepository();
         $nomColonnnes = $utilisateurRepository->formatNomsColonnes();
 
@@ -98,7 +99,43 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         return $objets;
     }
 
-    public function getNextIdCarte() : int {
-        return $this->getNextId("idCarte");
+    /**
+     * @throws PDOException
+     */
+    public function ajouterAffectation($login, $idCarte):bool
+    {
+        $sql = "INSERT INTO Affecter(login, idcarte) VALUES (:loginTag, :idCarteTag)";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "loginTag" => $login,
+            "idCarteTag" => $idCarte
+        ];
+        try {
+            $pdoStatement->execute($values);
+            return true;
+        } catch (PDOException $exception) {
+            if ($pdoStatement->errorCode() === "23000") {
+                return false;
+            } else {
+                throw $exception;
+            }
+        }
     }
+
+    public function supprimerAffectation($login, $idCarte):bool
+    {
+        $sql = "DELETE FROM Affecter 
+                WHERE login = :loginTag
+                AND idcarte = :idCarteTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "loginTag" => $login,
+            "idCarteTag" => $idCarte
+        ];
+        $pdoStatement->execute($values);
+        $deleteCount = $pdoStatement->rowCount();
+
+        return ($deleteCount > 0);
+    }
+
 }

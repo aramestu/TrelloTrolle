@@ -7,6 +7,7 @@ use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use Exception;
+use PDOException;
 
 class TableauRepository extends AbstractRepository implements TableauRepositoryInterface
 {
@@ -97,4 +98,44 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
         $obj = $pdoStatement->fetch();
         return $obj[0];
     }
+
+    /**
+     * @throws PDOException
+     */
+    public function ajouterParticipant($login, $idTableau):bool
+    {
+        $sql = "INSERT INTO Participer(login, idtableau) VALUES (:loginTag, :idTableauTag)";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "loginTag" => $login,
+            "idTableauTag" => $idTableau
+        ];
+        try {
+            $pdoStatement->execute($values);
+            return true;
+        } catch (PDOException $exception) {
+            if ($pdoStatement->errorCode() === "23000") {
+                return false;
+            } else {
+                throw $exception;
+            }
+        }
+    }
+
+    public function supprimerParticipant($login, $idTableau):bool
+    {
+        $sql = "DELETE FROM Participer 
+                WHERE login = :loginTag
+                AND idtableau = :idTableauTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $values = [
+            "loginTag" => $login,
+            "idTableauTag" => $idTableau
+        ];
+        $pdoStatement->execute($values);
+        $deleteCount = $pdoStatement->rowCount();
+
+        return ($deleteCount > 0);
+    }
+
 }

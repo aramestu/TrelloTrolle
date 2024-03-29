@@ -108,7 +108,10 @@ class TableauService implements TableauServiceInterface
 
         $codeTableauHache = $this->motDePasse->genererChaineAleatoire(64);
 
-        $tableau = new Tableau($codeTableauHache,$nomTableau,$utilisateur); // TODO: A revoir Ici pour l'user et voir si la requête au dessus est vrm nécessaire (idUtilisateur plutôt que Utilisateur)
+        $tableau = new Tableau();
+        $tableau->setCodeTableau($codeTableauHache);
+        $tableau->setTitreTableau($nomTableau);
+        $tableau->setProprietaireTableau($utilisateur); // TODO: A revoir Ici pour l'user et voir si la requête au dessus est vrm nécessaire (idUtilisateur plutôt que Utilisateur)
         $this->tableauRepository->ajouter($tableau);
     }
 
@@ -162,11 +165,11 @@ class TableauService implements TableauServiceInterface
         if(is_null($utilisateurNouveau)){
             throw new ServiceException( "L'utilisateur à ajouter n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if($this->tableauRepository->estParticipantOuProprietaire($loginUtilisateurNouveau, $idTableau)){ // TODO: ajouter cette méthode dans les repository
+        if($tableau->estParticipantOuProprietaire($loginUtilisateurNouveau)){
             throw new ServiceException( "L'utilisateur est proprio ou participe déjà à ce talbeau", Response::HTTP_CONFLICT);
         }
 
-        $this->tableauRepository->ajouterMembre($loginUtilisateurNouveau, $idTableau); // TODO : ajouter cette méthode dans les repository
+        $this->tableauRepository->ajouterParticipant($loginUtilisateurNouveau, $idTableau);
     }
 
     /**
@@ -191,7 +194,7 @@ class TableauService implements TableauServiceInterface
                 throw new ServiceException( "Seul le propriétaire du tableau peut mettre supprimer des membres", Response::HTTP_UNAUTHORIZED);
             }
         }
-        else{ // Ca signifie que l'utilisateur connecté est le même que celui à supprimer (il a le droite de quitter le tableau)
+        else{ // Ca signifie que l'utilisateur connecté est le même que celui à supprimer (il a le droit de quitter le tableau)
             if($tableau->estProprietaire($loginUtilisateurDelete)){
                 throw new ServiceException( "Vous ne pouvez pas vous supprimer du tableau si vous êtes propriétaire", Response::HTTP_BAD_REQUEST);
             }
@@ -205,12 +208,12 @@ class TableauService implements TableauServiceInterface
         if(is_null($utilisateurNouveau)){
             throw new ServiceException( "L'utilisateur à supprimer n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if(! $this->tableauRepository->estParticipantOuProprietaire($loginUtilisateurDelete, $idTableau)){ // TODO: ajouter cette méthode dans les repository. A voir si la fonction peut être simplifer (je pense que oui)
+        if(! $tableau->estParticipantOuProprietaire($loginUtilisateurDelete)){
             throw new ServiceException( "L'utilisateur ne participe pas à ce talbeau", Response::HTTP_CONFLICT);
         }
 
-        $this->carteRepository->supprimerAffectation($idTableau, $loginUtilisateurDelete); // TODO: ajotuer cette méthode dans les repository ou tout du moins faire en sorte que supprimerMembre supprime les affectations aux Cartes
-        $this->tableauRepository->supprimerMembre($loginUtilisateurDelete, $idTableau); // TODO : ajouter cette méthode dans les repository
+        $this->carteRepository->supprimerAffectation($idTableau, $loginUtilisateurDelete);
+        $this->tableauRepository->supprimerParticipant($loginUtilisateurDelete, $idTableau);
     }
 
     /**

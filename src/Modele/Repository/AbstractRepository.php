@@ -129,10 +129,11 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $nomTable = $this->getNomTable();
         $nomClePrimaire = $this->getNomCle();
         $sql = "DELETE FROM $nomTable WHERE $nomClePrimaire= :valeurClePrimaireTag";
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
         $values = [
             "valeurClePrimaireTag" => $valeurClePrimaire
         ];
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->query($sql);
+        $pdoStatement->execute($values);
         $deleteCount = $pdoStatement->rowCount();
 
         return ($deleteCount > 0);
