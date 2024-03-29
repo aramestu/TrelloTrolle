@@ -79,10 +79,8 @@ class ControleurUtilisateur extends ControleurGenerique
         try{
             $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"], );
         }catch (\Exception $e){
-            var_dump($e->getMessage());
             MessageFlash::ajouter("error", $e->getMessage());
-            return "";
-            //return $this->rediriger("inscription");
+            return $this->rediriger("inscription");
         }
         return $this->rediriger("connexion");
     }
