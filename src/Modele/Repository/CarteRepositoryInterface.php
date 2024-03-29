@@ -17,5 +17,4 @@ interface CarteRepositoryInterface extends AbstractRepositoryInterface
 
     public function getNombreCartesTotalUtilisateur(string $login): int;
 
-    public function getNextIdCarte(): int;
 }
