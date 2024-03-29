@@ -31,8 +31,7 @@ class ControleurGenerique {
 
     protected function afficherVue(string $cheminVue, array $parametres = []): Response {
         extract($parametres);
-        $messagesFlash = MessageFlash::lireTousMessages(); // TODO: injecter dépendance
-        ob_start();
+        $messagesFlash = MessageFlash::lireTousMessages();
         require $this->container->getParameter('project_root'). "/src/vue/$cheminVue";
         $corpsReponse = ob_get_clean();
         return new Response($corpsReponse);
