@@ -1,0 +1,100 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
+
+{% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
+{% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
+
+{% block page_content %}
+    <div class="trello-main">
+        <aside>
+            <div class="utilisateur icons_menu">
+                <span>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</span>
+                {% if estProprietaire %}
+                    <span>
+                        <a href="{{ route('mise_a_jour_utilisateur') }}">
+                            <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Modifier l'utilisateur">
+                        </a>
+                    </span>
+                {% endif %}
+            </div>
+            <div class="tableau">
+                <div class="icons_menu">
+                    <span>{{ tableau.titreTableau }}</span>
+                </div>
+                <div class="participants">
+                    Membres :
+                    <ul>
+                        <li>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</li>
+                        {% for participant in tableau.participants %}
+                            <li>
+                                <div class="icons_menu_stick">
+                                    {{ participant.prenom }} {{ participant.nom }}
+                                    {% if estProprietaire %}
+                                        <span class="actions">
+                                            <a href="{{ route('supprimer_membre', {idTableau: tableau.idTableau, login: participant.login}) }}">
+                                                <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Retirer le membre">
+                                            </a>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                        {% if estProprietaire %}
+                            <li>
+                                <a href="{{ route('ajouter_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="participants">
+                    Travail en cours :
+                    <ul>
+                        {% for participant in participants %}
+                            <li>
+                                <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
+                                <ul>
+                                    {% for colonne in participant['colonnes'] %}
+                                        <li>{{ colonne[1] }} {{ colonne[0] }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                        {% if participants is empty %}
+                            <span><strong>Pas de travail en cours</strong></span>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </aside>
+        <article>
+            <div class="tableau">
+                <div class="titre icons_menu">
+                    {{ tableau.titreTableau }}
+                    {% if estParticipant %}
+                        <span class="actions">
+                            <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
+                                <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
+                            </a>
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="corps">
+                    {% for colonne in colonnes %}
+                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, estParticipant: estParticipant} %}
+                    {% endfor %}
+
+                    {% if estParticipant %}
+                        <a class="ajout-tableau" href="{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}">
+                            <div class="colonne">
+                                <div class="titre icons_menu btn-ajout">
+                                    <span>Ajouter une colonne</span>
+                                </div>
+                            </div>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+    </div>
+{% endblock %}

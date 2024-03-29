@@ -6,25 +6,23 @@ use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use Exception;
 
-class ColonneRepository extends AbstractRepository
+class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
 {
 
     protected function getNomTable(): string
     {
-        return "app_db";
+        return "Colonnes";
     }
 
     protected function getNomCle(): string
     {
-        return "idcolonne";
+        return "idColonne";
     }
 
     protected function getNomsColonnes(): array
     {
         return [
-            "login", "nom", "prenom", "email", "mdphache",
-            "mdp", "idtableau", "codetableau", "titretableau",
-            "participants", "idcolonne", "titrecolonne"
+            "idColonne", "titreColonne", "idTableau"
         ];
     }
 
@@ -42,19 +40,11 @@ class ColonneRepository extends AbstractRepository
     }
 
     public function getNombreColonnesTotalTableau(int $idTableau) : int {
-        $query = "SELECT COUNT(DISTINCT idcolonne) FROM app_db WHERE idtableau=:idTableau";
+        $query = "SELECT COUNT(DISTINCT idColonne) FROM Colonnes WHERE idTableau=:idTableau";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
         $pdoStatement->execute(["idTableau" => $idTableau]);
         $obj = $pdoStatement->fetch();
         return $obj[0];
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function ajouter(AbstractDataObject $object): bool
-    {
-        throw new Exception("Impossible d'ajouter seulement une colonne...");
     }
 
 

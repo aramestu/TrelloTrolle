@@ -1,0 +1,20 @@
+<div class="colonne">
+    <div class="titre icons_menu">
+        <span>{{ colonne.titreColonne }}</span>
+        {% if estParticipant %}
+            <span class="actions">
+                <a href="{{ route('mise_a_jour_colonne', {idColonne: colonne.idColonne}) }}">
+                    <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la colonne">
+                </a>
+                <a href="{{ route('supprimer_colonne', {idColonne: colonne.idColonne}) }}">
+                    <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Supprimer la colonne">
+                </a>
+            </span>
+        {% endif %}
+    </div>
+    <div class="corps">
+        {% for carte in data[colonne.idColonne] %}
+            {% include 'carte/carte.html.twig' with {carte: carte, idColonne: colonne.idColonne, estParticipant: estParticipant} %}
+        {% endfor %}
+    </div>
+</div>

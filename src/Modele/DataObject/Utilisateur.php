@@ -2,7 +2,7 @@
 
 namespace App\Trellotrolle\Modele\DataObject;
 
-class Utilisateur extends AbstractDataObject
+class Utilisateur extends AbstractDataObject implements \JsonSerializable
 {
     public function __construct(
         private string $login,
@@ -10,18 +10,16 @@ class Utilisateur extends AbstractDataObject
         private string $prenom,
         private string $email,
         private string $mdpHache,
-        private string $mdp,
     )
     {}
 
     public static function construireDepuisTableau(array $objetFormatTableau) : Utilisateur {
         return new Utilisateur(
             $objetFormatTableau["login"],
-            $objetFormatTableau["nom"],
-            $objetFormatTableau["prenom"],
-            $objetFormatTableau["email"],
-            $objetFormatTableau["mdphache"],
-            $objetFormatTableau["mdp"],
+            $objetFormatTableau["nomUtilisateur"],
+            $objetFormatTableau["prenomUtilisateur"],
+            $objetFormatTableau["emailUtilisateur"],
+            $objetFormatTableau["mdpHache"],
         );
     }
 
@@ -77,17 +75,6 @@ class Utilisateur extends AbstractDataObject
         $this->mdpHache = $mdpHache;
     }
 
-    public function getMdp(): string
-    {
-        return $this->mdp;
-    }
-
-
-    public function setMdp(string $mdp): void
-    {
-        $this->mdp = $mdp;
-    }
-
     public function getEmail(): string
     {
         return $this->email;
@@ -96,17 +83,6 @@ class Utilisateur extends AbstractDataObject
     public function setEmail(string $email): void
     {
         $this->email = $email;
-    }
-
-    public function formatTablleauUtilisateurPourJson() : array {
-        return [
-            "login" => $this->login,
-            "nom" => $this->nom,
-            "prenom" => $this->prenom,
-            "email" => $this->email,
-            "mdphache" => $this->mdpHache,
-            "mdp" => $this->mdp
-        ];
     }
 
     public static function formatJsonListeUtilisateurs($utilisateurs) : string {
@@ -124,8 +100,18 @@ class Utilisateur extends AbstractDataObject
             "nomTag" => $this->nom,
             "prenomTag" => $this->prenom,
             "emailTag" => $this->email,
-            "mdphacheTag" => $this->mdpHache,
-            "mdpTag" => $this->mdp,
+            "mdpHacheTag" => $this->mdpHache,
         );
+    }
+
+    public function jsonSerialize()
+    {
+        return [
+            "login" => $this->login,
+            "nom" => $this->nom,
+            "prenom" => $this->prenom,
+            "email" => $this->email,
+            "mdpHache" => $this->mdpHache,
+        ];
     }
 }

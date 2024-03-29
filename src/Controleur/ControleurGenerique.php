@@ -3,15 +3,42 @@
 namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\MessageFlash;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use Twig\Environment;
 
 class ControleurGenerique {
 
-    protected static function afficherVue(string $cheminVue, array $parametres = []): void
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
     {
+        $this->container = $container;
+    }
+
+    protected function afficherVuePHP(string $cheminVue, array $parametres = []): Response {
         extract($parametres);
-//        $messagesFlash = $_REQUEST["messagesFlash"] ?? [];
         $messagesFlash = MessageFlash::lireTousMessages();
-        require __DIR__ . "/../vue/$cheminVue";
+        ob_start();
+        require $this->container->getParameter('project_root'). "/src/vue/$cheminVue";
+        $corpsReponse = ob_get_clean();
+        return new Response($corpsReponse);
+    }
+
+    public function afficherVue(string $cheminVue, array $parametres = []): Response
+    {
+        /** @var Environment $twig */
+        $twig = $this->container->get("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
+        return new Response($corpsReponse);
+    }
+
+    protected function rediriger(string $routeName, array $parameters = []) : RedirectResponse
+    {
+        $generateurUrl = $this->container->get("url_generator");
+        $url = $generateurUrl->generate($routeName, $parameters);
+        return new RedirectResponse($url);
     }
 
     // https://stackoverflow.com/questions/768431/how-do-i-make-a-redirect-in-php
@@ -34,18 +61,10 @@ class ControleurGenerique {
         exit();
     }
 
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+    public function afficherErreur($messageErreur = ""): Response
     {
-        $messageErreurVue = "Problème";
-        if ($controleur !== "")
-            $messageErreurVue .= " avec le contrôleur $controleur";
-        if ($messageErreur !== "")
-            $messageErreurVue .= " : $messageErreur";
-
-        ControleurGenerique::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Problème",
-            "cheminVueBody" => "erreur.php",
-            "messageErreur" => $messageErreurVue
+        return ControleurGenerique::afficherVue('erreur.html.twig', [
+            "messageErreur" => $messageErreur
         ]);
     }
 
@@ -57,4 +76,5 @@ class ControleurGenerique {
         }
         return true;
     }
+
 }

@@ -1,0 +1,17 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Accueil{% endblock %}
+
+{% block page_content %}
+    <div><p>Bienvenue sur <strong>Trello-Trollé</strong> !</p></div>
+    <div>
+        {% if estConnecte %}
+            <span><a href="{{ route('mes_tableaux') }}">Consulter mes tableaux</a></span>
+        {% else %}
+            <p>
+                Pour créer des tableaux, commencez par vous <a href="{{ route('connexion') }}">connecter</a>
+                ou par <a href={{ route('inscription') }}>créer un compte</a>!
+            </p>
+        {% endif %}
+    </div>
+{% endblock %}
