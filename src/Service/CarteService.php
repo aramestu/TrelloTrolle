@@ -7,7 +7,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
-class CarteService
+class CarteService implements CarteServiceInterface
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
                                 private ColonneServiceInterface $colonneService,
