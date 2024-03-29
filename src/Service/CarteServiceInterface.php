@@ -26,4 +26,6 @@ interface CarteServiceInterface
      * @throws ServiceException
      */
     public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations);
+
+    public function getCartesParIdColonne(?int $idColonne): ?array;
 }

@@ -13,6 +13,7 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use App\Trellotrolle\Service\CarteServiceInterface;
 use App\Trellotrolle\Service\ColonneServiceInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\TableauServiceInterface;
@@ -48,9 +49,13 @@ class ControleurTableau extends ControleurGenerique
         $participant = [];
 
         foreach ($colonnes as $colonne){
-            $cartes = $this->carteService->
+            $cartes = $this->carteService->getCartesParIdColonne($colonne->getIdColonne());
+            foreach ($cartes as $carte){
+                //foreach ($carte->get) TODO: a finir
+            }
         }
 
+        return new Response();
 
         /*if(!ControleurTableau::issetAndNotNull(["codeTableau"])) {
             MessageFlash::ajouter("warning", "Code de tableau manquant");
