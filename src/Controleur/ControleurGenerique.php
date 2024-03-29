@@ -13,8 +13,12 @@ use Twig\Error\SyntaxError;
 
 class ControleurGenerique {
 
-    public function __construct(private ContainerInterface $container)
-    {}
+    private ContainerInterface $container;
+
+    public function __construct(ContainerInterface $container)
+    {
+        $this->container = $container;
+    }
 
     /**
      * @throws SyntaxError
@@ -29,11 +33,20 @@ class ControleurGenerique {
         return new Response($corpsReponse);
     }
 
-    protected function afficherVue(string $cheminVue, array $parametres = []): Response {
+    protected function afficherVuePHP(string $cheminVue, array $parametres = []): Response {
         extract($parametres);
         $messagesFlash = MessageFlash::lireTousMessages();
+        ob_start();
         require $this->container->getParameter('project_root'). "/src/vue/$cheminVue";
         $corpsReponse = ob_get_clean();
+        return new Response($corpsReponse);
+    }
+
+    public function afficherVue(string $cheminVue, array $parametres = []): Response
+    {
+        /** @var Environment $twig */
+        $twig = $this->container->get("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
         return new Response($corpsReponse);
     }
 
@@ -64,9 +77,14 @@ class ControleurGenerique {
         exit();
     }
 
-    public function afficherErreur($messageErreur = ""): Response
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
-        return ControleurGenerique::afficherVue('erreur.html.twig', [
+        return ControleurGenerique::afficherTwig('erreur.html.twig', [
             "messageErreur" => $messageErreur
         ]);
     }

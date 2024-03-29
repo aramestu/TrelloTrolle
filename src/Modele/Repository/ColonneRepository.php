@@ -6,11 +6,12 @@ use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
 {
 
-    public function __construct(private CarteRepositoryInterface $carteRepository){
+    public function __construct(private ContainerInterface $container){
 
     }
 
@@ -58,7 +59,7 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
 
     public function supprimer(string $valeurClePrimaire): bool
     {
-        $carteRepository = $this->carteRepository;
+        $carteRepository = $this->container->get("carte_repository");
         $cartes = $carteRepository->recupererPlusieursParOrdonne("idColonne", $valeurClePrimaire, ["idColonne"]);
         foreach ($cartes as $carte){
             $carteRepository->supprimer($carte->getIdCarte());
