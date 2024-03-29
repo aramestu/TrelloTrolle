@@ -125,7 +125,7 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->rediriger("accueil");
     }
 
-    #[Route(path: '/utilisateur/re', name:'supprimer', methods:["GET"])]
+    #[Route(path: '/utilisateur/{login}/supprimer', name:'supprimer', methods:["GET"])]
     public function supprimer(string $login): Response
     {
         if(! $this->estConnecte()) {
@@ -157,19 +157,19 @@ class ControleurUtilisateur extends ControleurGenerique
     public function connecter(): Response
     {
         if($this->estConnecte()) {
-            return $this->rediriger("connexion");
+            return $this->rediriger("accueil");
         }
         try{
-            $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
-            $this->serviceUtilisateur->supprimer($login);
+            $this->serviceUtilisateur->getUtilisateur($_POST["login"]);
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
-            return $this->rediriger("detail_utilisateur");
+            return $this->rediriger("accueil");
         }
         $this->connexionUtilisateurSession->deconnecter();
         $this->connexionUtilisateurJWT->deconnecter();
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
         return $this->rediriger("connexion");
+
         if(ConnexionUtilisateur::estConnecte()) {
             self::rediriger("mes_tableaux");
         }
