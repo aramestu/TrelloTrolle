@@ -37,7 +37,7 @@ class ConfigurationBaseDeDonnees {
     }
 
     public function getDSN() : string{
-        return "pgsql:host={".ConfigurationBaseDeDonnees::getNomHote()."};port={".ConfigurationBaseDeDonnees::getPort()."};dbname".ConfigurationBaseDeDonnees::getNomBaseDeDonnees();
+        return "pgsql:host=".ConfigurationBaseDeDonnees::getNomHote().";port=".ConfigurationBaseDeDonnees::getPort().";dbname=".ConfigurationBaseDeDonnees::getNomBaseDeDonnees();
     }
     public function getOptions() : array {
         // Option pour que toutes les chaines de caractères
