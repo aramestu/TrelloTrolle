@@ -166,6 +166,6 @@ class CarteService implements CarteServiceInterface
         $carte->setColonne($colonne);
         $carte->setAffectationsCartes($affectations);
 
-        $this->carteRepository->ajouter($carte);
+        $this->carteRepository->mettreAJour($carte);
     }
 }
