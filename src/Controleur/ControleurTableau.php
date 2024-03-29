@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
+use App\Trellotrolle\Lib\ConnexionUtilisateurInterface;
 use App\Trellotrolle\Lib\MessageFlash;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
@@ -12,11 +13,22 @@ use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
+use App\Trellotrolle\Service\ColonneServiceInterface;
+use App\Trellotrolle\Service\Exception\ServiceException;
+use App\Trellotrolle\Service\TableauServiceInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
 class ControleurTableau extends ControleurGenerique
 {
+
+    private function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
+                                 private ConnexionUtilisateurInterface $utilisateur, private ColonneServiceInterface $colonneService,
+                                 private CarteServiceInterface $carteService){
+        parent::__construct($container);
+    }
+
     public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
         return parent::afficherErreur($messageErreur, "tableau");
@@ -24,7 +36,23 @@ class ControleurTableau extends ControleurGenerique
 
     #[Route(path: '/tableau/{codeTableau}/afficher', name:'afficher_tableau', methods:["GET"])]
     public function afficherTableau() : Response {
-        if(!ControleurTableau::issetAndNotNull(["codeTableau"])) {
+        try {
+            $tableau = $this->tableauService->getByCodeTableau($_REQUEST["codeTableau"]);
+        } catch (ServiceException $e) {
+            MessageFlash::ajouter("error", $e);
+            return $this->rediriger("acceuil");
+        }
+
+        $colonnes = $this->colonneService->recupererColonnesTableau($tableau->getIdTableau());
+        $data = [];
+        $participant = [];
+
+        foreach ($colonnes as $colonne){
+            $cartes = $this->carteService->
+        }
+
+
+        /*if(!ControleurTableau::issetAndNotNull(["codeTableau"])) {
             MessageFlash::ajouter("warning", "Code de tableau manquant");
             return $this->rediriger("accueil");
         }
@@ -34,7 +62,7 @@ class ControleurTableau extends ControleurGenerique
         /**
          * @var Tableau $tableau
          */
-        $tableau = $tableauRepository->recupererParCodeTableau($code);
+        /*$tableau = $tableauRepository->recupererParCodeTableau($code);
         if(!$tableau) {
             MessageFlash::ajouter("warning", "Tableau inexistant");
             return $this->rediriger("accueil");
@@ -44,7 +72,7 @@ class ControleurTableau extends ControleurGenerique
         /**
          * @var Colonne[] $colonnes
          */
-        $colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
+        /*$colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
         $data = [];
         $participants = [];
 
@@ -53,7 +81,7 @@ class ControleurTableau extends ControleurGenerique
             /**
              * @var Carte[] $cartes
              */
-            $cartes = $carteRepository->recupererCartesColonne($colonne->getIdColonne());
+            /*$cartes = $carteRepository->recupererCartesColonne($colonne->getIdColonne());
             foreach ($cartes as $carte) {
                 foreach ($carte->getAffectationsCarte() as $utilisateur) {
                     if(!isset($participants[$utilisateur->getLogin()])) {
@@ -75,7 +103,7 @@ class ControleurTableau extends ControleurGenerique
             "colonnes" => $colonnes,
             "participants" => $participants,
             "data" => $data,
-        ]);
+        ]);*/
     }
 
     #[Route(path: '/tableau/{idTableau}/mise-a-jour', name:'mise_a_jour_tableau', methods:["GET"])]

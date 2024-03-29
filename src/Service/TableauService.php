@@ -8,6 +8,7 @@ use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 class TableauService implements TableauServiceInterface
@@ -81,7 +82,8 @@ class TableauService implements TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierLoginCorrect(?string $login){
+    private function verifierLoginCorrect(?string $login): void
+    {
         $nb = strlen($login);
         if(is_null($login) || $nb < 4 || $nb > 32){
             throw new ServiceException( "Le login ne peut pas être vide, et doit daire entre 4 et 32 caractères", Response::HTTP_BAD_REQUEST);
@@ -141,7 +143,8 @@ class TableauService implements TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau){
+    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau): void
+    {
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierLoginCorrect($loginUtilisateurNouveau);
         $this->verifierIdTableauCorrect($idTableau);
@@ -175,7 +178,8 @@ class TableauService implements TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete){ // Fonction à vrm tester
+    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete): void
+    { // Fonction à vrm tester
         if(is_null($idTableau) ||is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0 || is_null($loginUtilisateurDelete) || strlen($loginUtilisateurDelete) == 0){
             throw new ServiceException( "L'idTableau ou le login de l'user connecté ou le login a ajouté ne peut pas être vide", Response::HTTP_BAD_REQUEST);
         }
