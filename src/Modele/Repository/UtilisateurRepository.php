@@ -5,11 +5,12 @@ namespace App\Trellotrolle\Modele\Repository;
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class UtilisateurRepository extends AbstractRepository implements UtilisateurRepositoryInterface
 {
 
-    public function __construct(private TableauRepository $tableauRepository){
+    public function __construct(private ContainerInterface $container){
 
     }
 
@@ -48,7 +49,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
 
     public function recupererTableauxOuUtilisateurEstMembre(string $login): array
     {
-        $tableauRepository =  $this->tableauRepository;
+        $tableauRepository =  $this->container->get("tableau_repository");
         $nomColonnes = $tableauRepository->formatNomsColonnes();
         $sql = "SELECT DISTINCT  t.$nomColonnes FROM Tableaux t
                 LEFT JOIN participer p ON t.idTableau = p.idtableau
@@ -72,7 +73,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
         $this->supprimerToutesParticipation("login", $valeurClePrimaire);
 
         $tableaux = $this->recupererTableauxOuUtilisateurEstMembre($valeurClePrimaire);
-        $tableauRepository = $this->tableauRepository;
+        $tableauRepository =  $this->container->get("tableau_repository");
         foreach ($tableaux as $tableau){
             $tableauRepository->supprimer($tableau->getIdTableau());
         }

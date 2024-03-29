@@ -26,19 +26,19 @@ services:
 
   carte_repository:
     class: App\Trellotrolle\Modele\Repository\CarteRepository
-    arguments: ['@utilisateur_repository']
+    arguments: ['@container']
 
   colonne_repository:
     class: App\Trellotrolle\Modele\Repository\ColonneRepository
-    arguments: ['@carte_repository']
+    arguments: ['@container']
 
   tableau_repository:
     class: App\Trellotrolle\Modele\Repository\TableauRepository
-    arguments: ['@utilisateur_repository', '@colonne_repository']
+    arguments: ['@container']
 
   utilisateur_repository:
     class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
-    arguments: ['@tableau_repository']
+    arguments: ['@container']
 
   #Lib
   mot_de_passe:

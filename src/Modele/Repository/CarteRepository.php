@@ -7,11 +7,12 @@ use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use Exception;
 use PDOException;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CarteRepository extends AbstractRepository implements CarteRepositoryInterface
 {
 
-    public function __construct(private UtilisateurRepositoryInterface $utilisateurRepository){
+    public function __construct(private ContainerInterface $container){
 
     }
 
@@ -88,7 +89,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     }
 
     public function recupererAffectationsCartes(string $idCarte): array {
-        $utilisateurRepository = $this->utilisateurRepository;
+        $utilisateurRepository = $this->container->get("utilisateur_repository");
         $nomColonnnes = $utilisateurRepository->formatNomsColonnes();
 
         $sql = "SELECT a.$nomColonnnes FROM Affecter a
