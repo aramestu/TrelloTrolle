@@ -40,4 +40,9 @@ interface TableauServiceInterface
      * @throws ServiceException
      */
     public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau): void;
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void;
 }

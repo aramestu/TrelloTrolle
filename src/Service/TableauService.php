@@ -8,6 +8,7 @@ use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 
 class TableauService implements TableauServiceInterface
@@ -241,4 +242,15 @@ class TableauService implements TableauServiceInterface
         $this->tableauRepository->supprimerUtilisateurParticipant($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
         $this->tableauRepository->supprimer($idTableau);
     }
+
+    public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void
+    {
+        $tableau = $this->getByIdTableau($_GET['idTableau']);
+        if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte))
+        {
+            throw new ServiceException('Vous n\'êtes pas un participant de ce tableau.');
+        }
+
+    }
+
 }
