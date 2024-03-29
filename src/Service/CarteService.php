@@ -7,6 +7,7 @@ use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
+use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -49,7 +50,7 @@ class CarteService
     /**
      * @throws ServiceException
      */
-    public function verifierNomCarteCorrect(?string $titreCarte) {
+    private function verifierTitreCarteCorrect(?string $titreCarte) {
         $nb = strlen($titreCarte);
         if(is_null($titreCarte) || $nb == 0 || $nb > 64){
             throw new ServiceException( "Le nom de la carte ne peut pas faire plus de 64 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -59,7 +60,7 @@ class CarteService
     /**
      * @throws ServiceException
      */
-    public function verifierDescriptifCarteCorrect(?string $descriptifCarte) {
+    private function verifierDescriptifCarteCorrect(?string $descriptifCarte) {
         $nb = strlen($descriptifCarte);
         if(is_null($descriptifCarte) || $nb == 0){
             throw new ServiceException( "La description de la carte doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -69,10 +70,34 @@ class CarteService
     /**
      * @throws ServiceException
      */
-    public function verifierCouleurCarteCorrect(?string $couleurCarte) {
+    private function verifierCouleurCarteCorrect(?string $couleurCarte) {
         $nb = strlen($couleurCarte);
         if(is_null($couleurCarte) || $nb == 0 || $nb > 7){
             throw new ServiceException( "La couleur de la carte ne peut pas faire plus de 7 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    //A vérifier potentielement source d'erreur
+    /**
+     * @throws ServiceException
+     */
+    private function verifierAffectationsCorrect(?array $affectations, ?array $affectationsTableau) {
+        if(is_null($affectations)) {
+            throw new ServiceException( "Les affectations doit être renseigné", Response::HTTP_BAD_REQUEST);
+        }
+        foreach ($affectations as $affectation) {
+            if (!in_array($affectation, $affectationsTableau)) {
+                throw new ServiceException( "L'un des membres n'est pas affecté au tableau ou n'existe pas", Response::HTTP_BAD_REQUEST);
+            }
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    private function verifierIdColonneCorrect(?int $idColonne): void{
+        if(is_null($idColonne)){
+            throw new ServiceException( "La colonne n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -91,6 +116,27 @@ class CarteService
         }
 
         $this->carteRepository->supprimer($idCarte);
+    }
 
+    /**
+     * @throws ServiceException
+     */
+    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
+        $this->verifierTitreCarteCorrect($titreCarte);
+        $this->verifierDescriptifCarteCorrect($descriptifCarte);
+        $this->verifierCouleurCarteCorrect($couleurCarte);
+        $this->verifierIdColonneCorrect($idColonne);
+
+        $colonne = $this->colonneService->getColonne($idColonne);
+        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+
+        $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
+
+        if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
+            throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $carte = new Carte(14, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
+        $this->carteRepository->ajouter($carte);
     }
 }
