@@ -11,7 +11,8 @@
         "twig/twig": "^3.8",
         "symfony/config": "^6.4",
         "symfony/dependency-injection": "^6.4",
-        "symfony/yaml": "^6.4"
+        "symfony/yaml": "^6.4",
+        "ext-pdo": "*"
     },
     "require-dev": {
         "phpunit/phpunit": "^10"

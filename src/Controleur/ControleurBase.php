@@ -2,6 +2,8 @@
 
 namespace App\Trellotrolle\Controleur;
 
+use App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees;
+use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 
