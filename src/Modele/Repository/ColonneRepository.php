@@ -10,6 +10,10 @@ use Exception;
 class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
 {
 
+    public function __construct(private CarteRepositoryInterface $carteRepository){
+
+    }
+
     protected function getNomTable(): string
     {
         return "Colonnes";
@@ -54,7 +58,7 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
 
     public function supprimer(string $valeurClePrimaire): bool
     {
-        $carteRepository = new CarteRepository();
+        $carteRepository = $this->carteRepository;
         $cartes = $carteRepository->recupererPlusieursParOrdonne("idColonne", $valeurClePrimaire, ["idColonne"]);
         foreach ($cartes as $carte){
             $carteRepository->supprimer($carte->getIdCarte());

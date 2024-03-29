@@ -11,6 +11,11 @@ use PDOException;
 
 class TableauRepository extends AbstractRepository implements TableauRepositoryInterface
 {
+
+    public function __construct(private UtilisateurRepositoryInterface $utilisateurRepository, private ColonneRepositoryInterface $colonneRepository){
+
+    }
+
     protected function getNomTable(): string
     {
         return "Tableaux";
@@ -34,7 +39,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     protected function construireDepuisTableau(array $objetFormatTableau): AbstractDataObject
     {
         $objetFormatTableau["participants"] = $this->recupererParticipantsTableau($objetFormatTableau["idtableau"]);
-        $objetFormatTableau["proprietairetableau"] = (new UtilisateurRepository())->recupererParClePrimaire($objetFormatTableau["proprietairetableau"]);
+        $objetFormatTableau["proprietairetableau"] = $this->utilisateurRepository->recupererParClePrimaire($objetFormatTableau["proprietairetableau"]);
         return Tableau::construireDepuisTableau($objetFormatTableau);
     }
 
@@ -71,7 +76,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
      */
     public function recupererParticipantsTableau(string $idTableau): array
     {
-        $utilisateurRepository = new UtilisateurRepository();
+        $utilisateurRepository = $this->utilisateurRepository;
         $nomColonne = $utilisateurRepository->formatNomsColonnes();
         $sql = "SELECT p.$nomColonne
                 FROM Participer p
@@ -142,11 +147,11 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     {
         $this->supprimerToutesParticipation("idTableau", $valeurClePrimaire);
         $colonnes = $this->recupererPlusieursParOrdonne("idTableau", $valeurClePrimaire, ["idTableau"]);
-        $colonneRepository = new ColonneRepository();
+        $colonneRepository = $this->colonneRepository;
         foreach ($colonnes as $colonne){
             $colonneRepository->supprimer($colonne->getIdColonne());
         }
-        parent::supprimer($valeurClePrimaire);
+        return parent::supprimer($valeurClePrimaire);
     }
 
 }
