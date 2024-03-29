@@ -124,4 +124,9 @@ class ColonneService implements ColonneServiceInterface
         $colonne->setTitreColonne($nomColonne);
         $this->colonneRepository->mettreAJour($colonne);
     }
+
+    public function recupererColonnesTableau(int $idTableau): array
+    {
+        return $this->colonneRepository->recupererColonnesTableau($idTableau);
+    }
 }
