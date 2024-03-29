@@ -101,7 +101,7 @@ class ControleurTableau extends ControleurGenerique
             $data[] = $cartes;
         }
 
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "{$tableau->getTitreTableau()}",
             "cheminVueBody" => "tableau/tableau.php",
             "tableau" => $tableau,
@@ -133,7 +133,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("danger", "Vous n'avez pas de droits d'éditions sur ce tableau");
             return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
         }
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Modification d'un tableau",
             "cheminVueBody" => "tableau/formulaireMiseAJourTableau.php",
             "idTableau" => $_REQUEST["idTableau"],
@@ -146,7 +146,7 @@ class ControleurTableau extends ControleurGenerique
         if(!ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("connexion");
         }
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Ajout d'un tableau",
             "cheminVueBody" => "tableau/formulaireCreationTableau.php",
         ]);
@@ -313,7 +313,7 @@ class ControleurTableau extends ControleurGenerique
             return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
         }
 
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Ajout d'un membre",
             "cheminVueBody" => "tableau/formulaireAjoutMembreTableau.php",
             "tableau" => $tableau,
@@ -437,7 +437,7 @@ class ControleurTableau extends ControleurGenerique
         $repository = new TableauRepository();
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
         $tableaux = $repository->recupererTableauxOuUtilisateurEstMembre($login);
-        return ControleurTableau::afficherVue('vueGenerale.php', [
+        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Liste des tableaux de $login",
             "cheminVueBody" => "tableau/listeTableauxUtilisateur.php",
             "tableaux" => $tableaux
