@@ -122,18 +122,19 @@ class UtilisateurService implements UtilisateurServiceInterface
         $this->verifierToutesInfosCorrectes($login, $nom, $prenom, $email, $mdp, $mdp2);
 
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
-        if ($utilisateur != null) {
+        if (! is_null($utilisateur)) {
             throw new ServiceException( "Ce login est déjà pris!", Response::HTTP_CONFLICT);
         }
 
-        $utilisateur = $this->utilisateurRepository->recupererUtilisateursParEmail($email);
-        if ($utilisateur != null) {
+        $tabUser = $this->utilisateurRepository->recupererUtilisateursParEmail($email);
+        // S'il existe déjà des utilisateurs avec cette adresse mail
+        if (count($tabUser) > 0) {
             throw new ServiceException("Un compte est déjà enregistré avec cette adresse mail!", Response::HTTP_CONFLICT);
         }
 
         $mdpHache = $this->motDePasse->hacher($mdp);
 
-        $utilisateur = new Utilisateur($login, $nom, $prenom, $email, $mdpHache);
+        $utilisateur = Utilisateur::create($login, $nom, $prenom, $email, $mdpHache);
         $this->utilisateurRepository->ajouter($utilisateur);
     }
 
@@ -168,6 +169,23 @@ class UtilisateurService implements UtilisateurServiceInterface
         $utilisateur->setNom($nom);
         $utilisateur->setPrenom($nom);
         $this->utilisateurRepository->mettreAJour($utilisateur);
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierIdentifiantUtilisateur($login, $mdp): void
+    {
+        if (is_null($login) || is_null($mdp)) {
+            throw new ServiceException( "Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST);
+        }
+
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getUtilisateur($login);
+
+        if (!$this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())) {
+            throw new ServiceException( "Mot de passe incorrect.", Response::HTTP_UNAUTHORIZED);
+        }
     }
 
     /**

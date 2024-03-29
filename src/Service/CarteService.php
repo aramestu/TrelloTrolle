@@ -168,4 +168,12 @@ class CarteService implements CarteServiceInterface
 
         $this->carteRepository->mettreAJour($carte);
     }
+
+    public function getCartesParIdColonne(?int $idColonne): ?array{
+        $this->verifierIdColonneCorrect($idColonne);
+
+        $cartes = $this->carteRepository->recupererCartesColonne($idColonne);
+
+        return $cartes;
+    }
 }

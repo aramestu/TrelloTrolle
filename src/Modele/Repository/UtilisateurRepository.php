@@ -9,6 +9,10 @@ use Exception;
 class UtilisateurRepository extends AbstractRepository implements UtilisateurRepositoryInterface
 {
 
+    public function __construct(private TableauRepository $tableauRepository){
+
+    }
+
     protected function getNomTable(): string
     {
         return "Utilisateurs";
@@ -44,7 +48,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
 
     public function recupererTableauxOuUtilisateurEstMembre(string $login): array
     {
-        $tableauRepository =  new TableauRepository();
+        $tableauRepository =  $this->tableauRepository;
         $nomColonnes = $tableauRepository->formatNomsColonnes();
         $sql = "SELECT DISTINCT  t.$nomColonnes FROM Tableaux t
                 LEFT JOIN participer p ON t.idTableau = p.idtableau
@@ -68,7 +72,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
         $this->supprimerToutesParticipation("login", $valeurClePrimaire);
 
         $tableaux = $this->recupererTableauxOuUtilisateurEstMembre($valeurClePrimaire);
-        $tableauRepository = new TableauRepository();
+        $tableauRepository = $this->tableauRepository;
         foreach ($tableaux as $tableau){
             $tableauRepository->supprimer($tableau->getIdTableau());
         }

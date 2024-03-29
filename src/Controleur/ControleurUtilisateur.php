@@ -77,7 +77,7 @@ class ControleurUtilisateur extends ControleurGenerique
             return $this->rediriger("mes_tableaux");
         }
         try{
-            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["prenom"], $_POST["nom"], $_POST["mdp"], $_POST["mdp2"], $_POST["email"]);
+            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"], );
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("inscription");
@@ -125,7 +125,7 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->rediriger("accueil");
     }
 
-    #[Route(path: '/utilisateur/re', name:'supprimer', methods:["GET"])]
+    #[Route(path: '/utilisateur/{login}/supprimer', name:'supprimer', methods:["GET"])]
     public function supprimer(string $login): Response
     {
         if(! $this->estConnecte()) {
@@ -134,12 +134,12 @@ class ControleurUtilisateur extends ControleurGenerique
         try{
             $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
             $this->serviceUtilisateur->supprimer($login);
+            $this->connexionUtilisateurSession->deconnecter();
+            $this->connexionUtilisateurJWT->deconnecter();
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("detail_utilisateur");
         }
-        $this->connexionUtilisateurSession->deconnecter();
-        $this->connexionUtilisateurJWT->deconnecter();
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
         return $this->rediriger("connexion");
     }
@@ -157,71 +157,49 @@ class ControleurUtilisateur extends ControleurGenerique
     public function connecter(): Response
     {
         if($this->estConnecte()) {
-            return $this->rediriger("connexion");
+            return $this->rediriger("mes_tableaux");
         }
         try{
-            $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
-            $this->serviceUtilisateur->supprimer($login);
+            $login = $_POST["login"];
+            $mdp = $_POST["mdp"];
+            $this->serviceUtilisateur->verifierIdentifiantUtilisateur($login, $mdp);
+            $this->connexionUtilisateurSession->connecter($login);
+            $this->connexionUtilisateurJWT->connecter($login);
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
-            return $this->rediriger("detail_utilisateur");
-        }
-        $this->connexionUtilisateurSession->deconnecter();
-        $this->connexionUtilisateurJWT->deconnecter();
-        MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
-        return $this->rediriger("connexion");
-        if(ConnexionUtilisateur::estConnecte()) {
-            self::rediriger("mes_tableaux");
-        }
-        if (!ControleurUtilisateur::issetAndNotNull(["login", "mdp"])) {
-            MessageFlash::ajouter("danger", "Login ou mot de passe manquant.");
             return $this->rediriger("connexion");
         }
-        $utilisateurRepository = new UtilisateurRepository();
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $utilisateurRepository->recupererParClePrimaire($_REQUEST["login"]);
-
-        if ($utilisateur == null) {
-            MessageFlash::ajouter("warning", "Login inconnu.");
-            return $this->rediriger("connexion");
-        }
-
-        if (!MotDePasse::verifier($_REQUEST["mdp"], $utilisateur->getMdpHache())) {
-            MessageFlash::ajouter("warning", "Mot de passe incorrect.");
-            return $this->rediriger("connexion");
-        }
-
-        ConnexionUtilisateur::connecter($utilisateur->getLogin());
-        Cookie::enregistrer("login", $_REQUEST["login"]);
-        Cookie::enregistrer("mdp", $_REQUEST["mdp"]);
-        MessageFlash::ajouter("success", "Connexion effectuée.");
+        MessageFlash::ajouter("success", "Connexion effectué !");
         return $this->rediriger("mes_tableaux");
     }
 
     #[Route(path: '/utilisateur/deconnexion', name:'deconnecter', methods:["GET"])]
     public function deconnecter(): Response
     {
-        if (!ConnexionUtilisateur::estConnecte()) {
+        if (! $this->estConnecte()) {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
             return $this->rediriger("accueil");
         }
-        ConnexionUtilisateur::deconnecter();
+        $this->connexionUtilisateurSession->deconnecter();
+        $this->connexionUtilisateurJWT->deconnecter();
         MessageFlash::ajouter("success", "L'utilisateur a bien été déconnecté.");
         return $this->rediriger("accueil");
     }
 
+    /**
+     * @throws RuntimeError
+     * @throws SyntaxError
+     * @throws LoaderError
+     */
     #[Route(path: '/utilisateur/back-up', name:'recuperation_compte', methods:["GET"])]
     public function afficherFormulaireRecuperationCompte(): Response {
-        if(ConnexionUtilisateur::estConnecte()) {
+        if($this->estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resetCompte.php"
-        ]);
+        return $this->afficherTwig("utilisateur/resetCompte.html.twig", ["pagetitle" => "Récupérer mon compte"]);
     }
 
-    #[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])]
+    /*#[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])] // TODO
     public function recupererCompte(): Response {
         if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
@@ -241,5 +219,5 @@ class ControleurUtilisateur extends ControleurGenerique
             "cheminVueBody" => "utilisateur/resultatResetCompte.php",
             "utilisateurs" => $utilisateurs
         ]);
-    }
+    }*/
 }

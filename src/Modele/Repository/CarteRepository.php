@@ -11,6 +11,10 @@ use PDOException;
 class CarteRepository extends AbstractRepository implements CarteRepositoryInterface
 {
 
+    public function __construct(private UtilisateurRepositoryInterface $utilisateurRepository){
+
+    }
+
     protected function getNomTable(): string
     {
         return "Cartes";
@@ -84,7 +88,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     }
 
     public function recupererAffectationsCartes(string $idCarte): array {
-        $utilisateurRepository = new UtilisateurRepository();
+        $utilisateurRepository = $this->utilisateurRepository;
         $nomColonnnes = $utilisateurRepository->formatNomsColonnes();
 
         $sql = "SELECT a.$nomColonnnes FROM Affecter a

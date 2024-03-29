@@ -21,13 +21,13 @@ class ConnexionUtilisateurJWT implements ConnexionUtilisateurInterface
 
     public function deconnecter(): void
     {
-        if (Cookie::existeCle("auth_token"))
+        if (Cookie::contient("auth_token"))
             Cookie::supprimer("auth_token");
     }
 
     public function getIdUtilisateurConnecte(): ?string
     {
-        if (Cookie::existeCle("auth_token")) {
+        if (Cookie::contient("auth_token")) {
             $jwt = Cookie::lire("auth_token");
             $donnees = JsonWebToken::decoder($jwt);
             return $donnees["idUtilisateur"] ?? null;
