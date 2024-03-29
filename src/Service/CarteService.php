@@ -3,19 +3,13 @@
 namespace App\Trellotrolle\Service;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
-use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
-use App\Trellotrolle\Modele\Repository\ColonneRepositoryInterface;
-use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
-use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
-class CarteService
+class CarteService implements CarteServiceInterface
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
-                                private ColonneRepositoryInterface $colonneRepository,
-                                private TableauRepositoryInterface $tableauRepository,
                                 private ColonneServiceInterface $colonneService,
                                 private TableauServiceInterface $tableauService) {}
 
@@ -111,7 +105,7 @@ class CarteService
         $colonne = $this->colonneService->getColonne($carte->getColonne());
         $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
 
-        if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
+        if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
         }
 
@@ -132,11 +126,46 @@ class CarteService
 
         $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
 
-        if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
+        if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
         }
 
         $carte = new Carte(14, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
+
         $this->carteRepository->ajouter($carte);
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
+        $this->verifierIdCarteCorrect($idCarte);
+        $this->verifierIdColonneCorrect($idColonne);
+        $this->verifierTitreCarteCorrect($titreCarte);
+        $this->verifierDescriptifCarteCorrect($descriptifCarte);
+        $this->verifierCouleurCarteCorrect($couleurCarte);
+
+        $carte = $this->getCarte($idCarte);
+        $colonne = $this->colonneService->getColonne($idColonne);
+        $originalColonne = $this->colonneService->getColonne($carte->getColonne());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+
+        $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
+
+        if ($colonne->getTableau()->getIdTableau() !== $originalColonne->getTableau()->getIdTableau()) {
+            throw new ServiceException( "La nouvelle colonne n'appartient pas au bon tableau", Response::HTTP_BAD_REQUEST);
+        }
+
+        if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
+            throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
+        }
+
+        $carte->setTitreCarte($titreCarte);
+        $carte->setDescriptifCarte($descriptifCarte);
+        $carte->setCouleurCarte($couleurCarte);
+        $carte->setColonne($colonne);
+        $carte->setAffectationsCartes($affectations);
+
+        $this->carteRepository->mettreAJour($carte);
     }
 }
