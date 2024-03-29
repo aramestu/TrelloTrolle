@@ -5,7 +5,7 @@ namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Service\Exception\ServiceException;
 
-interface CarteServiceService
+interface CarteServiceInterface
 {
     /**
      * @throws ServiceException
