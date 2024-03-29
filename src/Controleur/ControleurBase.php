@@ -9,7 +9,7 @@ class ControleurBase extends ControleurGenerique
 {
     #[Route(path: '/', name:'accueil', methods:["GET", "POST"])]
     public function accueil(): Response {
-        return $this->afficherVue('vueGenerale.php', [
+        return $this->afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Accueil",
             "cheminVueBody" => "base/accueil.php"
         ]);
