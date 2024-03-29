@@ -92,7 +92,7 @@ class ColonneService implements ColonneServiceInterface
      */
     public function creerColonne(?int $idTableau, ?string $nomColonne, ?string $loginUtilisateurConnecte): void{
         $this->verifierNomColonneCorrect($nomColonne);
-        $this->verifierIdColonneCorrect($idTableau);
+        $this->verifierIdTableau($idTableau);
 
         $tableau = $this->tableauService->getByIdTableau($idTableau);
 
