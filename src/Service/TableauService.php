@@ -245,4 +245,15 @@ class TableauService implements TableauServiceInterface
         $this->tableauRepository->supprimerUtilisateurParticipant($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
         $this->tableauRepository->supprimer($idTableau);
     }
+
+    public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void
+    {
+        $tableau = $this->getByIdTableau($_GET['idTableau']);
+        if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte))
+        {
+            throw new ServiceException('Vous n\'êtes pas un participant de ce tableau.');
+        }
+
+    }
+
 }
