@@ -66,10 +66,8 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     protected function recupererPlusieursPar(string $nomAttribut, $valeur): array
     {
         $nomTable = $this->getNomTable();
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM :nomTableTag WHERE :nomAttributTag = :valeurTag");
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag");
         $values = [
-            "nomTableTag" => $nomTable,
-            "nomAttributTag" => $nomAttribut,
             "valeurTag" => $valeur
         ];
         $pdoStatement->execute($values);

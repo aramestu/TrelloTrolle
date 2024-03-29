@@ -15,10 +15,10 @@ services:
 
 
   configuration_bdd_my_sql:
-    class: App\TrelloTrolle\Configuration\ConfigurationBaseDeDonnees
+    class: App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees
 
   connexion_base_de_donnees:
-    class: App\TrelloTrolle\Modele\Repository\ConnexionBaseDeDonnees
+    class: App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees
     arguments: ['@configuration_bdd_my_sql']
 
   #Repositories
@@ -38,23 +38,23 @@ services:
 
   #Lib
   mot_de_passe:
-    class: App\TrelloTrolle\Lib\MotDePasse
+    class: App\Trellotrolle\Lib\MotDePasse
 
   #Sercices
   utilisateur_service:
-    class: App\TrelloTrolle\Service\UtilisateurService
+    class: App\Trellotrolle\Service\UtilisateurService
     arguments: ['@utilisateur_repository', '@tableau_repository', '@mot_de_passe' ]
 
   colonne_service:
-    class: App\TrelloTrolle\Service\ColonneService
+    class: App\Trellotrolle\Service\ColonneService
     arguments: [ '@colonne_repository', '@tableau_repository']
 
   tableau_service:
-    class: App\TrelloTrolle\Service\TableauService
+    class: App\Trellotrolle\Service\TableauService
     arguments: [ '@tableau_repository', '@utilisateur_repository' ,'@carte_repository', '@colonne_repository', '@mot_de_passe' ]
 
   carte_service:
-    class: App\TrelloTrolle\Service\TableauService
+    class: App\Trellotrolle\Service\TableauService
     arguments: [ '@carte_repository', '@colonne_repository', '@tableau_repository', '@colonne_service' ,  '@tableau_service' ]
 
 
@@ -77,37 +77,37 @@ services:
 
   #Controleurs
   controleur_generique:
-    class: App\TrelloTrolle\Controleur\ControleurGenerique
+    class: App\Trellotrolle\Controleur\ControleurGenerique
     arguments:
       container: '@container'
 
   controleur_base:
-    class: App\TrelloTrolle\Controleur\ControleurBase
+    class: App\Trellotrolle\Controleur\ControleurBase
     arguments:
       container: '@container'
 
   controleur_carte:
-    class: App\TrelloTrolle\Controleur\ControleurCarte
+    class: App\Trellotrolle\Controleur\ControleurCarte
     arguments:
       container: '@container'
 
   controleur_colonne:
-    class: App\TrelloTrolle\Controleur\ControleurColonne
+    class: App\Trellotrolle\Controleur\ControleurColonne
     arguments:
       container: '@container'
 
   controleur_tableau:
-    class: App\TrelloTrolle\Controleur\ControleurTableau
+    class: App\Trellotrolle\Controleur\ControleurTableau
     arguments:
       container: '@container'
 
   controleur_utilisateur:
-    class: App\TrelloTrolle\Controleur\ControleurUtilisateur
+    class: App\Trellotrolle\Controleur\ControleurUtilisateur
     arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_session', '@connexion_utilisateur_jwt']
 
   #Connexion utilisateur
   connexion_utilisateur_session:
-    class: App\TrelloTrolle\Lib\ConnexionUtilisateurSession
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurSession
 
   connexion_utilisateur_jwt:
-    class: App\TrelloTrolle\Lib\ConnexionUtilisateurJWT
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurJWT

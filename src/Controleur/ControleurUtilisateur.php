@@ -77,10 +77,12 @@ class ControleurUtilisateur extends ControleurGenerique
             return $this->rediriger("mes_tableaux");
         }
         try{
-            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["prenom"], $_POST["nom"], $_POST["mdp"], $_POST["mdp2"], $_POST["email"]);
+            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"], );
         }catch (\Exception $e){
+            var_dump($e->getMessage());
             MessageFlash::ajouter("error", $e->getMessage());
-            return $this->rediriger("inscription");
+            return "";
+            //return $this->rediriger("inscription");
         }
         return $this->rediriger("connexion");
     }
