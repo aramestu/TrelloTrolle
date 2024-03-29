@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Modele\Repository;
 
 use App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees;
+use App\Trellotrolle\Configuration\ConfigurationBaseDeDonneesInterface;
 use PDO;
 
 
@@ -15,7 +16,7 @@ class ConnexionBaseDeDonnees implements ConnexionBaseDeDonneesInterface
         return $this->pdo;
     }
 
-    public function __construct(ConfigurationBaseDeDonnees $configurationBDD)
+    public function __construct(ConfigurationBaseDeDonneesInterface $configurationBDD)
     {
         
         $this->pdo = new PDO(
