@@ -188,12 +188,12 @@ class UtilisateurService implements UtilisateurServiceInterface
 
     /**
      * @throws ServiceException
-     */
+
     public function getUtilisateursPasMembreOuPasProprioTableau(?int $idTableau): array{
         if(is_null($idTableau)){
             throw new ServiceException("L'idTableau n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
 
         return $this->utilisateurRepository->recupererUtilisateursPasMembreOuPasProprio($idTableau); // TODO : ajouter cette fonction dans le Repository
-    }
+    }*/
 }

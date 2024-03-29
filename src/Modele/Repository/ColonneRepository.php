@@ -59,6 +59,6 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
         foreach ($cartes as $carte){
             $carteRepository->supprimer($carte->getIdCarte());
         }
-        parent::supprimer($valeurClePrimaire);
+        return parent::supprimer($valeurClePrimaire);
     }
 }
