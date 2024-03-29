@@ -12,6 +12,7 @@ use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
+use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Service\CarteServiceInterface;
 use App\Trellotrolle\Service\ColonneServiceInterface;
@@ -24,9 +25,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class ControleurTableau extends ControleurGenerique
 {
 
-    private function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
+    public function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
                                  private ConnexionUtilisateurInterface $utilisateur, private ColonneServiceInterface $colonneService,
-                                 private CarteServiceInterface $carteService){
+                                 private CarteServiceInterface $carteService, private TableauRepositoryInterface $tableauRepository){
         parent::__construct($container);
     }
 
@@ -434,9 +435,9 @@ class ControleurTableau extends ControleurGenerique
         if(!ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("connexion");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-        $tableaux = $repository->recupererTableauxOuUtilisateurEstMembre($login);
+        $tableaux = $repository->recupererTableauxParticipeUtilisateur($login);
         return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Liste des tableaux de $login",
             "cheminVueBody" => "tableau/listeTableauxUtilisateur.php",
@@ -453,7 +454,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("danger", "Identifiant du tableau manquant");
             return $this->rediriger("mes_tableaux");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         /**
          * @var Tableau $tableau
          */
@@ -504,7 +505,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("danger", "Identifiant de tableau manquant");
             return $this->rediriger("mes_tableaux");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         $idTableau = $_REQUEST["idTableau"];
         /**
          * @var Tableau $tableau
