@@ -95,6 +95,15 @@ class CarteService
     /**
      * @throws ServiceException
      */
+    private function verifierIdColonneCorrect(?int $idColonne): void{
+        if(is_null($idColonne)){
+            throw new ServiceException( "La colonne n'est pas renseigné", Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * @throws ServiceException
+     */
     public function supprimerCarte(?int $idCarte, ?string $loginUtilisateurConnecte) {
         $this->verifierIdCarteCorrect($idCarte);
 
@@ -109,18 +118,25 @@ class CarteService
         $this->carteRepository->supprimer($idCarte);
     }
 
-    public function creerCarte(?int $idCarte, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
-        $this->verifierIdCarteCorrect($idCarte);
+    /**
+     * @throws ServiceException
+     */
+    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
         $this->verifierTitreCarteCorrect($titreCarte);
         $this->verifierDescriptifCarteCorrect($descriptifCarte);
         $this->verifierCouleurCarteCorrect($couleurCarte);
+        $this->verifierIdColonneCorrect($idColonne);
 
-        $carte = $this->getCarte($idCarte);
-        $colonne = $this->colonneService->getColonne($carte->getColonne());
+        $colonne = $this->colonneService->getColonne($idColonne);
         $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+
+        $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
 
         if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
         }
+
+        $carte = new Carte(14, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
+        $this->carteRepository->ajouter($carte);
     }
 }
