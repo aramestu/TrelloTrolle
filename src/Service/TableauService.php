@@ -114,14 +114,14 @@ class TableauService implements TableauServiceInterface
         $tableau = new Tableau();
         $tableau->setCodeTableau($codeTableauHache);
         $tableau->setTitreTableau($nomTableau);
-        $tableau->setProprietaireTableau($utilisateur); // TODO: A revoir Ici pour l'user et voir si la requête au dessus est vrm nécessaire (idUtilisateur plutôt que Utilisateur)
+        $tableau->setProprietaireTableau($utilisateur);
         $this->tableauRepository->ajouter($tableau);
     }
 
     /**
      * @throws ServiceException
      */
-    public function metterAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void{
+    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void{
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierIdTableauCorrect($idTableau);
         $this->verifierNomTableauCorrect($nomtableau);

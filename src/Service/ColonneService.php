@@ -60,7 +60,7 @@ class ColonneService implements ColonneServiceInterface
 
         $colonne = $this->getColonne($idColonne);
 
-        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
         if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
@@ -72,7 +72,8 @@ class ColonneService implements ColonneServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierNomColonneCorrect(?string $nomColonne){
+    private function verifierNomColonneCorrect(?string $nomColonne): void
+    {
         $nb = strlen($nomColonne);
         if(is_null($nomColonne) || $nb == 0 || $nb > 64){
             throw new ServiceException( "Le nom de la colonne ne peut pas faire plus de 64 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -102,7 +103,7 @@ class ColonneService implements ColonneServiceInterface
             throw new ServiceException( "Vous devez être participant au tableau pour pouvoir créer une Colonne!", Response::HTTP_UNAUTHORIZED);
         }
 
-        $colonne = new Colonne($nomColonne, $idTableau);
+        $colonne = Colonne::create(1, $nomColonne, $tableau);
         $this->colonneRepository->ajouter($colonne);
     }
 
@@ -115,7 +116,7 @@ class ColonneService implements ColonneServiceInterface
 
         $colonne = $this->getColonne($idColonne);
 
-        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
         if(! $tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
