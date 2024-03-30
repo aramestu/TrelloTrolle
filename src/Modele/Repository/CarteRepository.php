@@ -80,10 +80,13 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
      */
     public function recupererCartesUtilisateur(string $login): array
     {
-        $sql = "SELECT {$this->formatNomsColonnes()} from app_db WHERE affectationscarte @> :json";
+        $sql = "SELECT {$this->formatNomsColonnes()} from Cartes c 
+                WHERE EXISTS(SELECT * FROM Affecter a
+                             WHERE a.idcarte = c.idcarte
+                             AND a.login = :loginTag)";
         $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = array(
-            "json" => json_encode(["utilisateurs" => [["login" => $login]]])
+            "loginTag" => $login
         );
         $pdoStatement->execute($values);
         $objets = [];
