@@ -256,9 +256,10 @@ class TableauService implements TableauServiceInterface
     public function recupererColonnesEtCartesDuTableau(string $idTableau): array
     {
         $colonnes = $this->colonneRepository->recupererColonnesTableau($idTableau);
-        $associationColonneCarte = [];
+        $associationColonneCarte = array("colonnes" => $colonnes,
+                                        "associations" => []);
         foreach ($colonnes as $colonne){
-            $associationColonneCarte[$colonne] = $this->carteRepository->recupererCartesColonne($colonne->getIdColonne());
+            $associationColonneCarte["associations"][$colonne->getIdColonne()] = $this->carteRepository->recupererCartesColonne($colonne->getIdColonne());
         }
         return $associationColonneCarte;
     }

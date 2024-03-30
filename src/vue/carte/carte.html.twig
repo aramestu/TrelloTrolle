@@ -22,7 +22,7 @@
     </div>
 </div>
 {% if estParticipant %}
-    <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: idColonne}) }}">
+    <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: carte.colonne.idColonne}) }}">
         <div>
             <div class="titre icons_menu btn-ajout">
                 <span>Ajouter une carte</span>

@@ -39,10 +39,10 @@ class ControleurTableau extends ControleurGenerique
     #[Route(path: '/tableau/{codeTableau}/afficher', name:'afficher_tableau', methods:["GET"])]
     public function afficherTableau(string $codeTableau) : Response {
         try {
-            $tableau = $this->tableauService->getByCodeTableau($_REQUEST["codeTableau"]);
+            $tableau = $this->tableauService->getByCodeTableau($codeTableau);
             $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
         } catch (ServiceException $e) {
-            MessageFlash::ajouter("error", $e);
+            MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("accueil");
         }
 

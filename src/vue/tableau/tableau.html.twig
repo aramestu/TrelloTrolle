@@ -9,7 +9,7 @@
     <div class="trello-main">
         <aside>
             <div class="utilisateur icons_menu">
-                <span>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</span>
+                <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
                 {% if estProprietaire %}
                     <span>
                         <a href="{{ route('mise_a_jour_utilisateur') }}">
@@ -25,7 +25,7 @@
                 <div class="participants">
                     Membres :
                     <ul>
-                        <li>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</li>
+                        <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
                         {% for participant in tableau.participants %}
                             <li>
                                 <div class="icons_menu_stick">
@@ -50,19 +50,21 @@
                 <div class="participants">
                     Travail en cours :
                     <ul>
-                        {% for participant in participants %}
+                        {% for participant in tableau.participants %}
                             <li>
-                                <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
+                                <div>{{ participant.prenom }} {{ participant.nom }}</div>
+                                {#
                                 <ul>
                                     {% for colonne in participant['colonnes'] %}
-                                        <li>{{ colonne[1] }} {{ colonne[0] }}</li>
+                                    <li>{{ colonne[1] }} {{ colonne[0] }}</li>
                                     {% endfor %}
                                 </ul>
+                                TODO#}
                             </li>
                         {% endfor %}
-                        {% if participants is empty %}
-                            <span><strong>Pas de travail en cours</strong></span>
-                        {% endif %}
+                        {# { % if participants is empty %}
+                        <span><strong>Pas de travail en cours</strong></span>
+                        {% endif % } TODO#}
                     </ul>
                 </div>
             </div>
@@ -80,8 +82,8 @@
                     {% endif %}
                 </div>
                 <div class="corps">
-                    {% for colonne in colonnes %}
-                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, estParticipant: estParticipant} %}
+                    {% for colonne in associationColonneCarte['colonnes'] %}
+                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipant: estParticipant} %}
                     {% endfor %}
 
                     {% if estParticipant %}

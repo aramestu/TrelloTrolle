@@ -86,11 +86,9 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag ORDER BY :attributsTexteTag :sensTag ");
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag ORDER BY $attributsTexte $sens ");
         $values = array(
-            "valeurTag" => $valeur,
-            "attributsTexteTag" => $attributsTexte,
-            "sensTag" => $sens
+            "valeurTag" => $valeur
         );
         $pdoStatement->execute($values);
         $objets = [];
@@ -104,9 +102,12 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     protected function recupererPar(string $nomAttribut, $valeur): ?AbstractDataObject
     {
         $nomTable = $this->getNomTable();
-        $sql = "SELECT DISTINCT {$this->formatNomsColonnes()} from $nomTable WHERE $nomAttribut='$valeur'";
+        $sql = "SELECT DISTINCT {$this->formatNomsColonnes()} from $nomTable WHERE $nomAttribut= :valeurTag";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
-        $pdoStatement->execute();
+        $values = [
+            "valeurTag" => $valeur
+        ];
+        $pdoStatement->execute($values);
         $objetFormatTableau = $pdoStatement->fetch();
 
         if ($objetFormatTableau !== false) {

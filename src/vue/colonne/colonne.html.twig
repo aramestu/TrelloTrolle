@@ -13,8 +13,8 @@
         {% endif %}
     </div>
     <div class="corps">
-        {% for carte in data[colonne.idColonne] %}
-            {% include 'carte/carte.html.twig' with {carte: carte, idColonne: colonne.idColonne, estParticipant: estParticipant} %}
+        {% for carte in cartes %}
+            {% include 'carte/carte.html.twig' with {carte: carte, estParticipant: estParticipant} %}
         {% endfor %}
     </div>
 </div>
