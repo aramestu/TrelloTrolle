@@ -37,79 +37,20 @@ class ControleurTableau extends ControleurGenerique
     }
 
     #[Route(path: '/tableau/{codeTableau}/afficher', name:'afficher_tableau', methods:["GET"])]
-    public function afficherTableau() : Response {
+    public function afficherTableau(string $codeTableau) : Response {
         try {
             $tableau = $this->tableauService->getByCodeTableau($_REQUEST["codeTableau"]);
+            $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
         } catch (ServiceException $e) {
             MessageFlash::ajouter("error", $e);
-            return $this->rediriger("acceuil");
-        }
-
-        $colonnes = $this->colonneService->recupererColonnesTableau($tableau->getIdTableau());
-        $data = [];
-        $participant = [];
-
-        foreach ($colonnes as $colonne){
-            $cartes = $this->carteService->getCartesParIdColonne($colonne->getIdColonne());
-            foreach ($cartes as $carte){
-                //foreach ($carte->get) TODO: a finir
-            }
-        }
-
-        return new Response();
-
-        /*if(!ControleurTableau::issetAndNotNull(["codeTableau"])) {
-            MessageFlash::ajouter("warning", "Code de tableau manquant");
             return $this->rediriger("accueil");
         }
-        $code = $_REQUEST["codeTableau"];
-        $tableauRepository = new TableauRepository();
 
-        /**
-         * @var Tableau $tableau
-         */
-        /*$tableau = $tableauRepository->recupererParCodeTableau($code);
-        if(!$tableau) {
-            MessageFlash::ajouter("warning", "Tableau inexistant");
-            return $this->rediriger("accueil");
-        }
-        $colonneRepository = new ColonneRepository();
-
-        /**
-         * @var Colonne[] $colonnes
-         */
-        /*$colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
-        $data = [];
-        $participants = [];
-
-        $carteRepository = new CarteRepository();
-        foreach ($colonnes as $colonne) {
-            /**
-             * @var Carte[] $cartes
-             */
-            /*$cartes = $carteRepository->recupererCartesColonne($colonne->getIdColonne());
-            foreach ($cartes as $carte) {
-                foreach ($carte->getAffectationsCarte() as $utilisateur) {
-                    if(!isset($participants[$utilisateur->getLogin()])) {
-                        $participants[$utilisateur->getLogin()] = ["infos" => $utilisateur, "colonnes" => []];
-                    }
-                    if(!isset($participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()])) {
-                        $participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()] = [$colonne->getTitreColonne(), 0];
-                    }
-                    $participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()][1]++;
-                }
-            }
-            $data[] = $cartes;
-        }
-
-        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
-            "pagetitle" => "{$tableau->getTitreTableau()}",
-            "cheminVueBody" => "tableau/tableau.php",
+        return $this->afficherTwig("tableau/tableau.html.twig",[
             "tableau" => $tableau,
-            "colonnes" => $colonnes,
-            "participants" => $participants,
-            "data" => $data,
-        ]);*/
+            "associationColonneCarte" => $associationColonneCarte
+        ]);
+
     }
 
     #[Route(path: '/tableau/{idTableau}/mise-a-jour', name:'mise_a_jour_tableau', methods:["GET"])]

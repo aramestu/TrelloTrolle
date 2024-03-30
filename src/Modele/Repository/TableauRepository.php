@@ -60,9 +60,10 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     {
         $nomColonnes = $this->formatNomsColonnes();
         $sql = "SELECT DISTINCT t.$nomColonnes
-                FROM Participer p
-                RIGHT JOIN Tableaux t ON t.idtableau = p.idtableau
-                WHERE login= :login";
+                FROM Tableaux t
+                LEFT JOIN Participer p ON t.idtableau = p.idtableau
+                WHERE login= :login
+                OR proprietairetableau = :login";
         $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
         $values = array(
             "login" => $login

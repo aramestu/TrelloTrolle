@@ -240,9 +240,6 @@ class TableauService implements TableauServiceInterface
             throw new ServiceException( "Vous ne pouvez pas supprimer le tableau où vous n'êtes pas propriétaire", Response::HTTP_NOT_FOUND);
         }
 
-        $this->carteRepository->supprimerCartesTableau($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
-        $this->colonneRepository->supprimerColonneTableau($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
-        $this->tableauRepository->supprimerUtilisateurParticipant($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
         $this->tableauRepository->supprimer($idTableau);
     }
 
@@ -255,5 +252,16 @@ class TableauService implements TableauServiceInterface
         }
 
     }
+
+    public function recupererColonnesEtCartesDuTableau(string $idTableau): array
+    {
+        $colonnes = $this->colonneRepository->recupererColonnesTableau($idTableau);
+        $associationColonneCarte = [];
+        foreach ($colonnes as $colonne){
+            $associationColonneCarte[$colonne] = $this->carteRepository->recupererCartesColonne($colonne->getIdColonne());
+        }
+        return $associationColonneCarte;
+    }
+
 
 }
