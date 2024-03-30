@@ -4,6 +4,7 @@
 
 {% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
+{% set estParticipantOuProprietaire = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte)%}
 
 {% block page_content %}
     <div class="trello-main">
@@ -73,7 +74,7 @@
             <div class="tableau">
                 <div class="titre icons_menu">
                     {{ tableau.titreTableau }}
-                    {% if estParticipant %}
+                    {% if estParticipantOuProprietaire %}
                         <span class="actions">
                             <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
                                 <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
@@ -83,10 +84,10 @@
                 </div>
                 <div class="corps">
                     {% for colonne in associationColonneCarte['colonnes'] %}
-                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipant: estParticipant} %}
+                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipantOuProprietaire: estParticipantOuProprietaire} %}
                     {% endfor %}
 
-                    {% if estParticipant %}
+                    {% if estParticipantOuProprietaire %}
                         <a class="ajout-tableau" href="{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}">
                             <div class="colonne">
                                 <div class="titre icons_menu btn-ajout">

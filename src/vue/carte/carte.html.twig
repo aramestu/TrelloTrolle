@@ -1,7 +1,7 @@
 <div class="carte" style="background-color: {{ carte.couleurCarte }};">
     <div class="titre icons_menu">
         <span>{{ carte.titreCarte }}</span>
-        {% if estParticipant %}
+        {% if estParticipantOuProprietaire %}
             <span class="actions">
                 <a href="{{ route('mise_a_jour_carte', {idCarte: carte.idCarte}) }}">
                     <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la carte">
@@ -21,7 +21,7 @@
         {% endfor %}
     </div>
 </div>
-{% if estParticipant %}
+{% if estParticipantOuProprietaire %}
     <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: carte.colonne.idColonne}) }}">
         <div>
             <div class="titre icons_menu btn-ajout">
