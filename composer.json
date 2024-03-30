@@ -16,6 +16,7 @@
         "firebase/php-jwt": "^6.10"
     },
     "require-dev": {
-        "phpunit/phpunit": "^10"
+        "phpunit/phpunit": "^10",
+        "mockery/mockery": "dev-main"
     }
 }

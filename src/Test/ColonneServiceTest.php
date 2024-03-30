@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trellotrolle\test;
+namespace App\Trellotrolle\Test;
 
 use App\Trellotrolle\Service\ColonneService;
 use PHPUnit\Framework\TestCase;

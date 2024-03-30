@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Trellotrolle\test;
+namespace App\Trellotrolle\Test;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
+use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees;
+use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonneesInterface;
 use App\Trellotrolle\Service\CarteService;
 use App\Trellotrolle\Service\ColonneServiceInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
@@ -15,10 +17,19 @@ use PHPUnit\Framework\TestCase;
 class CarteServiceTest extends TestCase
 {
 
+    private static ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees;
+
     protected CarteRepositoryInterface $carteRepositoryMock;
     protected ColonneServiceInterface $colonneServiceMock;
     protected TableauServiceInterface $tableauServiceMock;
     protected CarteService $carteService;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+        self::$connexionBaseDeDonnees = new ConnexionBaseDeDonnees(new ConfigurationBDDTest());
+        self::$connexionBaseDeDonnees->getPdo()->exec(file_get_contents(__DIR__."/BD_Tables_V1.sql"));
+    }
 
     /**
      * @throws Exception
@@ -57,7 +68,6 @@ class CarteServiceTest extends TestCase
         $idCarte = 1;
         $carte = new Carte();
 
-        $carteRepositoryMock = $this->createMock(CarteRepositoryInterface::class);
         $this->carteRepositoryMock->expects($this->once())
             ->method('recupererParClePrimaire')
             ->with($idCarte)
