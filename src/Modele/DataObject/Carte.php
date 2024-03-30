@@ -93,6 +93,12 @@ class Carte extends AbstractDataObject implements \JsonSerializable
         return array_slice($this->affectationsCarte, 0);
     }
 
+    public function setAffectationsCarte(array $affectationsCarte): void
+    {
+        $this->affectationsCarte = $affectationsCarte;
+    }
+
+
     public function formatTableau(): array
     {
             return array(

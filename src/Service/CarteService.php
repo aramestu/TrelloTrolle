@@ -17,9 +17,7 @@ class CarteService implements CarteServiceInterface
      * @throws ServiceException
      */
     public function getCarte(?int $idCarte): ?Carte{
-        if(is_null($idCarte)){
-            throw new ServiceException( "La carte n'est pas renseigné", Response::HTTP_NOT_FOUND);
-        }
+        $this->verifierIdCarteCorrect($idCarte);
 
         /**
          * @var Carte $carte
@@ -99,14 +97,12 @@ class CarteService implements CarteServiceInterface
      * @throws ServiceException
      */
     public function supprimerCarte(?int $idCarte, ?string $loginUtilisateurConnecte) {
-        $this->verifierIdCarteCorrect($idCarte);
-
         $carte = $this->getCarte($idCarte);
-        $colonne = $this->colonneService->getColonne($carte->getColonne());
-        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+        $colonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
         if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
-            throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
+            throw new ServiceException( "Vous n'avez pas les droits nécessaires!", Response::HTTP_UNAUTHORIZED);
         }
 
         $this->carteRepository->supprimer($idCarte);
@@ -122,7 +118,7 @@ class CarteService implements CarteServiceInterface
         $this->verifierIdColonneCorrect($idColonne);
 
         $colonne = $this->colonneService->getColonne($idColonne);
-        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
         $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
 
@@ -130,7 +126,7 @@ class CarteService implements CarteServiceInterface
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
         }
 
-        $carte = new Carte(14, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
+        $carte = Carte::create(1, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
 
         $this->carteRepository->ajouter($carte);
     }
@@ -147,11 +143,12 @@ class CarteService implements CarteServiceInterface
 
         $carte = $this->getCarte($idCarte);
         $colonne = $this->colonneService->getColonne($idColonne);
-        $originalColonne = $this->colonneService->getColonne($carte->getColonne());
-        $tableau = $this->tableauService->getByIdTableau($colonne->getIdTableau());
+        $originalColonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
+        $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
         $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
 
+        // Si les colonnes ne sont pas dans le même tableau
         if ($colonne->getTableau()->getIdTableau() !== $originalColonne->getTableau()->getIdTableau()) {
             throw new ServiceException( "La nouvelle colonne n'appartient pas au bon tableau", Response::HTTP_BAD_REQUEST);
         }
@@ -164,16 +161,17 @@ class CarteService implements CarteServiceInterface
         $carte->setDescriptifCarte($descriptifCarte);
         $carte->setCouleurCarte($couleurCarte);
         $carte->setColonne($colonne);
-        $carte->setAffectationsCartes($affectations);
+        $carte->setAffectationsCarte($affectations);
 
         $this->carteRepository->mettreAJour($carte);
     }
 
+    /**
+     * @throws ServiceException
+     */
     public function getCartesParIdColonne(?int $idColonne): ?array{
         $this->verifierIdColonneCorrect($idColonne);
 
-        $cartes = $this->carteRepository->recupererCartesColonne($idColonne);
-
-        return $cartes;
+        return $this->carteRepository->recupererCartesColonne($idColonne);
     }
 }

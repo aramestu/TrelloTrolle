@@ -149,7 +149,9 @@ class UtilisateurService implements UtilisateurServiceInterface
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierNomEtPrenomCorrecte($nom, $prenom);
 
-
+        /**
+         * @var Utilisateur $utilisateur
+         */
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
         if (is_null($utilisateur)) {
             throw new ServiceException( "Ce login n'existe pas!", Response::HTTP_NOT_FOUND);
@@ -198,7 +200,6 @@ class UtilisateurService implements UtilisateurServiceInterface
         }
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
-        //TODO : Redéfinir la méthode supprimer dans UtilisateurRepository pour qu'elle appelle supprimer de TableauRep
         $this->utilisateurRepository->supprimer($loginUtilisateurConnecte);
     }
 

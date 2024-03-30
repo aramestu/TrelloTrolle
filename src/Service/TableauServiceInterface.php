@@ -24,7 +24,7 @@ interface TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function metterAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void;
+    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void;
 
     /**
      * @throws ServiceException
