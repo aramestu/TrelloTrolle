@@ -70,23 +70,25 @@ class ControleurUtilisateur extends ControleurGenerique
         return self::afficherTwig("utilisateur/formulaireCreation.html.twig");
     }
 
-    #[Route(path: 'utilisateur/inscription', name:'inscrire', methods:["POST"])]
+    #[Route(path: '/inscription', name:'inscrire', methods:["POST"])]
     public function creerDepuisFormulaire(): Response
     {
         if($this->connexionUtilisateurSession->estConnecte() || $this->connexionUtilisateurJWT->estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
         try{
-            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"], );
+            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"]);
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("inscription");
         }
+
+        MessageFlash::ajouter("success", "L'utilisateur a bien été crée!");
         return $this->rediriger("connexion");
     }
 
     private function estConnecte(): bool{
-        return $this->connexionUtilisateurSession->estConnecte();
+        return $this->connexionUtilisateurSession->estConnecte() && $this->connexionUtilisateurJWT->estConnecte();
     }
 
     /**
@@ -122,10 +124,11 @@ class ControleurUtilisateur extends ControleurGenerique
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("mise_a_jour_utilisateur");
         }
+        MessageFlash::ajouter("success", "Utilisateur mis à jour");
         return $this->rediriger("accueil");
     }
 
-    #[Route(path: '/utilisateur/{login}/supprimer', name:'supprimer', methods:["GET"])]
+    #[Route(path: '/supprimer', name:'supprimer', methods:["GET"])]
     public function supprimer(string $login): Response
     {
         if(! $this->estConnecte()) {
@@ -144,7 +147,7 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->rediriger("connexion");
     }
 
-    #[Route(path: '/utilisateur/connexion', name:'connexion', methods:["GET"])]
+    #[Route(path: '/connexion', name:'connexion', methods:["GET"])]
     public function afficherFormulaireConnexion(): Response
     {
         if($this->estConnecte()) {
@@ -153,7 +156,7 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->afficherTwig("utilisateur/formulaireConnexion.html.twig", ["pagetitle" => "Page de connexion"]);
     }
 
-    #[Route(path: '/utilisateur/connexion', name:'connecter', methods:["POST"])]
+    #[Route(path: '/connexion', name:'connecter', methods:["POST"])]
     public function connecter(): Response
     {
         if($this->estConnecte()) {
@@ -173,12 +176,12 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->rediriger("mes_tableaux");
     }
 
-    #[Route(path: '/utilisateur/deconnexion', name:'deconnecter', methods:["GET"])]
+    #[Route(path: '/deconnexion', name:'deconnecter', methods:["GET"])]
     public function deconnecter(): Response
     {
         if (! $this->estConnecte()) {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
-            return $this->rediriger("accueil");
+            return $this->rediriger("connexion");
         }
         $this->connexionUtilisateurSession->deconnecter();
         $this->connexionUtilisateurJWT->deconnecter();

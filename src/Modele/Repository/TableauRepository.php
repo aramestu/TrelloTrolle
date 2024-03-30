@@ -14,7 +14,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
 {
 
     public function __construct(private ContainerInterface $container, private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
-        parent::__construct($this->connexionBaseDeDonnees);
+        parent::__construct($connexionBaseDeDonnees);
     }
 
     protected function getNomTable(): string

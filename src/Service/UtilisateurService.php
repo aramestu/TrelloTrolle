@@ -118,6 +118,7 @@ class UtilisateurService implements UtilisateurServiceInterface
             throw new ServiceException("le login ou le mdp ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
 
+
         // Throw une erreur si une donnée n'est pas correcte
         $this->verifierToutesInfosCorrectes($login, $nom, $prenom, $email, $mdp, $mdp2);
 

@@ -23,6 +23,7 @@ class ConnexionUtilisateurJWT implements ConnexionUtilisateurInterface
     {
         if (Cookie::contient("auth_token"))
             Cookie::supprimer("auth_token");
+
     }
 
     public function getIdUtilisateurConnecte(): ?string
