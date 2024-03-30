@@ -13,8 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class TableauRepository extends AbstractRepository implements TableauRepositoryInterface
 {
 
-    public function __construct(private ContainerInterface $container){
-
+    public function __construct(private ContainerInterface $container, private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($this->connexionBaseDeDonnees);
     }
 
     protected function getNomTable(): string
@@ -64,7 +64,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
                 LEFT JOIN Participer p ON t.idtableau = p.idtableau
                 WHERE login= :login
                 OR proprietairetableau = :login";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = array(
             "login" => $login
         );
@@ -87,7 +87,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
                 FROM Participer p
                 JOIN Utilisateurs u ON p.login = u.login
                 WHERE idTableau= :idTableauTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = array(
             "idTableauTag" => $idTableau
         );
@@ -103,7 +103,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
 
     public function getNombreTableauxTotalUtilisateur(string $login) : int {
         $query = "SELECT COUNT(DISTINCT idTableau) FROM Participer WHERE login=:login";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($query);
         $pdoStatement->execute(["login" => $login]);
         $obj = $pdoStatement->fetch();
         return $obj[0];
@@ -115,7 +115,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     public function ajouterParticipant($login, $idTableau):bool
     {
         $sql = "INSERT INTO Participer(login, idtableau) VALUES (:loginTag, :idTableauTag)";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "loginTag" => $login,
             "idTableauTag" => $idTableau
@@ -137,7 +137,7 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
         $sql = "DELETE FROM Participer 
                 WHERE login = :loginTag
                 AND idtableau = :idTableauTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "loginTag" => $login,
             "idTableauTag" => $idTableau

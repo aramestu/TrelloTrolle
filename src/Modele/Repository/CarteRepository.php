@@ -12,8 +12,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class CarteRepository extends AbstractRepository implements CarteRepositoryInterface
 {
 
-    public function __construct(private ContainerInterface $container){
-
+    public function __construct(private ContainerInterface $container, private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($this->connexionBaseDeDonnees);
     }
 
     protected function getNomTable(): string
@@ -64,7 +64,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         $values = [
             "idTableauTag" => $idTableau
         ];
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $pdoStatement->execute($values);
         $objets = [];
         foreach ($pdoStatement as $objetFormatTableau) {
@@ -81,7 +81,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     public function recupererCartesUtilisateur(string $login): array
     {
         $sql = "SELECT {$this->formatNomsColonnes()} from app_db WHERE affectationscarte @> :json";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = array(
             "json" => json_encode(["utilisateurs" => [["login" => $login]]])
         );
@@ -95,7 +95,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
 
     public function getNombreCartesTotalUtilisateur(string $login) : int {
         $query = "SELECT COUNT(*) FROM Affecter WHERE login=:login";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($query);
         $pdoStatement->execute(["login" => $login]);
         $obj = $pdoStatement->fetch();
         return $obj[0];
@@ -108,7 +108,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         $sql = "SELECT a.$nomColonnnes FROM Affecter a
              JOIN Utilisateurs u ON u.login = a.login
              WHERE idCarte=:idCarteTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $pdoStatement->execute(["idCarteTag" => $idCarte]);
         $objets = [];
         foreach ($pdoStatement as $objetFormatTableau) {
@@ -123,7 +123,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     public function ajouterAffectation($login, $idCarte):bool
     {
         $sql = "INSERT INTO Affecter(login, idcarte) VALUES (:loginTag, :idCarteTag)";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "loginTag" => $login,
             "idCarteTag" => $idCarte
@@ -145,7 +145,7 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         $sql = "DELETE FROM Affecter 
                 WHERE login = :loginTag
                 AND idcarte = :idCarteTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "loginTag" => $login,
             "idCarteTag" => $idCarte

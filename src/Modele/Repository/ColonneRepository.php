@@ -11,8 +11,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class ColonneRepository extends AbstractRepository implements ColonneRepositoryInterface
 {
 
-    public function __construct(private ContainerInterface $container){
-
+    public function __construct(private ContainerInterface $container, private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($this->connexionBaseDeDonnees);
     }
 
     protected function getNomTable(): string
@@ -51,7 +51,7 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
 
     public function getNombreColonnesTotalTableau(int $idTableau) : int {
         $query = "SELECT COUNT(DISTINCT idColonne) FROM Colonnes WHERE idTableau=:idTableau";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($query);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($query);
         $pdoStatement->execute(["idTableau" => $idTableau]);
         $obj = $pdoStatement->fetch();
         return $obj[0];

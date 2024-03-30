@@ -7,6 +7,9 @@ use PDOException;
 
 abstract class AbstractRepository implements AbstractRepositoryInterface
 {
+
+    public function __construct(private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees) {}
+
     protected abstract function getNomTable(): string;
     protected abstract function getNomCle(): string;
     protected abstract function getNomsColonnes(): array;
@@ -26,7 +29,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $nomTable = $this->getNomTable();
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->query("SELECT * FROM $nomTable");
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->query("SELECT * FROM $nomTable");
 
         $objets = [];
         foreach ($pdoStatement as $objetFormatTableau) {
@@ -44,7 +47,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
 
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable ORDER BY :attributsTexteTag :sensTag");
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable ORDER BY :attributsTexteTag :sensTag");
         $values = [
             "attributsTexteTag" => $attributsTexte,
             "sensTag" => $sens
@@ -66,7 +69,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     protected function recupererPlusieursPar(string $nomAttribut, $valeur): array
     {
         $nomTable = $this->getNomTable();
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag");
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag");
         $values = [
             "valeurTag" => $valeur
         ];
@@ -86,7 +89,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag ORDER BY $attributsTexte $sens ");
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable WHERE $nomAttribut = :valeurTag ORDER BY $attributsTexte $sens ");
         $values = array(
             "valeurTag" => $valeur
         );
@@ -103,7 +106,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $nomTable = $this->getNomTable();
         $sql = "SELECT DISTINCT {$this->formatNomsColonnes()} from $nomTable WHERE $nomAttribut= :valeurTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "valeurTag" => $valeur
         ];
@@ -126,7 +129,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $nomTable = $this->getNomTable();
         $nomClePrimaire = $this->getNomCle();
         $sql = "DELETE FROM $nomTable WHERE $nomClePrimaire= :valeurClePrimaireTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "valeurClePrimaireTag" => $valeurClePrimaire
         ];
@@ -149,7 +152,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $whereString = "$nomClePrimaire = :{$nomClePrimaire}Tag";
 
         $sql = "UPDATE $nomTable SET $setString WHERE $whereString";
-        $req_prep = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $req_prep = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         $objetFormatTableau = $object->formatTableau();
         $req_prep->execute($objetFormatTableau);
@@ -171,7 +174,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $valueString = '(' . join(', ', $partiesValues) . ')';
 
         $sql = "INSERT INTO $nomTable $insertString VALUES $valueString";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
 
         $objetFormatTableau = $object->formatTableau();
         if ($this->estAutoIncremente()) unset($objetFormatTableau[$this->getNomCle() . "Tag"]);
@@ -191,7 +194,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
     {
         $sql = "DELETE FROM Affecter 
                 WHERE $nomColonne = :valeurTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "valeurTag" => $valeurColonne
         ];
@@ -207,7 +210,7 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
 
         $sql = "DELETE FROM Participer 
                 WHERE $nomColonne = :valeurTag";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = [
             "valeurTag" => $valeurColonne
         ];

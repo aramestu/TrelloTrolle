@@ -10,8 +10,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class UtilisateurRepository extends AbstractRepository implements UtilisateurRepositoryInterface
 {
 
-    public function __construct(private ContainerInterface $container){
-
+    public function __construct(private ContainerInterface $container, private ConnexionBaseDeDonneesInterface $connexionBaseDeDonnees){
+        parent::__construct($this->connexionBaseDeDonnees);
     }
 
     protected function getNomTable(): string
@@ -56,7 +56,7 @@ class UtilisateurRepository extends AbstractRepository implements UtilisateurRep
                 WHERE p.login = :loginTag
                 OR t.proprietairetableau = :loginTag
                 ";
-        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
         $values = ["loginTag" => $login];
         $pdoStatement->execute($values);
         $objets = [];

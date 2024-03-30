@@ -26,19 +26,19 @@ services:
 
   carte_repository:
     class: App\Trellotrolle\Modele\Repository\CarteRepository
-    arguments: ['@container']
+    arguments: ['@container', '@connexion_base_de_donnees']
 
   colonne_repository:
     class: App\Trellotrolle\Modele\Repository\ColonneRepository
-    arguments: ['@container']
+    arguments: ['@container', '@connexion_base_de_donnees']
 
   tableau_repository:
     class: App\Trellotrolle\Modele\Repository\TableauRepository
-    arguments: ['@container']
+    arguments: ['@container', '@connexion_base_de_donnees']
 
   utilisateur_repository:
     class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
-    arguments: ['@container']
+    arguments: ['@container', '@connexion_base_de_donnees']
 
 
   #Lib
