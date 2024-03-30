@@ -13,7 +13,7 @@ use Twig\Error\SyntaxError;
 
 class ControleurGenerique {
 
-    private ContainerInterface $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {

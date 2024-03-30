@@ -40,9 +40,17 @@ services:
     class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
     arguments: ['@container']
 
+
   #Lib
   mot_de_passe:
     class: App\Trellotrolle\Lib\MotDePasse
+
+  connexion_utilisateur_session:
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurSession
+
+  connexion_utilisateur_jwt:
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurJWT
+
 
   #Sercices
   utilisateur_service:
@@ -51,15 +59,15 @@ services:
 
   colonne_service:
     class: App\Trellotrolle\Service\ColonneService
-    arguments: [ '@colonne_repository', '@tableau_repository']
+    arguments: [ '@colonne_repository', '@tableau_service']
 
   tableau_service:
     class: App\Trellotrolle\Service\TableauService
-    arguments: [ '@tableau_repository', '@utilisateur_repository' ,'@carte_repository', '@colonne_repository', '@mot_de_passe' ]
+    arguments: [ '@tableau_repository', '@utilisateur_repository' ,'@carte_repository', '@colonne_repository', '@mot_de_passe']
 
   carte_service:
-    class: App\Trellotrolle\Service\TableauService
-    arguments: [ '@carte_repository', '@colonne_repository', '@tableau_repository', '@colonne_service' ,  '@tableau_service' ]
+    class: App\Trellotrolle\Service\CarteService
+    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service']
 
 
 
@@ -102,16 +110,9 @@ services:
 
   controleur_tableau:
     class: App\Trellotrolle\Controleur\ControleurTableau
-    arguments:
-      container: '@container'
+    arguments: ['@container', '@tableau_service', '@connexion_utilisateur_session', '@colonne_service', '@carte_service', '@tableau_repository']
 
   controleur_utilisateur:
     class: App\Trellotrolle\Controleur\ControleurUtilisateur
     arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_session', '@connexion_utilisateur_jwt']
 
-  #Connexion utilisateur
-  connexion_utilisateur_session:
-    class: App\Trellotrolle\Lib\ConnexionUtilisateurSession
-
-  connexion_utilisateur_jwt:
-    class: App\Trellotrolle\Lib\ConnexionUtilisateurJWT

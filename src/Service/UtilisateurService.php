@@ -30,7 +30,7 @@ class UtilisateurService implements UtilisateurServiceInterface
         /**
          * @var Utilisateur $utilisateur
          */
-        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire($loginUtilisateurConnecte);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
 
         if(is_null($utilisateur)){
             throw new ServiceException( "L'utilisateur n'existe pas", Response::HTTP_NOT_FOUND);

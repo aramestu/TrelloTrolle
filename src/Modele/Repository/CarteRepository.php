@@ -55,9 +55,22 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
     }
 
 
-    //Cette fonction ne va surement pas fonctionner avec la nouvelle BD
     public function recupererCartesTableau(int $idTableau): array {
-        return $this->recupererPlusieursPar("idtableau", $idTableau);
+        $nomColonnes = $this->formatNomsColonnes();
+        $sql = "SELECT $nomColonnes FROM Cartes c1
+                WHERE EXISTS (SELECT * FROM Colonnes c2
+                              WHERE idtableau = :idTableauTag
+                              AND c1.idcolonne = c2.idcolonne)";
+        $values = [
+            "idTableauTag" => $idTableau
+        ];
+        $pdoStatement = ConnexionBaseDeDonnees::getPdo()->prepare($sql);
+        $pdoStatement->execute($values);
+        $objets = [];
+        foreach ($pdoStatement as $objetFormatTableau) {
+            $objets[] = $this->construireDepuisTableau($objetFormatTableau);
+        }
+        return $objets;
     }
 
 

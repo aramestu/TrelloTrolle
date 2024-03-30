@@ -1,6 +1,7 @@
 <?php
 namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Lib\MotDePasseInterface;
+use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
@@ -240,9 +241,6 @@ class TableauService implements TableauServiceInterface
             throw new ServiceException( "Vous ne pouvez pas supprimer le tableau où vous n'êtes pas propriétaire", Response::HTTP_NOT_FOUND);
         }
 
-        $this->carteRepository->supprimerCartesTableau($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
-        $this->colonneRepository->supprimerColonneTableau($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
-        $this->tableauRepository->supprimerUtilisateurParticipant($idTableau); // TODO: ajouter cette méthode dans les repository ou alors faire ceci dans supprimer de tableauRepository ?
         $this->tableauRepository->supprimer($idTableau);
     }
 
@@ -256,4 +254,35 @@ class TableauService implements TableauServiceInterface
 
     }
 
+    public function recupererColonnesEtCartesDuTableau(string $idTableau): array
+    {
+        $colonnes = $this->colonneRepository->recupererColonnesTableau($idTableau);
+        $associationColonneCarte = array("colonnes" => $colonnes,
+                                        "associations" => []);
+        foreach ($colonnes as $colonne){
+            $associationColonneCarte["associations"][$colonne->getIdColonne()] = $this->carteRepository->recupererCartesColonne($colonne->getIdColonne());
+        }
+        return $associationColonneCarte;
+    }
+
+    public function informationsAffectationsCartes(string $idTableau): array
+    {
+        /**
+         * @var Carte[] $cartes
+         */
+        $infoAffectations = [];
+        $cartes = $this->carteRepository->recupererCartesTableau($idTableau);
+        foreach ($cartes as $carte) {
+            foreach ($carte->getAffectationsCarte() as $utilisateur) {
+                if(!isset($infoAffectations[$utilisateur->getLogin()])) {
+                    $infoAffectations[$utilisateur->getLogin()] = ["infos" => $utilisateur, "colonnes" => []];
+                }
+                if(!isset($infoAffectations[$utilisateur->getLogin()]["colonnes"][$carte->getColonne()->getIdColonne()])) {
+                    $infoAffectations[$utilisateur->getLogin()]["colonnes"][$carte->getColonne()->getIdColonne()] = 0;
+                }
+                $infoAffectations[$utilisateur->getLogin()]["colonnes"][$carte->getColonne()->getIdColonne()]++;
+            }
+        }
+        return $infoAffectations;
+    }
 }

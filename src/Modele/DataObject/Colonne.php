@@ -57,6 +57,11 @@ class Colonne extends AbstractDataObject implements \JsonSerializable
         $this->titreColonne = $titreColonne;
     }
 
+    public function __hashCode(): string {
+        return spl_object_hash($this);
+    }
+
+
     public function formatTableau(): array
     {
         return array(

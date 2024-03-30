@@ -12,6 +12,7 @@ use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Modele\Repository\CarteRepository;
 use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\TableauRepository;
+use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Service\CarteServiceInterface;
 use App\Trellotrolle\Service\ColonneServiceInterface;
@@ -24,9 +25,9 @@ use Symfony\Component\Routing\Attribute\Route;
 class ControleurTableau extends ControleurGenerique
 {
 
-    private function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
+    public function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
                                  private ConnexionUtilisateurInterface $utilisateur, private ColonneServiceInterface $colonneService,
-                                 private CarteServiceInterface $carteService){
+                                 private CarteServiceInterface $carteService, private TableauRepositoryInterface $tableauRepository){
         parent::__construct($container);
     }
 
@@ -36,79 +37,22 @@ class ControleurTableau extends ControleurGenerique
     }
 
     #[Route(path: '/tableau/{codeTableau}/afficher', name:'afficher_tableau', methods:["GET"])]
-    public function afficherTableau() : Response {
+    public function afficherTableau(string $codeTableau) : Response {
         try {
-            $tableau = $this->tableauService->getByCodeTableau($_REQUEST["codeTableau"]);
+            $tableau = $this->tableauService->getByCodeTableau($codeTableau);
+            $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
+            $informationsAffectation = $this->tableauService->informationsAffectationsCartes($tableau->getIdTableau());
         } catch (ServiceException $e) {
-            MessageFlash::ajouter("error", $e);
-            return $this->rediriger("acceuil");
-        }
-
-        $colonnes = $this->colonneService->recupererColonnesTableau($tableau->getIdTableau());
-        $data = [];
-        $participant = [];
-
-        foreach ($colonnes as $colonne){
-            $cartes = $this->carteService->getCartesParIdColonne($colonne->getIdColonne());
-            foreach ($cartes as $carte){
-                //foreach ($carte->get) TODO: a finir
-            }
-        }
-
-        return new Response();
-
-        /*if(!ControleurTableau::issetAndNotNull(["codeTableau"])) {
-            MessageFlash::ajouter("warning", "Code de tableau manquant");
+            MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("accueil");
         }
-        $code = $_REQUEST["codeTableau"];
-        $tableauRepository = new TableauRepository();
 
-        /**
-         * @var Tableau $tableau
-         */
-        /*$tableau = $tableauRepository->recupererParCodeTableau($code);
-        if(!$tableau) {
-            MessageFlash::ajouter("warning", "Tableau inexistant");
-            return $this->rediriger("accueil");
-        }
-        $colonneRepository = new ColonneRepository();
-
-        /**
-         * @var Colonne[] $colonnes
-         */
-        /*$colonnes = $colonneRepository->recupererColonnesTableau($tableau->getIdTableau());
-        $data = [];
-        $participants = [];
-
-        $carteRepository = new CarteRepository();
-        foreach ($colonnes as $colonne) {
-            /**
-             * @var Carte[] $cartes
-             */
-            /*$cartes = $carteRepository->recupererCartesColonne($colonne->getIdColonne());
-            foreach ($cartes as $carte) {
-                foreach ($carte->getAffectationsCarte() as $utilisateur) {
-                    if(!isset($participants[$utilisateur->getLogin()])) {
-                        $participants[$utilisateur->getLogin()] = ["infos" => $utilisateur, "colonnes" => []];
-                    }
-                    if(!isset($participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()])) {
-                        $participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()] = [$colonne->getTitreColonne(), 0];
-                    }
-                    $participants[$utilisateur->getLogin()]["colonnes"][$colonne->getIdColonne()][1]++;
-                }
-            }
-            $data[] = $cartes;
-        }
-
-        return ControleurTableau::afficherVuePHP('vueGenerale.php', [
-            "pagetitle" => "{$tableau->getTitreTableau()}",
-            "cheminVueBody" => "tableau/tableau.php",
+        return $this->afficherTwig("tableau/tableau.html.twig",[
             "tableau" => $tableau,
-            "colonnes" => $colonnes,
-            "participants" => $participants,
-            "data" => $data,
-        ]);*/
+            "associationColonneCarte" => $associationColonneCarte,
+            "informationsAffectation" => $informationsAffectation
+        ]);
+
     }
 
     #[Route(path: '/tableau/{idTableau}/mise-a-jour', name:'mise_a_jour_tableau', methods:["GET"])]
@@ -434,9 +378,9 @@ class ControleurTableau extends ControleurGenerique
         if(!ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("connexion");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-        $tableaux = $repository->recupererTableauxOuUtilisateurEstMembre($login);
+        $tableaux = $repository->recupererTableauxParticipeUtilisateur($login);
         return ControleurTableau::afficherVuePHP('vueGenerale.php', [
             "pagetitle" => "Liste des tableaux de $login",
             "cheminVueBody" => "tableau/listeTableauxUtilisateur.php",
@@ -453,7 +397,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("danger", "Identifiant du tableau manquant");
             return $this->rediriger("mes_tableaux");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         /**
          * @var Tableau $tableau
          */
@@ -504,7 +448,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("danger", "Identifiant de tableau manquant");
             return $this->rediriger("mes_tableaux");
         }
-        $repository = new TableauRepository();
+        $repository = $this->tableauRepository;
         $idTableau = $_REQUEST["idTableau"];
         /**
          * @var Tableau $tableau
