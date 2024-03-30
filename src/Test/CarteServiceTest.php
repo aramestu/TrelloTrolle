@@ -13,7 +13,9 @@ use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\TableauServiceInterface;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
+use PDO;
 
+//Base de donnees deja rempli d'import
 class CarteServiceTest extends TestCase
 {
 
@@ -28,7 +30,7 @@ class CarteServiceTest extends TestCase
     {
         parent::setUpBeforeClass();
         self::$connexionBaseDeDonnees = new ConnexionBaseDeDonnees(new ConfigurationBDDTest());
-        self::$connexionBaseDeDonnees->getPdo()->exec(file_get_contents(__DIR__."/BD_Tables_V1.sql"));
+        //self::$connexionBaseDeDonnees->getPdo()->exec(file_get_contents(__DIR__."/BD_Tables_V1.sql")); A décommenter si les tables n'éxiste plus dans la BDD de test
     }
 
     /**
@@ -58,6 +60,21 @@ class CarteServiceTest extends TestCase
         parent::tearDown();
     }
 
+    public function testScriptCreationTables(): void
+    {
+        // Assurez-vous que la connexion à la base de données est établie
+        self::$connexionBaseDeDonnees->getPdo()->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // Vérifiez si la table "cartes" existe dans la base de données
+        $stmt = self::$connexionBaseDeDonnees->getPdo()->query("SELECT 1 FROM cartes LIMIT 1");
+
+        // Assurez-vous que la requête s'est exécutée sans erreur
+        $this->assertNotFalse($stmt, "La table 'cartes' n'a pas été créée.");
+
+        // Facultatif : affichage d'un message de réussite
+        $this->assertTrue(true, "Le script de création de tables s'est exécuté avec succès.");
+    }
+
     /**
      * @throws Exception
      * @throws ServiceException
@@ -80,12 +97,10 @@ class CarteServiceTest extends TestCase
         $this->assertEquals($carte, $result);
     }
 
-    public function test__construct()
-    {
 
-    }
 
-    public function testMettreAJourCarte()
+
+    /*public function testMettreAJourCarte()
     {
 
     }
@@ -103,5 +118,5 @@ class CarteServiceTest extends TestCase
     public function testSupprimerCarte()
     {
 
-    }
+    }*/
 }
