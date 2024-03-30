@@ -4,6 +4,7 @@ namespace App\Trellotrolle\Test;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees;
 use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonneesInterface;
@@ -11,6 +12,7 @@ use App\Trellotrolle\Service\CarteService;
 use App\Trellotrolle\Service\ColonneServiceInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\TableauServiceInterface;
+use Mockery;
 use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use PDO;
@@ -98,14 +100,67 @@ class CarteServiceTest extends TestCase
     }
 
 
-
-
-    /*public function testMettreAJourCarte()
+    /**
+     * @throws ServiceException
+     */
+    public function testMettreAJourCarte()
     {
+        $statement = self::$connexionBaseDeDonnees->getPdo()->query("SELECT * FROM cartes where idCarte = 1");
+        $carteObject = $statement->fetch(PDO::FETCH_ASSOC);
 
+        $statement = self::$connexionBaseDeDonnees->getPdo()->query("SELECT * FROM colonnes where idcolonne ='" . $carteObject['idcolonne'] . "'");
+        $colonneObject = $statement->fetch(PDO::FETCH_ASSOC);
+
+        $statement = self::$connexionBaseDeDonnees->getPdo()->query("SELECT * from tableaux where idtableau='" . $colonneObject["idtableau"]. "'");
+        $tableauObject = $statement->fetch(PDO::FETCH_ASSOC);
+
+        $statement = self::$connexionBaseDeDonnees->getPdo()->query("SELECT * FROM affecter where login='" . $tableauObject['proprietaireTableau'] . "'");
+        $affected = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+
+        var_dump($carteObject);
+        var_dump($tableauObject);
+
+        $carte = new Carte();
+        $carte->setIdCarte($carteObject["idcarte"]);
+        $carte->setAffectationsCarte($affected);
+        $carte->setCouleurCarte($carteObject["couleurcarte"]);
+        $carte->setDescriptifCarte($carteObject["descriptifcarte"]);
+        $carte->setTitreCarte($carteObject["titrecarte"]);
+
+
+        $colonne = new Colonne();
+        $colonne->setIdColonne($carteObject["idcolonne"]);
+        $colonne->setTitreColonne($colonneObject["titrecolonne"]);
+
+
+        $carte->setColonne($colonne);
+
+        $tableau = new Tableau();
+        $tableau->setIdTableau($tableauObject['idtableau']);
+        $tableau->setCodeTableau($tableauObject["codetableau"]);
+        $tableau->setTitreTableau($tableauObject["titretableau"]);
+
+        $colonne->setTableau($tableau);
+
+        $this->colonneServiceMock->expects($this->once())
+            ->method('getColonne')
+            ->with($colonne->getIdColonne())
+            ->willReturn($colonne);
+
+        $this->tableauServiceMock->expects($this->once())
+            ->method('getByIdTableau')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
+
+        $this->carteRepositoryMock->expects($this->once())
+            ->method('mettreAJour')
+            ->with($carte);
+
+        $this->carteService->mettreAJourCarte($carte->getIdCarte(),$colonne->getIdColonne(), $carte->getTitreCarte(),$carte->getDescriptifCarte(), $carte->getCouleurCarte(),"utilisateur1", $affected);
     }
 
-    public function testCreerCarte()
+    /*public function testCreerCarte()
     {
 
     }
