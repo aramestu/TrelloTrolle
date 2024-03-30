@@ -88,7 +88,7 @@ class ControleurUtilisateur extends ControleurGenerique
     }
 
     private function estConnecte(): bool{
-        return $this->connexionUtilisateurSession->estConnecte() && $this->connexionUtilisateurJWT->estConnecte();
+        return $this->connexionUtilisateurSession->estConnecte();
     }
 
     /**

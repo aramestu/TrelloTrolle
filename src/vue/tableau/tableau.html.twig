@@ -76,7 +76,7 @@
                     {{ tableau.titreTableau }}
                     {% if estParticipantOuProprietaire %}
                         <span class="actions">
-                            <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
+                            <a href="{{ route('mettre_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
                                 <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
                             </a>
                         </span>

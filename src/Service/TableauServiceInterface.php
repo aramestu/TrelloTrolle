@@ -1,5 +1,6 @@
 <?php
 namespace App\Trellotrolle\Service;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Exception;
 
@@ -19,22 +20,22 @@ interface TableauServiceInterface
      * @throws ServiceException
      * @throws Exception
      */
-    public function creerTableau(?string $loginUtilisateurConnecte, ?string $nomTableau): void;
+    public function creerTableau(?string $loginUtilisateurConnecte, ?string $nomTableau): Tableau;
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void;
+    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): Tableau;
 
     /**
      * @throws ServiceException
      */
-    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau);
+    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau): Tableau;
 
     /**
      * @throws ServiceException
      */
-    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete);
+    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete) :Tableau;
 
     /**
      * @throws ServiceException
@@ -45,4 +46,6 @@ interface TableauServiceInterface
      * @throws ServiceException
      */
     public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void;
+
+    public function verifierProprietaire(?string $loginUtilisateurConnecte, ?int $idTableau): Tableau;
 }
