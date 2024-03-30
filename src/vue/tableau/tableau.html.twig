@@ -50,21 +50,21 @@
                 <div class="participants">
                     Travail en cours :
                     <ul>
-                        {% for participant in tableau.participants %}
+                        {% for participant in informationsAffectation %}
                             <li>
-                                <div>{{ participant.prenom }} {{ participant.nom }}</div>
-                                {#
+                                <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
                                 <ul>
-                                    {% for colonne in participant['colonnes'] %}
-                                    <li>{{ colonne[1] }} {{ colonne[0] }}</li>
+                                    {% for colonne in associationColonneCarte['colonnes'] %}
+                                        {% if informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] is defined and informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] > 0 %}
+                                            <li>{{ informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] }} {{ colonne.titreColonne }}</li>
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
-                                TODO#}
                             </li>
                         {% endfor %}
-                        {# { % if participants is empty %}
-                        <span><strong>Pas de travail en cours</strong></span>
-                        {% endif % } TODO#}
+                        {% if informationsAffectation is empty %}
+                            <span><strong>Pas de travail en cours</strong></span>
+                        {% endif %}
                     </ul>
                 </div>
             </div>

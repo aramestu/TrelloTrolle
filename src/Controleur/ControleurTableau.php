@@ -41,6 +41,7 @@ class ControleurTableau extends ControleurGenerique
         try {
             $tableau = $this->tableauService->getByCodeTableau($codeTableau);
             $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
+            $informationsAffectation = $this->tableauService->informationsAffectationsCartes($tableau->getIdTableau());
         } catch (ServiceException $e) {
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("accueil");
@@ -48,7 +49,8 @@ class ControleurTableau extends ControleurGenerique
 
         return $this->afficherTwig("tableau/tableau.html.twig",[
             "tableau" => $tableau,
-            "associationColonneCarte" => $associationColonneCarte
+            "associationColonneCarte" => $associationColonneCarte,
+            "informationsAffectation" => $informationsAffectation
         ]);
 
     }
