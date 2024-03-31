@@ -186,12 +186,12 @@ class ControleurTableau extends ControleurGenerique
 
     #[Route(path: '/tableau/{idTableau}/quitter', name:'quitter_tableau', methods:["GET"])]
     public function quitterTableau(string $idTableau): Response {
-        if(!ConnexionUtilisateur::estConnecte()) {
+        if(! $this->estConnecte()) {
             MessageFlash::ajouter("warning", "Vous devez être connecté pour quitter un tableau");
             return $this->rediriger("connexion");
         }
         try{
-            $this->tableauService->quitterTableau(ConnexionUtilisateur::getLoginUtilisateurConnecte(), $idTableau);
+            $this->tableauService->quitterTableau($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $idTableau);
         }catch (ServiceException $e){
             MessageFlash::ajouter("warning",$e->getMessage());
             return $this->rediriger("mes_tableaux");
@@ -201,12 +201,12 @@ class ControleurTableau extends ControleurGenerique
 
     #[Route(path: '/tableau/{idTableau}/supprimer', name:'supprimer_tableau', methods:["GET"])]
     public function supprimerTableau(string $idTableau): Response {
-        if(!ConnexionUtilisateur::estConnecte()) {
+        if(! $this->estConnecte()) {
             MessageFlash::ajouter("warning", "Vous devez être connecté pour supprimer un tableau");
             return $this->rediriger("connexion");
         }
         try{
-            $this->tableauService->supprimer(ConnexionUtilisateur::getLoginUtilisateurConnecte(), $idTableau);
+            $this->tableauService->supprimer($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $idTableau);
         }catch (ServiceException $e){
             MessageFlash::ajouter("warning", $e->getMessage());
             $this->rediriger("mes_tableaux");

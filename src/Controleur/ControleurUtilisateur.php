@@ -117,12 +117,12 @@ class ControleurUtilisateur extends ControleurGenerique
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
+        $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
         try{
-            $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
             $this->serviceUtilisateur->modifierUtilisateur($login, $_POST["nom"], $_POST["prenom"], $_POST["mdp"], $_POST["mdp2"]);
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
-            return $this->rediriger("mise_a_jour_utilisateur");
+            return $this->rediriger("mise_a_jour_utilisateur", ["login" => $login]);
         }
         MessageFlash::ajouter("success", "Utilisateur mis à jour");
         return $this->rediriger("accueil");

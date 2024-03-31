@@ -126,8 +126,12 @@ class ColonneService implements ColonneServiceInterface
         $this->colonneRepository->mettreAJour($colonne);
     }
 
+    /**
+     * @throws ServiceException
+     */
     public function recupererColonnesTableau(int|null $idTableau): array
     {
+        $this->verifierIdTableau($idTableau);
         return $this->colonneRepository->recupererColonnesTableau($idTableau);
     }
 }

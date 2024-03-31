@@ -100,8 +100,7 @@ services:
 
   controleur_carte:
     class: App\Trellotrolle\Controleur\ControleurCarte
-    arguments:
-      container: '@container'
+    arguments: ['@container', '@carte_service', '@colonne_service', '@tableau_service' ,'@connexion_utilisateur_session']
 
   controleur_colonne:
     class: App\Trellotrolle\Controleur\ControleurColonne
