@@ -116,22 +116,24 @@ class ControleurTableau extends ControleurGenerique
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
+        $idTableau = $_POST["idTableau"] ?? null;
+        $nomTableau = $_POST["nomTableau"] ?? null;
         try{
-            $tableau = $this->tableauService->mettreAJourTableau($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["nomTableau"]);
+            $tableau = $this->tableauService->mettreAJourTableau($idTableau, $this->connexionUtilisateurSession->getIdUtilisateurConnecte() , $nomTableau);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
-            return $this->rediriger("mise_a_jour_tableau", ["idTableau" => $_POST["idTableau"]]);
+            return $this->rediriger("mise_a_jour_tableau", ["idTableau" => $idTableau]);
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
     }
 
-    #[Route(path: '/tableau/ajout-membre', name:'ajout_membre', methods:["GET"])]
-    public function afficherFormulaireAjoutMembre(): Response {
+    #[Route(path: '/tableau/{idTableau}/ajout-membre', name:'ajout_membre', methods:["GET"])]
+    public function afficherFormulaireAjoutMembre($idTableau): Response {
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
         try{
-            $tableau = $this->tableauService->verifierProprietaire($this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["idTableau"]);
+            $tableau = $this->tableauService->verifierProprietaire($this->connexionUtilisateurSession->getIdUtilisateurConnecte() , $idTableau);
             $utilisateurs = $this->tableauService->recupererUtilisateursPasMembreOuPasProprietaireTableau($tableau);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
