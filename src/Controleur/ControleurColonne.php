@@ -39,24 +39,24 @@ class ControleurColonne extends ControleurGenerique
             return $this->rediriger("connexion");
         }
 
-        $colonne = null;
+        $tableau = null;
 
         try
         {
             $colonne = $this->colonneService->getColonne($idColonne);
             $this->colonneService->supprimerColonne($idColonne, $this->session->getIdUtilisateurConnecte());
-
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
             MessageFlash::ajouter("success", "La colonne '" . $colonne->getTitreColonne() . "' a été supprimée !");
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
         catch(ServiceException $exception)
         {
             MessageFlash::ajouter("danger", $exception->getMessage());
-            if($colonne === null)
+            if($tableau === null)
             {
                 return $this->rediriger("mes_tableaux");
             }
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
 
     }
