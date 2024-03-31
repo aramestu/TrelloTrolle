@@ -174,7 +174,7 @@ class CarteService implements CarteServiceInterface
         $carte->setCouleurCarte($couleurCarte);
         $carte->setColonne($colonne);
         $this->carteRepository->mettreAJour($carte);
-        $idCarte = $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+        $idCarte = $carte->getIdCarte();
         $this->carteRepository->supprimerToutesAffectationsCarte($idCarte);
         foreach ($affectations as $login){
             $this->carteRepository->ajouterAffectation($login, $idCarte);
