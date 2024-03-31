@@ -28,7 +28,7 @@ interface UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): Utilisateur;
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $email, $mdpAncien, $mdp = null, $mdp2 = null): Utilisateur;
 
     /**
      * @throws ServiceException

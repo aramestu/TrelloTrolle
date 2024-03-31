@@ -142,7 +142,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): Utilisateur{
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $email, $mdpAncien, $mdp = null, $mdp2 = null): Utilisateur{
         if(is_null($loginUtilisateurConnecte) || is_null($nom) || is_null($prenom)){
             throw new ServiceException("le login ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_NOT_FOUND);
         }
@@ -158,19 +158,20 @@ class UtilisateurService implements UtilisateurServiceInterface
         }
 
         // Pour ne pas throw d'erreurs s'il n'y a pas de mdp renseignés, on garde l'ancien
-        if(! is_null($mdp) && ! is_null($mdp2)) {
+        if((!is_null($mdp) && strlen($mdp) > 0) || (!is_null($mdp2) && strlen($mdp2) > 0)) {
             $this->verifier2MdpIdentiques($mdp, $mdp2);
             $this->verifierMotDePasseClair($mdp);
 
-            // Si l'utilisateur décide de changer de mdp
-            if(! $this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())){
-                $mdpHache = $this->motDePasse->hacher($mdp);
-                $utilisateur->setMdpHache($mdpHache);
+            if(! $this->motDePasse->verifier($mdpAncien, $utilisateur->getMdpHache())){
+                throw new ServiceException("Impossible de changer le mot de passe, l'ancien mot de passe est erroné");
             }
+            $mdpHache = $this->motDePasse->hacher($mdp);
+            $utilisateur->setMdpHache($mdpHache);
         }
 
         $utilisateur->setNom($nom);
-        $utilisateur->setPrenom($nom);
+        $utilisateur->setPrenom($prenom);
+        $utilisateur->setEmail($email);
         $this->utilisateurRepository->mettreAJour($utilisateur);
 
         return $utilisateur;
