@@ -105,8 +105,7 @@ services:
 
   controleur_colonne:
     class: App\Trellotrolle\Controleur\ControleurColonne
-    arguments:
-      container: '@container'
+    arguments: ['@container', '@connexion_utilisateur_session', '@colonne_service', '@tableau_service']
 
   controleur_tableau:
     class: App\Trellotrolle\Controleur\ControleurTableau

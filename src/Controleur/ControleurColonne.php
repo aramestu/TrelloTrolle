@@ -74,7 +74,7 @@ class ControleurColonne extends ControleurGenerique
         try
         {
             $this->tableauService->verifierParticipant($this->session->getIdUtilisateurConnecte(), $idTableau);
-            return ControleurTableau::afficherTwig('colonne/formulaireCreationColonne.php', [
+            return $this->afficherTwig('colonne/formulaireCreationColonne.html.twig', [
                 "idTableau" => $idTableau
             ]);
         }
@@ -106,7 +106,7 @@ class ControleurColonne extends ControleurGenerique
                 $this->session->getIdUtilisateurConnecte());
 
             MessageFlash::ajouter("success", "La colonne '$nomColonne' a été créée !");
-            return $this->rediriger("afficher_tableau", ['tableau' => $tableau]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
         catch(ServiceException | \Exception $exception)
         {
