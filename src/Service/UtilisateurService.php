@@ -177,7 +177,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function verifierIdentifiantUtilisateur($login, $mdp): void
+    public function verifierIdentifiantUtilisateur($login, $mdp): Utilisateur
     {
         if (is_null($login) || is_null($mdp)) {
             throw new ServiceException( "Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST);
@@ -189,6 +189,8 @@ class UtilisateurService implements UtilisateurServiceInterface
         if (!$this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())) {
             throw new ServiceException( "Mot de passe incorrect.", Response::HTTP_UNAUTHORIZED);
         }
+
+        return $utilisateur;
     }
 
     /**

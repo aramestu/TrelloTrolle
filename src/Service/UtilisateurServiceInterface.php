@@ -33,7 +33,7 @@ interface UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function verifierIdentifiantUtilisateur($login, $mdp): void;
+    public function verifierIdentifiantUtilisateur($login, $mdp): Utilisateur;
 
     /**
      * @throws ServiceException

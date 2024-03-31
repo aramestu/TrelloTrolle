@@ -114,3 +114,18 @@ services:
     class: App\Trellotrolle\Controleur\ControleurUtilisateur
     arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_session', '@connexion_utilisateur_jwt']
 
+  controleur_utilisateur_api:
+    class: App\Trellotrolle\Controleur\ControleurUtilisateurAPI
+    arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_jwt']
+
+  controleur_carte_api:
+    class: App\Trellotrolle\Controleur\ControleurCarteAPI
+    arguments: [ '@container', '@carte_service', '@connexion_utilisateur_jwt' ]
+
+  controleur_colonne_api:
+    class: App\Trellotrolle\Controleur\ControleurColonneAPI
+    arguments: [ '@container', '@colonne_service', '@connexion_utilisateur_jwt' ]
+
+  controleur_tableau_api:
+    class: App\Trellotrolle\Controleur\ControleurUtilisateurAPI
+    arguments: [ '@container', '@tableau_service', '@connexion_utilisateur_jwt' ]
