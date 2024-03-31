@@ -16,6 +16,16 @@ use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
 
+
+/**
+ * Classe de test pour le service UtilisateurService.
+ *
+ * Convention de nommage des tests : HappyPath/TriggerException_method/class/create_nom_Explication
+ * Cette classe contient des méthodes de test pour les différentes fonctionnalités du service UtilisateurService.
+ * Les méthodes de test vérifient le comportement attendu du service UtilisateurService en utilisant des mocks pour les dépendances.
+ * Les méthodes de test couvrent les cas de succès (Happy Path) ainsi que les cas d'exception (Trigger Exception) pour assurer le bon fonctionnement du service.
+ * Les méthodes de test vérifient également les paramètres d'entrée et lèvent des exceptions appropriées en cas de paramètres invalides.
+ */
 class UtilisateurServiceTest extends TestCase
 {
 
@@ -52,7 +62,10 @@ class UtilisateurServiceTest extends TestCase
         parent::tearDown();
     }
 
-    public function testGetUtilisateurWithValidLogin()
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_method_getUtilisateur_WithValidLogin()
     {
         $login = "lemoinem";
         $user = new Utilisateur();
@@ -68,7 +81,7 @@ class UtilisateurServiceTest extends TestCase
         self::assertSame($user, $result);
     }
 
-    public function testGetUtilisateurWithInvalidLogin(): void
+    public function testTriggerException_method_getUtilisateur_WithInvalidLogin(): void
     {
         $login = null;
 
@@ -85,7 +98,7 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->getUtilisateur($login);
     }
 
-    public function testGetUtilisateurWhenUserNotFound(): void
+    public function testTriggerException_method_getUtilisateur_UserNotFound(): void
     {
         $login = 'john_doe';
 
@@ -104,7 +117,10 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->getUtilisateur($login);
     }
 
-    public function testRecupererTableauxOuUtilisateurEstMembreWithValidLogin(): void
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_method_RecupererTableauxOuUtilisateurEstMembre_WithValidLogin(): void
     {
         $login = 'john_doe';
         $expectedResult = ['tableau1', 'tableau2']; // Simulez les tableaux retournés par le repository
@@ -122,7 +138,7 @@ class UtilisateurServiceTest extends TestCase
         $this->assertSame($expectedResult, $result);
     }
 
-    public function testRecupererTableauxOuUtilisateurEstMembreWithInvalidLogin(): void
+    public function testTriggerException_method_RecupererTableauxOuUtilisateurEstMembre_WithInValidLogin(): void
     {
         $login = null;
 
@@ -139,7 +155,10 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->recupererTableauxOuUtilisateurEstMembre($login);
     }
 
-    public function testCreerUtilisateurWithValidParameters(): void
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_create_Utilisateur_ValidParameters(): void
     {
         $login = 'john_doe';
         $nom = 'Doe';
@@ -173,7 +192,7 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2);
     }
 
-    public function testCreerUtilisateurWithMissingParameters(): void
+    public function testTriggerException_create_Utilisateur_MissingParameters(): void
     {
         $login = null;
         $nom = null;
@@ -198,11 +217,106 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2);
     }
 
+    public function testTriggerException_create_Utilisateur_LoginAlreadyExist(): void
+    {
+        // Mock du repository pour simuler qu'un utilisateur avec le même login existe déjà
+        $this->utilisateurRepository->method('recupererParClePrimaire')->willReturn(new Utilisateur());
+
+        // Teste si une exception est lancée lorsque le login est déjà pris
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_CONFLICT);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', 'john@example.com', 'MotDePasse123', 'MotDePasse123');
+    }
+
+    public function testTriggerException_create_Utilisateur_EmailAlreadyExist(): void
+    {
+        // Mock du repository pour simuler qu'un utilisateur avec le même email existe déjà
+        $this->utilisateurRepository->method('recupererUtilisateursParEmail')->willReturn([new Utilisateur()]);
+
+        // Teste si une exception est lancée lorsque l'email est déjà pris
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_CONFLICT);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', 'john@example.com', 'MotDePasse123', 'MotDePasse123');
+    }
+
+    public function testTriggerException_create_Utilisateur_InvalidLogin(): void
+    {
+        // Teste si une exception est lancée lorsque le login est invalide
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->creerUtilisateur('j', 'Doe', 'John', 'john@example.com', 'MotDePasse123', 'MotDePasse123');
+    }
+
+    public function testTriggerException_create_Utilisateur_InvalidEmail(): void
+    {
+        // Teste si une exception est lancée lorsque l'email est invalide
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', 'johnexample.com', 'MotDePasse123', 'MotDePasse123');
+    }
+
+    public function testTriggerException_create_Utilisateur_InvalidPassword(): void
+    {
+        // Teste si une exception est lancée lorsque le mot de passe est invalide
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', 'john@example.com', 'password', 'password');
+    }
+
+    public function testTriggerException_create_Utilisateur_DistinctPassword(): void
+    {
+        // Teste si une exception est lancée lorsque les mots de passe ne correspondent pas
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', 'john@example.com', 'MotDePasse123', 'MotDePasse456');
+    }
+
+    public function testTriggerException_create_Utilisateur_AmpleEmail(): void
+    {
+        // Teste si une exception est lancée lorsque l'email est trop long
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        // Adresse e-mail avec plus de 64 caractères
+        $email = 'john@example.com'; // exemple de 15 caractères
+
+        // Ajout de caractères supplémentaires pour dépasser 64 caractères
+        $longueurExcedante = 65 - strlen($email);
+        $email .= str_repeat('a', $longueurExcedante);
+
+        $this->utilisateurService->creerUtilisateur('johnDoe', 'Doe', 'John', $email, 'MotDePasse123', 'MotDePasse123');
+    }
+
+    public function testTriggerException_create_Utilisateur_AmpleName(): void
+    {
+        // Préparez les données pour le test
+        $login = 'johnDoe';
+        $nom = 'UnNomTresLongQuiDepasseLaLimiteDe32Caracteres';
+        $prenom = 'UnPrenomTresLongQuiDepasseLaLimiteDe32Caracteres';
+        $email = 'john.doe@example.com';
+        $mdp = 'MotDePasse123';
+        $mdp2 = 'MotDePasse123';
+
+        // Configurez le comportement attendu du repository ou d'autres dépendances si nécessaire
+
+        // Exécutez la méthode à tester et vérifiez qu'elle lance une exception
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Le nom et le prénom ne doivent pas faire plus de 32 caractères");
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2);
+    }
 
     /**
      * @throws ServiceException
      */
-    public function testModifierUtilisateurWithValidParameters(): void
+    public function testHappyPath_method_modifierUtilisateur_ValidParameters(): void
     {
         // Définissez les valeurs d'entrée pour le test
         $login = 'johnDoe';
@@ -234,7 +348,7 @@ class UtilisateurServiceTest extends TestCase
     }
 
 
-    public function testModifierUtilisateurWithMissingParameters(): void
+    public function testTriggerException_method_modifierUtilisateur_MissingParameters(): void
     {
         $login = null;
         $nom = null;
@@ -253,10 +367,33 @@ class UtilisateurServiceTest extends TestCase
         $this->utilisateurService->modifierUtilisateur($login, $nom, $prenom);
     }
 
+    public function testTriggerException_method_modifierUtilisateur_InvalidLogin(): void
+    {
+        // Préparez les données pour le test
+        $loginUtilisateurConnecte = 'johnDoe'; // Utilisateur connecté avec ce login
+        $nom = 'Doe';
+        $prenom = 'John';
+        $mdp = 'NouveauMotDePasse123';
+        $mdp2 = 'NouveauMotDePasse123';
+
+        // Configurez le comportement attendu du repository pour retourner null, ce qui simule un login inexistant
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($loginUtilisateurConnecte)
+            ->willReturn(null);
+
+        // Exécutez la méthode à tester et vérifiez qu'elle lance une exception
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Ce login n'existe pas!");
+        $this->expectExceptionCode(Response::HTTP_NOT_FOUND);
+
+        $this->utilisateurService->modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp, $mdp2);
+    }
+
     /**
      * @throws ServiceException
      */
-    public function testVerifieIdentifiantUtilisateurCorrect(): void
+    public function testHappyPath_method_verifierIdentifiantUtilisateur_ValidParameters(): void
     {
         // Création d'un utilisateur avec un mot de passe haché connu
         $login = 'johnDoe';
@@ -278,7 +415,7 @@ class UtilisateurServiceTest extends TestCase
     }
 
 
-    public function testVerifieIdentifiantUtilisateurIncorrect(): void
+    public function testTriggerException_method_verifierIdentifiantUtilisateur_InvalidParameters(): void
     {
         // Création d'un utilisateur avec un mot de passe haché connu
         $login = 'johnDoe';
@@ -303,7 +440,7 @@ class UtilisateurServiceTest extends TestCase
     }
 
 
-    public function testVerifieIdentifiantUtilisateurAvecIdentifiantOuMotDePasseManquant(): void
+    public function testTriggerException_method_verifierIdentifiantUtilisateur_MissingParameters(): void
     {
         // Définissez les valeurs d'entrée pour le test
         $loginManquant = null;
@@ -322,5 +459,34 @@ class UtilisateurServiceTest extends TestCase
         } catch (ServiceException $exception) {
             $this->assertEquals(Response::HTTP_BAD_REQUEST, $exception->getCode());
         }
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function testhappyPath_method_supprimer_ValidParameter(): void
+    {
+        // Préparez les données pour le test
+        $loginUtilisateurConnecte = 'johnDoe'; // Utilisateur connecté avec ce login
+
+        // Configurez le comportement attendu du repository
+        $this->utilisateurRepository->expects($this->once())
+            ->method('supprimer')
+            ->with($loginUtilisateurConnecte);
+
+        // Exécutez la méthode à tester sans qu'elle ne lève d'exception
+        $this->utilisateurService->supprimer($loginUtilisateurConnecte);
+
+        // Aucune exception ne devrait être levée
+    }
+
+    public function testTriggerException_method_supprimer_InvalidLogin(): void
+    {
+        // Exécutez la méthode à tester et vérifiez qu'elle lance une exception lorsque $loginUtilisateurConnecte est null
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("le login n'a pas été renseigné");
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->utilisateurService->supprimer(null);
     }
 }
