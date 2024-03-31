@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Trellotrolle\Service;
+
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Exception;
@@ -9,12 +11,12 @@ interface TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function getByCodeTableau(?string $codeTableau): \App\Trellotrolle\Modele\DataObject\Tableau;
+    public function getByCodeTableau(?string $codeTableau): Tableau;
 
     /**
      * @throws ServiceException
      */
-    public function getByIdTableau(?int $idTableau): \App\Trellotrolle\Modele\DataObject\Tableau;
+    public function getByIdTableau(?int $idTableau): Tableau;
 
     /**
      * @throws ServiceException
@@ -35,17 +37,31 @@ interface TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete) :Tableau;
+    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete): Tableau;
 
     /**
      * @throws ServiceException
      */
     public function supprimer(?string $loginUtilisateurConnecte, ?int $idTableau): void;
 
+    public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void;
+
     /**
      * @throws ServiceException
      */
-    public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void;
-
     public function verifierProprietaire(?string $loginUtilisateurConnecte, ?int $idTableau): Tableau;
+
+    public function recupererColonnesEtCartesDuTableau(string $idTableau): array;
+
+    public function informationsAffectationsCartes(string $idTableau): array;
+
+    /**
+     * @throws ServiceException
+     */
+    public function recupererUtilisateursPasMembreOuPasProprietaireTableau(Tableau $tableau);
+
+    /**
+     * @throws ServiceException
+     */
+    public function quitterTableau(?string $loginUtilisateurConnecte, ?int $idTableau);
 }

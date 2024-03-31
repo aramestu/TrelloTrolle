@@ -21,12 +21,15 @@ interface CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau;
+    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations): Tableau;
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau;
+    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations): Tableau;
 
+    /**
+     * @throws ServiceException
+     */
     public function getCartesParIdColonne(?int $idColonne): ?array;
 }

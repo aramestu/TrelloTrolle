@@ -29,5 +29,8 @@ interface ColonneServiceInterface
      */
     public function mettreAJour(?int $idColonne, ?string $nomColonne, ?string $loginUtilisateurConnecte): void;
 
-    public function recupererColonnesTableau(?int $idTableau): array;
+    /**
+     * @throws ServiceException
+     */
+    public function recupererColonnesTableau(int|null $idTableau): array;
 }
