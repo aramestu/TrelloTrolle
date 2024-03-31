@@ -238,31 +238,15 @@ class ControleurTableau extends ControleurGenerique
     #[Route(path: '/tableau/{idTableau}/supprimer', name:'supprimer_tableau', methods:["GET"])]
     public function supprimerTableau(string $idTableau): Response {
         if(!ConnexionUtilisateur::estConnecte()) {
+            MessageFlash::ajouter("warning", "Vous devez être connecté pour supprimer un tableau");
             return $this->rediriger("connexion");
         }
-        if(!ControleurCarte::issetAndNotNull(["idTableau"])) {
-            MessageFlash::ajouter("danger", "Identifiant de tableau manquant");
-            return $this->rediriger("mes_tableaux");
+        try{
+            $this->tableauService->supprimer(ConnexionUtilisateur::getLoginUtilisateurConnecte(), $idTableau);
+        }catch (ServiceException $e){
+            MessageFlash::ajouter("warning", $e->getMessage());
+            $this->rediriger("mes_tableaux");
         }
-        $repository = $this->tableauRepository;
-        $idTableau = $_REQUEST["idTableau"];
-        /**
-         * @var Tableau $tableau
-         */
-        $tableau = $repository->recupererParClePrimaire($idTableau);
-        if(!$tableau) {
-            MessageFlash::ajouter("danger", "Tableau inexistant");
-            return $this->rediriger("mes_tableaux");
-        }
-        if(!$tableau->estProprietaire(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
-            MessageFlash::ajouter("danger", "Vous n'êtes pas propriétaire de ce tableau");
-            return $this->rediriger("mes_tableaux");
-        }
-        if($repository->getNombreTableauxTotalUtilisateur(ConnexionUtilisateur::getLoginUtilisateurConnecte()) == 1) {
-            MessageFlash::ajouter("danger", "Vous ne pouvez pas supprimer ce tableau car cela entrainera la supression du compte");
-            return $this->rediriger("mes_tableaux");
-        }
-        $repository->supprimer($idTableau);
         return $this->rediriger("mes_tableaux");
     }
 }

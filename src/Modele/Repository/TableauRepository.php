@@ -171,7 +171,8 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
     public function supprimer(string $valeurClePrimaire): bool
     {
         $this->supprimerToutesParticipation("idTableau", $valeurClePrimaire);
-        $colonnes = $this->recupererPlusieursParOrdonne("idTableau", $valeurClePrimaire, ["idTableau"]);
+        $colonneRepository = $this->container->get("colonne_repository");
+        $colonnes = $colonneRepository->recupererPlusieursParOrdonne("idTableau", $valeurClePrimaire, ["idTableau"]);
         $colonneRepository = $this->container->get("colonne_repository");
         foreach ($colonnes as $colonne){
             $colonneRepository->supprimer($colonne->getIdColonne());
