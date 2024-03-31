@@ -49,7 +49,7 @@ class MotDePasse implements MotDePasseInterface
      */
     public function genererChaineAleatoire(int $nbCaracteres = 22): string
     {
-        $octetsAleatoires = random_bytes($nbCaracteres);
+        $octetsAleatoires = random_bytes($nbCaracteres/2);
         return bin2hex($octetsAleatoires);
     }
 }

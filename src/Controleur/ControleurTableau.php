@@ -48,7 +48,7 @@ class ControleurTableau extends ControleurGenerique
             $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
             $informationsAffectation = $this->tableauService->informationsAffectationsCartes($tableau->getIdTableau());
         } catch (ServiceException $e) {
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
 
@@ -78,7 +78,7 @@ class ControleurTableau extends ControleurGenerique
             $this->tableauService->verifierParticipant($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $idTableau);
             $nomTableau = $tableau->getTitreTableau();
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
         return self::afficherTwig("tableau/formulaireMiseAJourTableau.html.twig", ["idTableau" => $idTableau, "nomTableau" => $nomTableau, "pagetitle" => "Mise à jour Tableau"]);
@@ -89,7 +89,7 @@ class ControleurTableau extends ControleurGenerique
      * @throws RuntimeError
      * @throws LoaderError
      */
-    #[Route(path: '/tableau/mise-a-jour', name:'creation_tableau', methods:["GET"])]
+    #[Route(path: '/tableau/creation', name:'creation_tableau', methods:["GET"])]
     public function afficherFormulaireCreationTableau(): Response {
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
@@ -105,7 +105,7 @@ class ControleurTableau extends ControleurGenerique
         try{
             $tableau = $this->tableauService->creerTableau($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $_POST["nomTableau"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("creation_tableau");
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
@@ -119,7 +119,7 @@ class ControleurTableau extends ControleurGenerique
         try{
             $tableau = $this->tableauService->mettreAJourTableau($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["nomTableau"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mise_a_jour_tableau", ["idTableau" => $_POST["idTableau"]]);
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
@@ -134,7 +134,7 @@ class ControleurTableau extends ControleurGenerique
             $tableau = $this->tableauService->verifierProprietaire($this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["idTableau"]);
             $utilisateurs = $this->tableauService->recupererUtilisateursPasMembreOuPasProprietaireTableau($tableau);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
         return $this->afficherTwig("tableau/formulaireAjoutMembreTableau.html.twig", ["tableau" => $tableau, "utilisateurs" => $utilisateurs]);
@@ -148,7 +148,7 @@ class ControleurTableau extends ControleurGenerique
         try{
             $tableau = $this->tableauService->ajouterMembre($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["login"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
@@ -162,7 +162,7 @@ class ControleurTableau extends ControleurGenerique
         try{
             $tableau = $this->tableauService->supprimerMembre($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["login"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
@@ -176,7 +176,7 @@ class ControleurTableau extends ControleurGenerique
         try{
             $tableaux = $this->utilisateurService->recupererTableauxOuUtilisateurEstMembre($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         } catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
         return $this->afficherTwig("tableau/listeTableauxUtilisateur.html.twig", ["tableaux" => $tableaux]);

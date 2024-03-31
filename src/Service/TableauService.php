@@ -110,7 +110,6 @@ class TableauService implements TableauServiceInterface
         }
 
         $codeTableauHache = $this->motDePasse->genererChaineAleatoire(64);
-
         $tableau = new Tableau();
         $tableau->setCodeTableau($codeTableauHache);
         $tableau->setTitreTableau($nomTableau);
