@@ -21,12 +21,3 @@
         {% endfor %}
     </div>
 </div>
-{% if estParticipantOuProprietaire %}
-    <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: carte.colonne.idColonne}) }}">
-        <div>
-            <div class="titre icons_menu btn-ajout">
-                <span>Ajouter une carte</span>
-            </div>
-        </div>
-    </a>
-{% endif %}

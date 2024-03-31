@@ -2,8 +2,7 @@
 
 {% block page_title %}Nouvelle carte{% endblock %}
 
-{% set tableau = colonne.tableau %}
-{% set proprietaire = tableau.proprietaire %}
+{% set proprietaire = tableau.proprietaireTableau %}
 
 {% block page_content %}
     <div>
@@ -28,8 +27,8 @@
                     <label for="idColonne">Colonne de la carte&#42;</label> :
                     <select name="idColonne" id="idColonne">
                         {% for optColonne in colonnes %}
-                            <option {{ (optColonne.idColonne === colonne.idColonne) ? "selected" : "" }}
-                                    value="{{ optColonne.idColonne }}">{{ colonneOption.titreColonne }}</option>
+                            <option {{ (optColonne.idColonne == colonne.idColonne) ? "selected" : "" }}
+                                    value="{{ optColonne.idColonne }}">{{ optColonne.titreColonne }}</option>
                         {% endfor %}
                     </select>
                 </p>

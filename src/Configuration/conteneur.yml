@@ -14,12 +14,12 @@ services:
         strict_variables: true
 
 
-  configuration_bdd_my_sql:
+  configuration_bdd:
     class: App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees
 
   connexion_base_de_donnees:
     class: App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees
-    arguments: ['@configuration_bdd_my_sql']
+    arguments: ['@configuration_bdd']
 
   #Repositories
   #TODO : ajouter les argument quand on aura injecter la base de données comme dans le td
@@ -67,7 +67,7 @@ services:
 
   carte_service:
     class: App\Trellotrolle\Service\CarteService
-    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service']
+    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service', '@connexion_base_de_donnees']
 
 
 
