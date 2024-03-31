@@ -96,19 +96,19 @@ class ControleurUtilisateur extends ControleurGenerique
      * @throws SyntaxError
      * @throws LoaderError
      */
-    #[Route(path: '/utilisateur/mise-a-jour', name:'mise_a_jour_utilisateur', methods:["GET"])]
-    public function afficherFormulaireMiseAJour(): Response
+    #[Route(path: '/utilisateur/{login}/mise-a-jour', name:'mise_a_jour_utilisateur', methods:["GET"])]
+    public function afficherFormulaireMiseAJour(string $login): Response
     {
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
         try{
-            $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+            $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("accueil");
         }
-        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig");
+        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", ["utilisateur" => $utilisateur]);
     }
 
     #[Route(path: '/utilisateur/mise-a-jour', name:'mettre_a_jour_utilisateur', methods:["POST"])]
