@@ -44,13 +44,13 @@ class ControleurUtilisateurAPI extends ControleurGenerique
 
     #[Route(path: '/api/auth', name:'api_auth', methods:["POST"])]
     public function connecter(Request $request): Response
-    { // TODO: A Tester
+    { // Fonctionne
         try {
             // depuis le corps de requête au format JSON
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
             $login = $jsonObject->login;
-            $password = $jsonObject->password;
-            $utilisateur = $this->utilisateurService->verifierIdentifiantUtilisateur($login, $password);
+            $mdp = $jsonObject->mdp;
+            $utilisateur = $this->utilisateurService->verifierIdentifiantUtilisateur($login, $mdp);
 
             $this->connexionUtilisateurJWT->connecter($login);
             return new JsonResponse();
@@ -66,7 +66,7 @@ class ControleurUtilisateurAPI extends ControleurGenerique
 
     #[Route(path: '/api/deconnexion', name: 'api_deconnexion', methods: ["POST"])]
     public function deconnecter(): Response
-    { // TODO: A Tester
+    { // Fonctionne
         try {
             $this->connexionUtilisateurJWT->deconnecter(); // Appel de la méthode de déconnexion
             return new JsonResponse();
