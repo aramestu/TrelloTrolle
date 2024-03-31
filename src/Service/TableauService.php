@@ -193,7 +193,6 @@ class TableauService implements TableauServiceInterface
          * @var Tableau $tableau
          */
         $tableau = $this->tableauRepository->recupererParClePrimaire($idTableau);
-
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
@@ -213,15 +212,14 @@ class TableauService implements TableauServiceInterface
          * @var Utilisateur $utilisateurNouveau
          */
         $utilisateurNouveau = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurDelete);
-
         if(is_null($utilisateurNouveau)){
             throw new ServiceException( "L'utilisateur à supprimer n'existe pas", Response::HTTP_NOT_FOUND);
         }
         if(! $tableau->estParticipantOuProprietaire($loginUtilisateurDelete)){
-            throw new ServiceException( "L'utilisateur ne participe pas à ce talbeau", Response::HTTP_CONFLICT);
+            throw new ServiceException( "L'utilisateur ne participe pas à ce tableau", Response::HTTP_CONFLICT);
         }
 
-        $this->carteRepository->supprimerAffectation($idTableau, $loginUtilisateurDelete);
+        $this->carteRepository->supprimerAffectation($loginUtilisateurDelete, $idTableau);
         $this->tableauRepository->supprimerParticipant($loginUtilisateurDelete, $idTableau);
 
         return $tableau;
@@ -310,6 +308,7 @@ class TableauService implements TableauServiceInterface
      * @throws ServiceException
      */
     public function recupererUtilisateursPasMembreOuPasProprietaireTableau(Tableau $tableau){
+        //TODO mauvaise façon de faire. On ne peut pas récupérer tous les utilisateurs de ma BD pour les afficher ou les traiter, l'utilisateur devra entrer un login dans une zone de saisie
         $utilisateurs = $this->utilisateurRepository->recupererUtilisateursOrderedPrenomNom();
         $filtredUtilisateurs = array_filter($utilisateurs, function ($u) use ($tableau) {return !$tableau->estParticipantOuProprietaire($u->getLogin());});
 

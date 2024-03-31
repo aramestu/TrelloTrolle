@@ -148,6 +148,26 @@ class TableauRepository extends AbstractRepository implements TableauRepositoryI
         return ($deleteCount > 0);
     }
 
+    public function supprimerAffectation($login, $idTableau):bool
+    {
+        $sql = "DELETE FROM Affecter a 
+                WHERE EXISTS (SELECT * FROM Cartes ca
+                              JOIN colonnes co
+                              WHERE idTableau = :idTableauTag
+                              AND a.idcarte = ca.idcarte)
+                AND login = :loginTag
+                AND idcarte = :idCarteTag";
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare($sql);
+        $values = [
+            "loginTag" => $login,
+            "idTableauTag" => $idTableau
+        ];
+        $pdoStatement->execute($values);
+        $deleteCount = $pdoStatement->rowCount();
+
+        return ($deleteCount > 0);
+    }
+
     public function supprimer(string $valeurClePrimaire): bool
     {
         $this->supprimerToutesParticipation("idTableau", $valeurClePrimaire);

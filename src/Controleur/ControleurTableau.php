@@ -156,13 +156,13 @@ class ControleurTableau extends ControleurGenerique
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
     }
 
-    #[Route(path: '/tableau/supprimer-membre', name:'supprimer_membre', methods:["POST"])]
-    public function supprimerMembre(): Response {
+    #[Route(path: '/tableau/{idTableau}/supprimer-membre/{login}', name:'supprimer_membre', methods:["GET"])]
+    public function supprimerMembre($idTableau, $login): Response {
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
         try{
-            $tableau = $this->tableauService->supprimerMembre($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["login"]);
+            $tableau = $this->tableauService->supprimerMembre($idTableau, $this->connexionUtilisateurSession->getIdUtilisateurConnecte() , $login);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
