@@ -23,8 +23,15 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         parent::__construct($container);
     }
 
+    private function estConnecte(){
+        return $this->connexionUtilisateurJWT->estConnecte();
+    }
+
     #[Route(path: '/api/utilisateurs/{login}', name:'api_detail_utilisateur', methods:["GET"])]
-    public function afficherDetail(string $login): Response{
+    public function afficherDetail(string $login): Response{ // Fonctionne
+        if(! $this->estConnecte()){
+            return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
+        }
         try{
             $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
             $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne($loginUserConnecte, $login);
@@ -37,7 +44,7 @@ class ControleurUtilisateurAPI extends ControleurGenerique
 
     #[Route(path: '/api/auth', name:'api_auth', methods:["POST"])]
     public function connecter(Request $request): Response
-    {
+    { // TODO: A Tester
         try {
             // depuis le corps de requête au format JSON
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
@@ -58,14 +65,10 @@ class ControleurUtilisateurAPI extends ControleurGenerique
     }
 
     #[Route(path: '/api/deconnexion', name: 'api_deconnexion', methods: ["POST"])]
-    public function deconnecter(Request $request): Response
-    {
+    public function deconnecter(): Response
+    { // TODO: A Tester
         try {
-            $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
-            $login = $jsonObject->login;
-
             $this->connexionUtilisateurJWT->deconnecter(); // Appel de la méthode de déconnexion
-
             return new JsonResponse();
         } catch (ServiceException $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -78,7 +81,10 @@ class ControleurUtilisateurAPI extends ControleurGenerique
     }
 
     #[Route(path: '/api/utilisateurs', name:'api_modifier_utilisateur', methods:["POST"])]
-    public function mettreAJour(Request $request): Response{
+    public function mettreAJour(Request $request): Response{ // Fonctionne
+        if(! $this->estConnecte()){
+            return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
+        }
         try{
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
             $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
@@ -97,7 +103,10 @@ class ControleurUtilisateurAPI extends ControleurGenerique
     }
 
     #[Route(path: '/api/utilisateurs', name:'api_supprimer_utilisateur', methods:["DELETE"])]
-    public function supprimer(Request $request): Response{
+    public function supprimer(Request $request): Response{ // Fonctionne
+        if(! $this->estConnecte()){
+            return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
+        }
         try{
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
             $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
