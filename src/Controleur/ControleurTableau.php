@@ -81,7 +81,7 @@ class ControleurTableau extends ControleurGenerique
             MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
-        return self::afficherTwig("tableau/formulaireMiseAJourTableau.html.twig", ["idTableau" => $idTableau, "nomTableau" => $nomTableau, "pagetitle" => "Mise à jour Tableau"]);
+        return self::afficherTwig("tableau/formulaireMiseAJourTableau.html.twig", ["tableau" => $tableau, "pagetitle" => "Mise à jour Tableau"]);
     }
 
     /**

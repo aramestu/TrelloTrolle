@@ -134,7 +134,7 @@ class TableauService implements TableauServiceInterface
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if($tableau->estProprietaire($loginUtilisateurConnecte)){
+        if(!$tableau->estProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Seul le propriétaire du tableau peut mettre à jour le tableau!", Response::HTTP_UNAUTHORIZED);
         }
         $tableau->setTitreTableau($nomtableau);
