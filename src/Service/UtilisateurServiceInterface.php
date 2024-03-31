@@ -39,4 +39,6 @@ interface UtilisateurServiceInterface
      * @throws ServiceException
      */
     public function supprimer(?string $loginUtilisateurConnecte): void;
+
+    public function verifierLoginConnecteEstLoginRenseigne(?string $loginConnecte, ?string $loginRenseigne): void;
 }

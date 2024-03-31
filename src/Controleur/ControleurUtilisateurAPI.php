@@ -23,10 +23,12 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         parent::__construct($container);
     }
 
-    #[Route(path: '/api/utilisateurs/{idUtilisateur}', name:'api_detail_utilisateur', methods:["GET"])]
-    public function afficherDetail($idUtilisateur): Response{
+    #[Route(path: '/api/utilisateurs/{login}', name:'api_detail_utilisateur', methods:["GET"])]
+    public function afficherDetail(string $login): Response{
         try{
-            $user = $this->utilisateurService->getUtilisateur($idUtilisateur);
+            $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
+            $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne($loginUserConnecte, $login);
+            $user = $this->utilisateurService->getUtilisateur($loginUserConnecte);
             return new JsonResponse($user);
         }catch (Exception $exception){
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -75,28 +77,33 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         }
     }
 
-    #[Route(path: '/api/utilisateurs/modifier', name:'api_modifier_utilisateur', methods:["POST"])]
+    #[Route(path: '/api/utilisateurs', name:'api_modifier_utilisateur', methods:["POST"])]
     public function mettreAJour(Request $request): Response{
         try{
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
+            $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
             $login = $jsonObject->login;
             $nom = $jsonObject->nom;
             $prenom = $jsonObject->prenom;
             $mdp = $jsonObject->mdp;
             $mdp2 = $jsonObject->mdp2;
-            $utilisateur = $this->utilisateurService->modifierUtilisateur($login,$nom, $prenom, $mdp, $mdp2);
+            // Je vérifie que les 2 login sont identiques
+            $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne($loginUserConnecte, $login);
+            $utilisateur = $this->utilisateurService->modifierUtilisateur($loginUserConnecte,$nom, $prenom, $mdp, $mdp2);
             return new JsonResponse($utilisateur);
         }catch (Exception $exception){
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
     }
 
-    #[Route(path: '/api/utilisateurs/supprimer', name:'api_supprimer_utilisateur', methods:["POST"])]
+    #[Route(path: '/api/utilisateurs', name:'api_supprimer_utilisateur', methods:["DELETE"])]
     public function supprimer(Request $request): Response{
         try{
             $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
+            $loginUserConnecte = $this->connexionUtilisateurJWT->getIdUtilisateurConnecte();
             $login = $jsonObject->login;
-            $this->utilisateurService->supprimer($login);
+            $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne($loginUserConnecte, $login);
+            $this->utilisateurService->supprimer($loginUserConnecte);
             return new JsonResponse('', Response::HTTP_NO_CONTENT);
         }catch (Exception $exception){
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());

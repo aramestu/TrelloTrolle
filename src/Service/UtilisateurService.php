@@ -207,6 +207,19 @@ class UtilisateurService implements UtilisateurServiceInterface
         $this->utilisateurRepository->supprimer($loginUtilisateurConnecte);
     }
 
+    /**
+     * @throws ServiceException
+     */
+    public function verifierLoginConnecteEstLoginRenseigne(?string $loginConnecte, ?string $loginRenseigne): void{
+        $this->verifierLoginCorrect($loginConnecte);
+        $this->verifierLoginCorrect($loginRenseigne);
+
+        if($loginConnecte != $loginRenseigne){
+            throw new ServiceException("Vous n'avez pas accès à cet utilisateur", Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
+
     //TODO : Rajouter un système pour récupérer le mdp via l'email (mot de passe perdu)
 
 
