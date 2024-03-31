@@ -142,7 +142,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): void{
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): Utilisateur{
         if(is_null($loginUtilisateurConnecte) || is_null($nom) || is_null($prenom)){
             throw new ServiceException("le login ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_NOT_FOUND);
         }
@@ -172,6 +172,8 @@ class UtilisateurService implements UtilisateurServiceInterface
         $utilisateur->setNom($nom);
         $utilisateur->setPrenom($nom);
         $this->utilisateurRepository->mettreAJour($utilisateur);
+
+        return $utilisateur;
     }
 
     /**

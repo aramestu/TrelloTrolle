@@ -23,7 +23,7 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         parent::__construct($container);
     }
 
-    #[Route(path: '/api/utilisateurs/{idUtilisateur}', name:'detail_utilisateurAPI', methods:["GET"])]
+    #[Route(path: '/api/utilisateurs/{idUtilisateur}', name:'api_detail_utilisateur', methods:["GET"])]
     public function afficherDetail($idUtilisateur): Response{
         try{
             $user = $this->utilisateurService->getUtilisateur($idUtilisateur);
@@ -75,4 +75,31 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         }
     }
 
+    #[Route(path: '/api/utilisateurs/modifier', name:'api_modifier_utilisateur', methods:["POST"])]
+    public function mettreAJour(Request $request): Response{
+        try{
+            $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
+            $login = $jsonObject->login;
+            $nom = $jsonObject->nom;
+            $prenom = $jsonObject->prenom;
+            $mdp = $jsonObject->mdp;
+            $mdp2 = $jsonObject->mdp2;
+            $utilisateur = $this->utilisateurService->modifierUtilisateur($login,$nom, $prenom, $mdp, $mdp2);
+            return new JsonResponse($utilisateur);
+        }catch (Exception $exception){
+            return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
+        }
+    }
+
+    #[Route(path: '/api/utilisateurs/supprimer', name:'api_supprimer_utilisateur', methods:["POST"])]
+    public function supprimer(Request $request): Response{
+        try{
+            $jsonObject = json_decode($request->getContent(), flags: JSON_THROW_ON_ERROR);
+            $login = $jsonObject->login;
+            $this->utilisateurService->supprimer($login);
+            return new JsonResponse('', Response::HTTP_NO_CONTENT);
+        }catch (Exception $exception){
+            return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
+        }
+    }
 }
