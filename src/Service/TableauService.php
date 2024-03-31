@@ -95,7 +95,7 @@ class TableauService implements TableauServiceInterface
      * @throws ServiceException
      * @throws Exception
      */
-    public function creerTableau(?string $loginUtilisateurConnecte, ?string $nomTableau): void{
+    public function creerTableau(?string $loginUtilisateurConnecte, ?string $nomTableau): Tableau{
         $this->verifierNomTableauCorrect($nomTableau);
 
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
@@ -110,18 +110,18 @@ class TableauService implements TableauServiceInterface
         }
 
         $codeTableauHache = $this->motDePasse->genererChaineAleatoire(64);
-
         $tableau = new Tableau();
         $tableau->setCodeTableau($codeTableauHache);
         $tableau->setTitreTableau($nomTableau);
         $tableau->setProprietaireTableau($utilisateur);
         $this->tableauRepository->ajouter($tableau);
+        return $tableau;
     }
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): void{
+    public function mettreAJourTableau(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $nomtableau): Tableau{
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierIdTableauCorrect($idTableau);
         $this->verifierNomTableauCorrect($nomtableau);
@@ -134,17 +134,19 @@ class TableauService implements TableauServiceInterface
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if($tableau->estProprietaire($loginUtilisateurConnecte)){
-            throw new ServiceException( "Seul le propriétaire du tableau peut mettre à jour le tableau", Response::HTTP_UNAUTHORIZED);
+        if(!$tableau->estProprietaire($loginUtilisateurConnecte)){
+            throw new ServiceException( "Seul le propriétaire du tableau peut mettre à jour le tableau!", Response::HTTP_UNAUTHORIZED);
         }
         $tableau->setTitreTableau($nomtableau);
         $this->tableauRepository->mettreAJour($tableau);
+
+        return $tableau;
     }
 
     /**
      * @throws ServiceException
      */
-    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau): void
+    public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau): Tableau
     {
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierLoginCorrect($loginUtilisateurNouveau);
@@ -174,13 +176,15 @@ class TableauService implements TableauServiceInterface
         }
 
         $this->tableauRepository->ajouterParticipant($loginUtilisateurNouveau, $idTableau);
+
+        return $tableau;
     }
 
     /**
      * @throws ServiceException
      */
-    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete): void
-    { // Fonction à vrm tester
+    public function supprimerMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurDelete): Tableau
+    {
         if(is_null($idTableau) ||is_null($loginUtilisateurConnecte) || strlen($loginUtilisateurConnecte) == 0 || is_null($loginUtilisateurDelete) || strlen($loginUtilisateurDelete) == 0){
             throw new ServiceException( "L'idTableau ou le login de l'user connecté ou le login a ajouté ne peut pas être vide", Response::HTTP_BAD_REQUEST);
         }
@@ -189,7 +193,6 @@ class TableauService implements TableauServiceInterface
          * @var Tableau $tableau
          */
         $tableau = $this->tableauRepository->recupererParClePrimaire($idTableau);
-
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
@@ -209,16 +212,17 @@ class TableauService implements TableauServiceInterface
          * @var Utilisateur $utilisateurNouveau
          */
         $utilisateurNouveau = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurDelete);
-
         if(is_null($utilisateurNouveau)){
             throw new ServiceException( "L'utilisateur à supprimer n'existe pas", Response::HTTP_NOT_FOUND);
         }
         if(! $tableau->estParticipantOuProprietaire($loginUtilisateurDelete)){
-            throw new ServiceException( "L'utilisateur ne participe pas à ce talbeau", Response::HTTP_CONFLICT);
+            throw new ServiceException( "L'utilisateur ne participe pas à ce tableau", Response::HTTP_CONFLICT);
         }
 
-        $this->carteRepository->supprimerAffectation($idTableau, $loginUtilisateurDelete);
+        $this->carteRepository->supprimerAffectation($loginUtilisateurDelete, $idTableau);
         $this->tableauRepository->supprimerParticipant($loginUtilisateurDelete, $idTableau);
+
+        return $tableau;
     }
 
     /**
@@ -246,12 +250,26 @@ class TableauService implements TableauServiceInterface
 
     public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void
     {
-        $tableau = $this->getByIdTableau($_GET['idTableau']);
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $tableau = $this->getByIdTableau($idTableau);
         if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte))
         {
             throw new ServiceException('Vous n\'êtes pas un participant de ce tableau.');
         }
+    }
 
+    /**
+     * @throws ServiceException
+     */
+    public function verifierProprietaire(?string $loginUtilisateurConnecte, ?int $idTableau): Tableau
+    {
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $tableau = $this->getByIdTableau($idTableau);
+        if(!$tableau->estProprietaire($loginUtilisateurConnecte))
+        {
+            throw new ServiceException('Vous n\'êtes pas le propriétaire de ce tableau.');
+        }
+        return $tableau;
     }
 
     public function recupererColonnesEtCartesDuTableau(string $idTableau): array
@@ -284,5 +302,36 @@ class TableauService implements TableauServiceInterface
             }
         }
         return $infoAffectations;
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function recupererUtilisateursPasMembreOuPasProprietaireTableau(Tableau $tableau){
+        //TODO mauvaise façon de faire. On ne peut pas récupérer tous les utilisateurs de ma BD pour les afficher ou les traiter, l'utilisateur devra entrer un login dans une zone de saisie
+        $utilisateurs = $this->utilisateurRepository->recupererUtilisateursOrderedPrenomNom();
+        $filtredUtilisateurs = array_filter($utilisateurs, function ($u) use ($tableau) {return !$tableau->estParticipantOuProprietaire($u->getLogin());});
+
+        if(empty($filtredUtilisateurs)) {
+            throw new ServiceException( "Il n'est pas possible d'ajouter plus de membre à ce tableau !", Response::HTTP_BAD_REQUEST);
+        }
+        return $filtredUtilisateurs;
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function quitterTableau(?string $loginUtilisateurConnecte, ?int $idTableau)
+    {
+        $tableau = $this->getByIdTableau($idTableau);
+
+        if($tableau->estProprietaire($loginUtilisateurConnecte))
+            throw new ServiceException("Vous ne pouvez pas quitter un tableau qui vous appartient", Response::HTTP_FORBIDDEN);
+
+        if(!$tableau->estParticipant($loginUtilisateurConnecte))
+            throw new ServiceException("Vous n'appartenez pas à ce tableau", Response::HTTP_BAD_REQUEST);
+
+        $this->carteRepository->supprimerAffectation($loginUtilisateurConnecte, $idTableau);
+        $this->tableauRepository->supprimerParticipant($loginUtilisateurConnecte, $idTableau);
     }
 }

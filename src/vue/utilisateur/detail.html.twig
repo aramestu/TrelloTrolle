@@ -13,7 +13,7 @@
                 <input id="prenom" type="text" disabled value="{{ utilisateur.prenom }}">
             </p>
             {% if estConnecte and utilisateur.login == loginUtilisateurConnecte %}
-                <div class="btn btn_maj"><a href="{{ route('mise_a_jour_utilisateur') }}">Mettre à jour le compte</a></div>
+                <div class="btn btn_maj"><a href="{{ route('mise_a_jour_utilisateur', { 'login' : loginUtilisateurConnecte }) }}">Mettre à jour le compte</a></div>
                 <div class="btn btn_suppr"><a href="{{ route('supprimer', { 'login' : loginUtilisateurConnecte }) }}">Supprimer le compte</a></div>
             {% endif %}
         </form>

@@ -88,7 +88,7 @@ class ControleurUtilisateur extends ControleurGenerique
     }
 
     private function estConnecte(): bool{
-        return $this->connexionUtilisateurSession->estConnecte() && $this->connexionUtilisateurJWT->estConnecte();
+        return $this->connexionUtilisateurSession->estConnecte();
     }
 
     /**
@@ -96,19 +96,19 @@ class ControleurUtilisateur extends ControleurGenerique
      * @throws SyntaxError
      * @throws LoaderError
      */
-    #[Route(path: '/utilisateur/mise-a-jour', name:'mise_a_jour_utilisateur', methods:["GET"])]
-    public function afficherFormulaireMiseAJour(): Response
+    #[Route(path: '/utilisateur/{login}/mise-a-jour', name:'mise_a_jour_utilisateur', methods:["GET"])]
+    public function afficherFormulaireMiseAJour(string $login): Response
     {
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
         try{
-            $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+            $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
             return $this->rediriger("accueil");
         }
-        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig");
+        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", ["utilisateur" => $utilisateur]);
     }
 
     #[Route(path: '/utilisateur/mise-a-jour', name:'mettre_a_jour_utilisateur', methods:["POST"])]
@@ -117,12 +117,12 @@ class ControleurUtilisateur extends ControleurGenerique
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
+        $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
         try{
-            $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
             $this->serviceUtilisateur->modifierUtilisateur($login, $_POST["nom"], $_POST["prenom"], $_POST["mdp"], $_POST["mdp2"]);
         }catch (\Exception $e){
             MessageFlash::ajouter("error", $e->getMessage());
-            return $this->rediriger("mise_a_jour_utilisateur");
+            return $this->rediriger("mise_a_jour_utilisateur", ["login" => $login]);
         }
         MessageFlash::ajouter("success", "Utilisateur mis à jour");
         return $this->rediriger("accueil");

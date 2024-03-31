@@ -39,24 +39,24 @@ class ControleurColonne extends ControleurGenerique
             return $this->rediriger("connexion");
         }
 
-        $colonne = null;
+        $tableau = null;
 
         try
         {
             $colonne = $this->colonneService->getColonne($idColonne);
             $this->colonneService->supprimerColonne($idColonne, $this->session->getIdUtilisateurConnecte());
-
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
             MessageFlash::ajouter("success", "La colonne '" . $colonne->getTitreColonne() . "' a été supprimée !");
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
         catch(ServiceException $exception)
         {
             MessageFlash::ajouter("danger", $exception->getMessage());
-            if($colonne === null)
+            if($tableau === null)
             {
                 return $this->rediriger("mes_tableaux");
             }
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
 
     }
@@ -74,7 +74,7 @@ class ControleurColonne extends ControleurGenerique
         try
         {
             $this->tableauService->verifierParticipant($this->session->getIdUtilisateurConnecte(), $idTableau);
-            return ControleurTableau::afficherTwig('colonne/formulaireCreationColonne.php', [
+            return $this->afficherTwig('colonne/formulaireCreationColonne.html.twig', [
                 "idTableau" => $idTableau
             ]);
         }
@@ -106,7 +106,7 @@ class ControleurColonne extends ControleurGenerique
                 $this->session->getIdUtilisateurConnecte());
 
             MessageFlash::ajouter("success", "La colonne '$nomColonne' a été créée !");
-            return $this->rediriger("afficher_tableau", ['tableau' => $tableau]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
         catch(ServiceException | \Exception $exception)
         {
@@ -115,7 +115,7 @@ class ControleurColonne extends ControleurGenerique
             {
                 return $this->rediriger("mes_tableaux");
             }
-            return $this->rediriger("afficher_tableau", ['tableau' => $tableau]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
 
     }
@@ -128,29 +128,30 @@ class ControleurColonne extends ControleurGenerique
             return $this->rediriger("connexion");
         }
 
-        $colonne = null;
+        $tableau= null;
 
         try
         {
             $colonne = $this->colonneService->getColonne($idColonne);
-            return ControleurTableau::afficherTwig('colonne/formulaireMiseAJourColonne.html.twig', [
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
+            return $this->afficherTwig('colonne/formulaireMiseAJourColonne.html.twig', [
                 "colonne" => $colonne
             ]);
         }
         catch(ServiceException | \Exception $exception)
         {
             MessageFlash::ajouter("danger", $exception->getMessage());
-            if($colonne === null)
+            if($tableau === null)
             {
                 return $this->rediriger("mes_tableaux");
             }
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
 
     }
 
-    #[Route(path: '/colonne/{idColonne}/mise_a_jour', name:'mettre_a_jour_colonne', methods:["POST"])]
-    public function mettreAJourColonne($idColonne): Response
+    #[Route(path: '/colonne/mise_a_jour', name:'mettre_a_jour_colonne', methods:["POST"])]
+    public function mettreAJourColonne(): Response
     {
         if(!$this->session->estConnecte())
         {
@@ -165,9 +166,9 @@ class ControleurColonne extends ControleurGenerique
             $colonne = $this->colonneService->getColonne($idColonne);
             $ancienNom = $colonne->getTitreColonne();
             $this->colonneService->mettreAJour($idColonne, $nomColonne, $this->session->getIdUtilisateurConnecte());
-
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
             MessageFlash::ajouter("success", "La colonne '$ancienNom' a été renommée en '$nomColonne' !");
-            return $this->rediriger("afficher_tableau", ['tableau' => $colonne->getTableau()]);
+            return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
         catch(ServiceException | \Exception $exception)
         {

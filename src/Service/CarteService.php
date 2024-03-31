@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Service;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
@@ -96,7 +97,7 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    public function supprimerCarte(?int $idCarte, ?string $loginUtilisateurConnecte) {
+    public function supprimerCarte(?int $idCarte, ?string $loginUtilisateurConnecte) :Tableau{
         $carte = $this->getCarte($idCarte);
         $colonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
         $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
@@ -106,12 +107,14 @@ class CarteService implements CarteServiceInterface
         }
 
         $this->carteRepository->supprimer($idCarte);
+
+        return $tableau;
     }
 
     /**
      * @throws ServiceException
      */
-    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
+    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau{
         $this->verifierTitreCarteCorrect($titreCarte);
         $this->verifierDescriptifCarteCorrect($descriptifCarte);
         $this->verifierCouleurCarteCorrect($couleurCarte);
@@ -129,12 +132,14 @@ class CarteService implements CarteServiceInterface
         $carte = Carte::create(1, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
 
         $this->carteRepository->ajouter($carte);
+
+        return $tableau;
     }
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) {
+    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau{
         $this->verifierIdCarteCorrect($idCarte);
         $this->verifierIdColonneCorrect($idColonne);
         $this->verifierTitreCarteCorrect($titreCarte);
@@ -164,6 +169,8 @@ class CarteService implements CarteServiceInterface
         $carte->setAffectationsCarte($affectations);
 
         $this->carteRepository->mettreAJour($carte);
+
+        return $tableau;
     }
 
     /**

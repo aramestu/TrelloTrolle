@@ -100,17 +100,15 @@ services:
 
   controleur_carte:
     class: App\Trellotrolle\Controleur\ControleurCarte
-    arguments:
-      container: '@container'
+    arguments: ['@container', '@carte_service', '@colonne_service', '@tableau_service' ,'@connexion_utilisateur_session']
 
   controleur_colonne:
     class: App\Trellotrolle\Controleur\ControleurColonne
-    arguments:
-      container: '@container'
+    arguments: ['@container', '@connexion_utilisateur_session', '@colonne_service', '@tableau_service']
 
   controleur_tableau:
     class: App\Trellotrolle\Controleur\ControleurTableau
-    arguments: ['@container', '@tableau_service', '@connexion_utilisateur_session', '@colonne_service', '@carte_service', '@tableau_repository']
+    arguments: ['@container', '@tableau_service', '@connexion_utilisateur_session', '@colonne_service', '@carte_service', '@tableau_repository', '@utilisateur_service']
 
   controleur_utilisateur:
     class: App\Trellotrolle\Controleur\ControleurUtilisateur

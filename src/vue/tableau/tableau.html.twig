@@ -13,7 +13,7 @@
                 <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
                 {% if estProprietaire %}
                     <span>
-                        <a href="{{ route('mise_a_jour_utilisateur') }}">
+                        <a href="{{ route('mise_a_jour_utilisateur', {login: tableau.proprietaireTableau.login}) }}">
                             <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Modifier l'utilisateur">
                         </a>
                     </span>
@@ -43,7 +43,7 @@
                         {% endfor %}
                         {% if estProprietaire %}
                             <li>
-                                <a href="{{ route('ajouter_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                                <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
                             </li>
                         {% endif %}
                     </ul>

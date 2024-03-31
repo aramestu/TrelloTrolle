@@ -18,4 +18,8 @@ interface AbstractRepositoryInterface
     public function mettreAJour(AbstractDataObject $object): void;
 
     public function ajouter(AbstractDataObject $object): bool;
+
+    public function supprimerToutesAffectations(string $nomColonne, string $valeurColonne): bool;
+
+    public function supprimerToutesParticipation(string $nomColonne, string $valeurColonne): bool;
 }

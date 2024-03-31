@@ -47,13 +47,8 @@ abstract class AbstractRepository implements AbstractRepositoryInterface
         $nomTable = $this->getNomTable();
         $attributsTexte = join(",", $attributs);
 
-        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable ORDER BY :attributsTexteTag :sensTag");
-        $values = [
-            "attributsTexteTag" => $attributsTexte,
-            "sensTag" => $sens
-        ];
-
-        $pdoStatement->execute($values);
+        $pdoStatement = $this->connexionBaseDeDonnees->getPdo()->prepare("SELECT {$this->formatNomsColonnes()} FROM $nomTable ORDER BY $attributsTexte $sens");
+        $pdoStatement->execute();
 
         $objets = [];
         foreach ($pdoStatement as $objetFormatTableau) {
