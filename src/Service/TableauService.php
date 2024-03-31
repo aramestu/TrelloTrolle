@@ -317,4 +317,21 @@ class TableauService implements TableauServiceInterface
         }
         return $filtredUtilisateurs;
     }
+
+    /**
+     * @throws ServiceException
+     */
+    public function quitterTableau(?string $loginUtilisateurConnecte, ?int $idTableau)
+    {
+        $tableau = $this->getByIdTableau($idTableau);
+
+        if($tableau->estProprietaire($loginUtilisateurConnecte))
+            throw new ServiceException("Vous ne pouvez pas quitter un tableau qui vous appartient", Response::HTTP_FORBIDDEN);
+
+        if(!$tableau->estParticipant($loginUtilisateurConnecte))
+            throw new ServiceException("Vous n'appartenez pas à ce tableau", Response::HTTP_BAD_REQUEST);
+
+        $this->carteRepository->supprimerAffectation($loginUtilisateurConnecte, $idTableau);
+        $this->tableauRepository->supprimerParticipant($loginUtilisateurConnecte, $idTableau);
+    }
 }

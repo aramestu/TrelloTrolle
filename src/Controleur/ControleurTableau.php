@@ -185,52 +185,16 @@ class ControleurTableau extends ControleurGenerique
     }
 
     #[Route(path: '/tableau/{idTableau}/quitter', name:'quitter_tableau', methods:["GET"])]
-    public function quitterTableau(string $idtableau): Response {
+    public function quitterTableau(string $idTableau): Response {
         if(!ConnexionUtilisateur::estConnecte()) {
+            MessageFlash::ajouter("warning", "Vous devez être connecté pour quitter un tableau");
             return $this->rediriger("connexion");
         }
-        if(!ControleurCarte::issetAndNotNull(["idTableau"])) {
-            MessageFlash::ajouter("danger", "Identifiant du tableau manquant");
+        try{
+            $this->tableauService->quitterTableau(ConnexionUtilisateur::getLoginUtilisateurConnecte(), $idTableau);
+        }catch (ServiceException $e){
+            MessageFlash::ajouter("warning",$e->getMessage());
             return $this->rediriger("mes_tableaux");
-        }
-        $repository = $this->tableauRepository;
-        /**
-         * @var Tableau $tableau
-         */
-        $tableau = $repository->recupererParClePrimaire($_REQUEST["idTableau"]);
-        if(!$tableau) {
-            MessageFlash::ajouter("danger", "Tableau inexistant");
-            return $this->rediriger("mes_tableaux");
-        }
-
-        $utilisateurRepository = new UtilisateurRepository();
-
-        /**
-         * @var Utilisateur $utilisateur
-         */
-        $utilisateur = $utilisateurRepository->recupererParClePrimaire(ConnexionUtilisateur::getLoginUtilisateurConnecte());
-        if($tableau->estProprietaire($utilisateur->getLogin())) {
-            MessageFlash::ajouter("danger", "Vous ne pouvez pas quitter ce tableau");
-            return $this->rediriger("mes_tableaux");
-        }
-        if(!$tableau->estParticipant(ConnexionUtilisateur::getLoginUtilisateurConnecte())) {
-            MessageFlash::ajouter("danger", "Vous n'appartenez pas à ce tableau");
-            return $this->rediriger("mes_tableaux");
-        }
-        $participants = array_filter($tableau->getParticipants(), function ($u) use ($utilisateur) {return $u->getLogin() !== $utilisateur->getLogin();});
-        $tableau->setParticipants($participants);
-        $repository->mettreAJour($tableau);
-
-        $carteRepository = new CarteRepository();
-
-        /**
-         * @var Carte[] $cartes
-         */
-        $cartes = $carteRepository->recupererCartesTableau($tableau->getIdTableau());
-        foreach ($cartes as $carte) {
-            $affectations = array_filter($carte->getAffectationsCarte(), function ($u) use ($utilisateur) {return $u->getLogin() != $utilisateur->getLogin();});
-            $carte->setAffectationsCarte($affectations);
-            $carteRepository->mettreAJour($carte);
         }
         return $this->rediriger("mes_tableaux");
     }
