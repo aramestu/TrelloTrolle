@@ -538,6 +538,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->verifierParticipant($loginUtilisateurConnecte, $idTableau);
     }
 
+    //TODO: prbl ave participant
     public function testVerifierParticipantAvecParticipantOuProprietaire(): void
     {
         // Préparation des données de test
@@ -569,6 +570,11 @@ class TableauServiceTest extends TestCase
         $tableau->setProprietaireTableau(Utilisateur::create($loginUtilisateurConnecte, "Doe", "John", "john@example.com", "hashedPassword"));
         $tableau->setIdTableau($idTableau);
 
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn($tableau);
+
         // Attendre une exception ServiceException avec un code HTTP 403 (FORBIDDEN)
         $this->expectException(ServiceException::class);
         $this->expectExceptionCode(Response::HTTP_FORBIDDEN);
@@ -586,6 +592,22 @@ class TableauServiceTest extends TestCase
         // Création d'un tableau simulé sans l'utilisateur connecté comme participant
         $tableau = new Tableau();
         $tableau->setIdTableau($idTableau);
+        $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword"));
+        $tableau->setCodeTableau(1);
+        $tableau->setTitreTableau("test");
+
+        $this->tableauRepository->expects($this->once())
+            ->method('ajouterParticipant')
+            ->willReturnCallback(function ($loginUtilisateur, $idTableau) use ($tableau) {
+                // Ajoutez les participants au tableau simulé
+                $this->tableauRepository->ajouterParticipant($loginUtilisateur, $idTableau);
+                return $tableau;
+            });
+
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn($tableau);
 
         // Attendre une exception ServiceException avec un code HTTP 400 (BAD REQUEST)
         $this->expectException(ServiceException::class);
@@ -594,6 +616,9 @@ class TableauServiceTest extends TestCase
         // Exécution de la méthode à tester avec le tableau simulé
         $this->tableauService->quitterTableau($loginUtilisateurConnecte, $tableau->getIdTableau());
     }
+
+
+
 
     /**
      * @throws ServiceException
@@ -608,6 +633,11 @@ class TableauServiceTest extends TestCase
         $tableau->setIdTableau(1);
 
         $this->tableauRepository->ajouterParticipant($loginUtilisateurConnecte, 1);
+
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
 
         // Mock des méthodes supprimerAffectation et supprimerParticipant
         $this->carteRepository->expects($this->once())
