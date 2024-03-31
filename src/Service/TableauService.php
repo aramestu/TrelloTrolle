@@ -160,7 +160,7 @@ class TableauService implements TableauServiceInterface
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
         if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
-            throw new ServiceException( "Seul le propriétaire du tableau peut mettre ajouter des membres", Response::HTTP_UNAUTHORIZED);
+            throw new ServiceException( "Seul le propriétaire du tableau peut ajouter des membres", Response::HTTP_UNAUTHORIZED);
         }
 
         /**
@@ -172,7 +172,7 @@ class TableauService implements TableauServiceInterface
             throw new ServiceException( "L'utilisateur à ajouter n'existe pas", Response::HTTP_NOT_FOUND);
         }
         if($tableau->estParticipantOuProprietaire($loginUtilisateurNouveau)){
-            throw new ServiceException( "L'utilisateur est proprio ou participe déjà à ce talbeau", Response::HTTP_CONFLICT);
+            throw new ServiceException( "L'utilisateur est proprio ou participe déjà à ce tableau", Response::HTTP_CONFLICT);
         }
 
         $this->tableauRepository->ajouterParticipant($loginUtilisateurNouveau, $idTableau);
@@ -199,7 +199,7 @@ class TableauService implements TableauServiceInterface
         // Si l'utilisateur connecté veut supprimer qq d'autre (seul le proprio peut supprimer dans ce cas)
         if($loginUtilisateurConnecte != $loginUtilisateurDelete){
             if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
-                throw new ServiceException( "Seul le propriétaire du tableau peut mettre supprimer des membres", Response::HTTP_UNAUTHORIZED);
+                throw new ServiceException( "Seul le propriétaire du tableau peut supprimer des membres", Response::HTTP_UNAUTHORIZED);
             }
         }
         else{ // Ca signifie que l'utilisateur connecté est le même que celui à supprimer (il a le droit de quitter le tableau)
@@ -248,6 +248,9 @@ class TableauService implements TableauServiceInterface
         $this->tableauRepository->supprimer($idTableau);
     }
 
+    /**
+     * @throws ServiceException
+     */
     public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void
     {
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
