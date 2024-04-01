@@ -18,7 +18,6 @@ class ControleurCarteAPI extends ControleurGenerique
 {
     public function __construct (
         ContainerInterface $container,
-        private TableauServiceInterface $tableauService,
         private CarteServiceInterface $carteService,
         private ConnexionUtilisateurInterface $connexionUtilisateurJWT
     )
