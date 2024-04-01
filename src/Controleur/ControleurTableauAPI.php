@@ -35,7 +35,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez "], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            return new JsonResponse($this->recupererToutesInfosTableau($codeTableau));
+            return new JsonResponse($this->recupererToutesInfosTableau($codeTableau), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -52,7 +52,7 @@ class ControleurTableauAPI extends ControleurGenerique
             $nomTableau = $jsonObject->nomTableau;
 
             $tableau = $this->tableauService->creerTableau($loginUserConnecte, $nomTableau);
-            return new JsonResponse($tableau, Response::HTTP_NO_CONTENT);
+            return new JsonResponse($tableau, Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -68,7 +68,7 @@ class ControleurTableauAPI extends ControleurGenerique
             $idTableau =  $jsonObject->idTableau;
             $nomTableau =  $jsonObject->nomTableau;
             $tableau = $this->tableauService->mettreAJourTableau($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $nomTableau);
-            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()));
+            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -89,7 +89,7 @@ class ControleurTableauAPI extends ControleurGenerique
         }
         try {
             $tableau = $this->tableauService->ajouterMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
-            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()));
+            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -102,7 +102,7 @@ class ControleurTableauAPI extends ControleurGenerique
         }
         try {
             $tableau = $this->tableauService->supprimerMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
-            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()));
+            return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -115,7 +115,7 @@ class ControleurTableauAPI extends ControleurGenerique
         }
         try {
             $tableaux = $this->utilisateurService->recupererTableauxOuUtilisateurEstMembre($this->connexionUtilisateurJWT->getIdUtilisateurConnecte());
-            return new JsonResponse($tableaux);
+            return new JsonResponse($tableaux, Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -128,7 +128,7 @@ class ControleurTableauAPI extends ControleurGenerique
         }
         try {
             $tableaux = $this->tableauService->quitterTableau($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
-            return new JsonResponse($tableaux);
+            return new JsonResponse($tableaux, Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
@@ -141,7 +141,7 @@ class ControleurTableauAPI extends ControleurGenerique
         }
         try {
             $this->tableauService->supprimer($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
-            return new JsonResponse('');
+            return new JsonResponse('', Response::HTTP_NO_CONTENT);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
