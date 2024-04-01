@@ -58,10 +58,5 @@ interface TableauServiceInterface
     /**
      * @throws ServiceException
      */
-    public function recupererUtilisateursPasMembreOuPasProprietaireTableau(Tableau $tableau);
-
-    /**
-     * @throws ServiceException
-     */
     public function quitterTableau(?string $loginUtilisateurConnecte, ?int $idTableau);
 }

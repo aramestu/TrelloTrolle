@@ -28,15 +28,17 @@ interface UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): void;
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $email, $mdpAncien, $mdp = null, $mdp2 = null): Utilisateur;
 
     /**
      * @throws ServiceException
      */
-    public function verifierIdentifiantUtilisateur($login, $mdp): void;
+    public function verifierIdentifiantUtilisateur($login, $mdp): Utilisateur;
 
     /**
      * @throws ServiceException
      */
     public function supprimer(?string $loginUtilisateurConnecte): void;
+
+    public function verifierLoginConnecteEstLoginRenseigne(?string $loginConnecte, ?string $loginRenseigne): void;
 }

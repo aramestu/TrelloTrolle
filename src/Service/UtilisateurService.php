@@ -142,7 +142,7 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): void{
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $email, $mdpAncien, $mdp = null, $mdp2 = null): Utilisateur{
         if(is_null($loginUtilisateurConnecte) || is_null($nom) || is_null($prenom)){
             throw new ServiceException("le login ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_NOT_FOUND);
         }
@@ -158,26 +158,29 @@ class UtilisateurService implements UtilisateurServiceInterface
         }
 
         // Pour ne pas throw d'erreurs s'il n'y a pas de mdp renseignés, on garde l'ancien
-        if(! is_null($mdp) && ! is_null($mdp2)) {
+        if((!is_null($mdp) && strlen($mdp) > 0) || (!is_null($mdp2) && strlen($mdp2) > 0)) {
             $this->verifier2MdpIdentiques($mdp, $mdp2);
             $this->verifierMotDePasseClair($mdp);
 
-            // Si l'utilisateur décide de changer de mdp
-            if(! $this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())){
-                $mdpHache = $this->motDePasse->hacher($mdp);
-                $utilisateur->setMdpHache($mdpHache);
+            if(! $this->motDePasse->verifier($mdpAncien, $utilisateur->getMdpHache())){
+                throw new ServiceException("Impossible de changer le mot de passe, l'ancien mot de passe est erroné", Response::HTTP_FORBIDDEN);
             }
+            $mdpHache = $this->motDePasse->hacher($mdp);
+            $utilisateur->setMdpHache($mdpHache);
         }
 
         $utilisateur->setNom($nom);
-        $utilisateur->setPrenom($nom);
+        $utilisateur->setPrenom($prenom);
+        $utilisateur->setEmail($email);
         $this->utilisateurRepository->mettreAJour($utilisateur);
+
+        return $utilisateur;
     }
 
     /**
      * @throws ServiceException
      */
-    public function verifierIdentifiantUtilisateur($login, $mdp): void
+    public function verifierIdentifiantUtilisateur($login, $mdp): Utilisateur
     {
         if (is_null($login) || is_null($mdp)) {
             throw new ServiceException( "Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST);
@@ -189,6 +192,8 @@ class UtilisateurService implements UtilisateurServiceInterface
         if (!$this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())) {
             throw new ServiceException( "Mot de passe incorrect.", Response::HTTP_UNAUTHORIZED);
         }
+
+        return $utilisateur;
     }
 
     /**
@@ -202,6 +207,19 @@ class UtilisateurService implements UtilisateurServiceInterface
 
         $this->utilisateurRepository->supprimer($loginUtilisateurConnecte);
     }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierLoginConnecteEstLoginRenseigne(?string $loginConnecte, ?string $loginRenseigne): void{
+        $this->verifierLoginCorrect($loginConnecte);
+        $this->verifierLoginCorrect($loginRenseigne);
+
+        if($loginConnecte != $loginRenseigne){
+            throw new ServiceException("Vous n'avez pas accès à cet utilisateur", Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
 
     //TODO : Rajouter un système pour récupérer le mdp via l'email (mot de passe perdu)
 

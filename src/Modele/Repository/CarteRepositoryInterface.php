@@ -20,6 +20,8 @@ interface CarteRepositoryInterface
 
     public function recupererAffectationsCartes(string $idCarte): array;
 
+    public function supprimerToutesAffectationsCarte($idCarte): bool;
+
     /**
      * @throws PDOException
      */

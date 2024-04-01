@@ -14,6 +14,7 @@ use App\Trellotrolle\Modele\Repository\ColonneRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Service\CarteServiceInterface;
 use App\Trellotrolle\Service\ColonneServiceInterface;
+use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\TableauServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -47,7 +48,7 @@ class ControleurCarte extends ControleurGenerique
         try{
             $tableau = $this->carteService->supprimerCarte($idCarte, $this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
 
@@ -63,14 +64,14 @@ class ControleurCarte extends ControleurGenerique
         try{
             $colonne = $this->colonneService->getColonne($idColonne);
             $idTableau = $colonne->getTableau()->getIdTableau();
-
+            $tableau = $this->tableauService->getByIdTableau($idTableau);
             $this->tableauService->verifierParticipant($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $idTableau);
             $colonnes = $this->colonneService->recupererColonnesTableau($idTableau);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherTwig("carte/formulaireCreationCarte.html.twig", ["colonne" => $colonne, "colonnes" => $colonnes, "pagetitle" => "Création carte"]);
+        return $this->afficherTwig("carte/formulaireCreationCarte.html.twig", ["colonne" => $colonne, "colonnes" => $colonnes, "tableau" => $tableau, "pagetitle" => "Création carte"]);
     }
 
     #[Route(path: '/carte/creation', name:'creer_carte', methods:["POST"])]
@@ -78,10 +79,15 @@ class ControleurCarte extends ControleurGenerique
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
+        $idColonne = $_POST["idColonne"] ?? null;
+        $titreCarte = $_POST["titreCarte"] ?? null;
+        $descriptifCarte = $_POST["descriptifCarte"] ?? null;
+        $couleurCarte = $_POST["couleurCarte"] ?? null;
+        $affectationsCarte = $_POST["affectationsCarte"] ?? null;
         try{
-            $tableau = $this->carteService->creerCarte($_POST["idColonne"], $_POST["titreCarte"],$_POST["descriptifCarte"],$_POST["couleurCarte"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $_POST["affectationsCarte"]);
+            $tableau = $this->carteService->creerCarte($idColonne, $titreCarte, $descriptifCarte, $couleurCarte, $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $affectationsCarte);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
 
             if(isset($_POST["idColonne"])){
                 return $this->rediriger("creation_carte", ["idColonne" => $_POST["idColonne"]]);
@@ -100,14 +106,14 @@ class ControleurCarte extends ControleurGenerique
             $carte = $this->carteService->getCarte($idCarte);
             $colonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
             $idTableau = $colonne->getTableau()->getIdTableau();
-
+            $tableau = $this->tableauService->getByIdTableau($idTableau);
             $this->tableauService->verifierParticipant($this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $idTableau);
             $colonnes = $this->colonneService->recupererColonnesTableau($idTableau);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mes_tableaux");
         }
-        return $this->afficherTwig("carte/formulaireMiseAJourCarte.html.twig", ["carte" => $carte, "colonnes" => $colonnes, "pagetitle" => "Modification d'une carte"]);
+        return $this->afficherTwig("carte/formulaireMiseAJourCarte.html.twig", ["carte" => $carte, "tableau" => $tableau, "colonne" => $colonne ,"colonnes" => $colonnes, "pagetitle" => "Modification d'une carte"]);
     }
 
     #[Route(path: '/carte/{idCarte}/mettre_a_jour', name:'mettre_a_jour_carte', methods:["POST"])]
@@ -118,7 +124,7 @@ class ControleurCarte extends ControleurGenerique
         try{
             $tableau = $this->carteService->mettreAJourCarte($idCarte, $_POST["idColonne"],$_POST["titreCarte"],$_POST["descriptifCarte"],$_POST["couleurCarte"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $_POST["affectationsCarte"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mise_a_jour_carte", ["idCarte" => $idCarte]);
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);

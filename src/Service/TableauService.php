@@ -87,7 +87,7 @@ class TableauService implements TableauServiceInterface
     {
         $nb = strlen($login);
         if(is_null($login) || $nb < 4 || $nb > 32){
-            throw new ServiceException( "Le login ne peut pas être vide, et doit daire entre 4 et 32 caractères", Response::HTTP_BAD_REQUEST);
+            throw new ServiceException( "Le login ne peut pas être vide, et doit faire entre 4 et 32 caractères", Response::HTTP_BAD_REQUEST);
         }
     }
 
@@ -159,6 +159,8 @@ class TableauService implements TableauServiceInterface
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
+        if(is_null($loginUtilisateurNouveau))
+            throw new ServiceException("login du nouveau membre manquant", Response::HTTP_BAD_REQUEST);
         if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Seul le propriétaire du tableau peut ajouter des membres", Response::HTTP_UNAUTHORIZED);
         }
@@ -172,7 +174,7 @@ class TableauService implements TableauServiceInterface
             throw new ServiceException( "L'utilisateur à ajouter n'existe pas", Response::HTTP_NOT_FOUND);
         }
         if($tableau->estParticipantOuProprietaire($loginUtilisateurNouveau)){
-            throw new ServiceException( "L'utilisateur est proprio ou participe déjà à ce tableau", Response::HTTP_CONFLICT);
+            throw new ServiceException( "L'utilisateur est le propriétaire ou participe déjà à ce tableau", Response::HTTP_CONFLICT);
         }
 
         $this->tableauRepository->ajouterParticipant($loginUtilisateurNouveau, $idTableau);
@@ -305,20 +307,6 @@ class TableauService implements TableauServiceInterface
             }
         }
         return $infoAffectations;
-    }
-
-    /**
-     * @throws ServiceException
-     */
-    public function recupererUtilisateursPasMembreOuPasProprietaireTableau(Tableau $tableau){
-        //TODO mauvaise façon de faire. On ne peut pas récupérer tous les utilisateurs de ma BD pour les afficher ou les traiter, l'utilisateur devra entrer un login dans une zone de saisie
-        $utilisateurs = $this->utilisateurRepository->recupererUtilisateursOrderedPrenomNom();
-        $filtredUtilisateurs = array_filter($utilisateurs, function ($u) use ($tableau) {return !$tableau->estParticipantOuProprietaire($u->getLogin());});
-
-        if(empty($filtredUtilisateurs)) {
-            throw new ServiceException( "Il n'est pas possible d'ajouter plus de membre à ce tableau !", Response::HTTP_BAD_REQUEST);
-        }
-        return $filtredUtilisateurs;
     }
 
     /**

@@ -5,6 +5,7 @@ namespace App\Trellotrolle\Service;
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\Repository\CarteRepositoryInterface;
+use App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -12,7 +13,8 @@ class CarteService implements CarteServiceInterface
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
                                 private ColonneServiceInterface $colonneService,
-                                private TableauServiceInterface $tableauService) {}
+                                private TableauServiceInterface $tableauService,
+                                private ConnexionBaseDeDonnees $connexionBaseDeDonnees) {}
 
     /**
      * @throws ServiceException
@@ -74,12 +76,14 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierAffectationsCorrect(?array $affectations, ?array $affectationsTableau) {
-        if(is_null($affectations)) {
-            throw new ServiceException( "Les affectations doit être renseigné", Response::HTTP_BAD_REQUEST);
+    private function verifierAffectationsCorrect(?array $affectations, Tableau $tableau) {
+        $loginsParticipantsTableau = [];
+        foreach ($tableau->getParticipants() as $participant){
+            $loginsParticipantsTableau[] = $participant->getLogin();
         }
-        foreach ($affectations as $affectation) {
-            if (!in_array($affectation, $affectationsTableau)) {
+
+        foreach ($affectations as $loginAffectation) {
+            if ($loginAffectation != $tableau->getProprietaireTableau()->getLogin() && !in_array($loginAffectation, $loginsParticipantsTableau)) {
                 throw new ServiceException( "L'un des membres n'est pas affecté au tableau ou n'existe pas", Response::HTTP_BAD_REQUEST);
             }
         }
@@ -123,15 +127,18 @@ class CarteService implements CarteServiceInterface
         $colonne = $this->colonneService->getColonne($idColonne);
         $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
-        $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
+        $this->verifierAffectationsCorrect($affectations, $tableau);
 
         if(!$tableau->estParticipantOuProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Vous n'avez pas les droits nécessaires", Response::HTTP_UNAUTHORIZED);
         }
 
-        $carte = Carte::create(1, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations);
-
+        $carte = Carte::create(1, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations ?? []);
         $this->carteRepository->ajouter($carte);
+        $idCarte = $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+        foreach ($affectations as $login){
+            $this->carteRepository->ajouterAffectation($login, $idCarte);
+        }
 
         return $tableau;
     }
@@ -151,7 +158,7 @@ class CarteService implements CarteServiceInterface
         $originalColonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
         $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
-        $this->verifierAffectationsCorrect($affectations, $tableau->getParticipants());
+        $this->verifierAffectationsCorrect($affectations, $tableau);
 
         // Si les colonnes ne sont pas dans le même tableau
         if ($colonne->getTableau()->getIdTableau() !== $originalColonne->getTableau()->getIdTableau()) {
@@ -166,9 +173,12 @@ class CarteService implements CarteServiceInterface
         $carte->setDescriptifCarte($descriptifCarte);
         $carte->setCouleurCarte($couleurCarte);
         $carte->setColonne($colonne);
-        $carte->setAffectationsCarte($affectations);
-
         $this->carteRepository->mettreAJour($carte);
+        $idCarte = $carte->getIdCarte();
+        $this->carteRepository->supprimerToutesAffectationsCarte($idCarte);
+        foreach ($affectations as $login){
+            $this->carteRepository->ajouterAffectation($login, $idCarte);
+        }
 
         return $tableau;
     }

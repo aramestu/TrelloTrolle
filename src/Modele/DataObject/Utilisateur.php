@@ -117,7 +117,8 @@ class Utilisateur extends AbstractDataObject implements \JsonSerializable
         return [
             "login" => $this->login ?? null,
             "nom" => $this->nom ?? null,
-            "prenom" => $this->prenom ?? null
+            "prenom" => $this->prenom ?? null,
+            "email" => $this->email ?? null
         ];
     }
 }

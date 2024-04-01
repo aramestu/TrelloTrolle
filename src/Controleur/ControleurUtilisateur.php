@@ -50,7 +50,7 @@ class ControleurUtilisateur extends ControleurGenerique
         try{
             $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         } catch (ServiceException $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("connexion");
         }
         return self::afficherTwig("utilisateur/detail.html.twig", ["utilisateur" => $utilisateur, "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}"]);
@@ -79,7 +79,7 @@ class ControleurUtilisateur extends ControleurGenerique
         try{
             $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"],$_POST["email"] , $_POST["mdp"], $_POST["mdp2"]);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("inscription");
         }
 
@@ -105,7 +105,7 @@ class ControleurUtilisateur extends ControleurGenerique
         try{
             $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
         return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", ["utilisateur" => $utilisateur]);
@@ -118,10 +118,17 @@ class ControleurUtilisateur extends ControleurGenerique
             return $this->rediriger("connexion");
         }
         $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
+        $nom = $_POST["nom"] ?? null;
+        $prenom = $_POST["prenom"] ?? null;
+        $email = $_POST["email"] ?? null;
+        $mdpAncien = $_POST["mdpAncien"] ?? null;
+        $mdpNouveau = $_POST["mdp"] ?? null;
+        $mdpNouveau2 = $_POST["mdp2"] ?? null;
+
         try{
-            $this->serviceUtilisateur->modifierUtilisateur($login, $_POST["nom"], $_POST["prenom"], $_POST["mdp"], $_POST["mdp2"]);
+            $this->serviceUtilisateur->modifierUtilisateur($login, $nom, $prenom, $email, $mdpAncien, $mdpNouveau, $mdpNouveau2);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mise_a_jour_utilisateur", ["login" => $login]);
         }
         MessageFlash::ajouter("success", "Utilisateur mis à jour");
@@ -140,7 +147,7 @@ class ControleurUtilisateur extends ControleurGenerique
             $this->connexionUtilisateurSession->deconnecter();
             $this->connexionUtilisateurJWT->deconnecter();
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("detail_utilisateur");
         }
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
@@ -169,7 +176,7 @@ class ControleurUtilisateur extends ControleurGenerique
             $this->connexionUtilisateurSession->connecter($login);
             $this->connexionUtilisateurJWT->connecter($login);
         }catch (\Exception $e){
-            MessageFlash::ajouter("error", $e->getMessage());
+            MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("connexion");
         }
         MessageFlash::ajouter("success", "Connexion effectué !");
@@ -202,9 +209,9 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->afficherTwig("utilisateur/resetCompte.html.twig", ["pagetitle" => "Récupérer mon compte"]);
     }
 
-    /*#[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])] // TODO
+    #[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])] // TODO
     public function recupererCompte(): Response {
-        if(ConnexionUtilisateur::estConnecte()) {
+        /*if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
         if (!ControleurUtilisateur::issetAndNotNull(["email"])) {
@@ -216,11 +223,7 @@ class ControleurUtilisateur extends ControleurGenerique
         if(empty($utilisateurs)) {
             MessageFlash::ajouter("warning", "Aucun compte associé à cette adresse email");
             return $this->rediriger("connexion");
-        }
-        return $this->afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resultatResetCompte.php",
-            "utilisateurs" => $utilisateurs
-        ]);
-    }*/
+        }*/
+        return $this->afficherTwig("utilisateur/resultatResetCompte.html.twig");
+    }
 }
