@@ -159,8 +159,6 @@ class TableauService implements TableauServiceInterface
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if(is_null($loginUtilisateurNouveau))
-            throw new ServiceException("login du nouveau membre manquant", Response::HTTP_BAD_REQUEST);
         if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Seul le propriétaire du tableau peut ajouter des membres", Response::HTTP_UNAUTHORIZED);
         }

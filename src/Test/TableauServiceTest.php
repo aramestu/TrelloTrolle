@@ -4,6 +4,8 @@ namespace App\Trellotrolle\Test;
 
 use App\Trellotrolle\Lib\MotDePasse;
 use App\Trellotrolle\Lib\MotDePasseInterface;
+use App\Trellotrolle\Modele\DataObject\Carte;
+use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Modele\DataObject\Utilisateur;
 use App\Trellotrolle\Modele\Repository\CarteRepository;
@@ -152,6 +154,16 @@ class TableauServiceTest extends TestCase
         $this->tableauService->getByIdTableau($idTableau);
     }
 
+    public function testTriggerException_method_getByIdTableau_InvalidIdTableau(){
+        $idTableau = null;
+
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("L'idTableau n'est pas renseigné");
+        $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
+
+        $this->tableauService->getByIdTableau($idTableau);
+    }
+
     /**
      * @throws ServiceException
      */
@@ -220,6 +232,12 @@ class TableauServiceTest extends TestCase
         // Exécution de la méthode à tester et attente de l'exception
         $this->expectException(ServiceException::class);
         $this->tableauService->creerTableau($loginUtilisateurConnecte, $nomTableau);
+    }
+
+    public function testTriggerException_method_creerTableau_InvalidLogin()
+    {
+        $this->expectException(ServiceException::class);
+        $this->tableauService->creerTableau("a", "tableau");
     }
 
     /**
@@ -294,41 +312,34 @@ class TableauServiceTest extends TestCase
     }
 
     /**
-     * //TODO: a revoir setParticipant
      * @throws ServiceException
      */
     public function testAjouterMembreAvecSucces(): void
     {
-        // Préparation des données de test
-        $idTableau = 1;
-        $loginUtilisateurConnecte = "proprietaire";
-        $loginUtilisateurNouveau = "nouveauMembre";
 
-        // Création d'un tableau avec le propriétaire spécifié
-        $tableau = new Tableau();
-        $tableau->setIdTableau($idTableau);
-        $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword"));
-        $tableau->setParticipants([]); // Initialisation de la liste des participants
+        $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
+        $user = Utilisateur::create("participantDejaPresent", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $proprietaire, []);
 
         // Mock du tableauRepository pour retourner le tableau existant
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($idTableau)
+            ->with($tableau->getIdTableau())
             ->willReturn($tableau);
 
         // Mock de l'utilisateurRepository pour retourner un utilisateur existant
         $this->utilisateurRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($loginUtilisateurNouveau)
-            ->willReturn(Utilisateur::create("nouveauMembre", "Doe", "Jane", "jane@example.com", "hashedPassword"));
+            ->with($user->getLogin())
+            ->willReturn($user);
 
         // Attendre que le participant soit ajouté avec succès
         $this->tableauRepository->expects($this->once())
             ->method('ajouterParticipant')
-            ->with($loginUtilisateurNouveau, $idTableau);
+            ->with($user->getLogin(), $tableau->getIdTableau());
 
         // Exécution de la méthode à tester
-        $result = $this->tableauService->ajouterMembre($idTableau, $loginUtilisateurConnecte, $loginUtilisateurNouveau);
+        $result = $this->tableauService->ajouterMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $user->getLogin());
 
         // Vérifier que le tableau est retourné
         $this->assertInstanceOf(Tableau::class, $result);
@@ -409,35 +420,30 @@ class TableauServiceTest extends TestCase
         $this->tableauService->ajouterMembre($idTableau, $loginUtilisateurConnecte, $loginUtilisateurNouveau);
     }
 
-    //TODO: a revoir setParticipant
     public function testAjouterMembreDejaParticipantOuProprietaire(): void
     {
-        // Préparation des données de test
-        $idTableau = 1;
-        $loginUtilisateurConnecte = "proprietaire";
-        $loginUtilisateurNouveau = "participantDejaPresent";
-        $tableau = new Tableau();
-        $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword"));
-        $tableau->setParticipants([Utilisateur::create("participantDejaPresent", "Doe", "Jane", "jane@example.com", "hashedPassword")]);
+        $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
+        $user = Utilisateur::create("participantDejaPresent", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $proprietaire, [$user]);
 
         // Mock du tableauRepository pour retourner un tableau existant
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($idTableau)
+            ->with($tableau->getIdTableau())
             ->willReturn($tableau);
 
         // Mock du utilisateurRepository pour retourner un utilisateur existant
         $this->utilisateurRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($loginUtilisateurNouveau)
-            ->willReturn(Utilisateur::create("participantDejaPresent", "Doe", "Jane", "jane@example.com", "hashedPassword"));
+            ->with($user->getLogin())
+            ->willReturn($user);
 
         // Attendre une levée d'exception ServiceException
         $this->expectException(ServiceException::class);
-        $this->expectExceptionMessage("L'utilisateur est déjà propriétaire ou participe déjà à ce tableau");
+        $this->expectExceptionMessage("L'utilisateur est le propriétaire ou participe déjà à ce tableau");
 
         // Exécution de la méthode à tester
-        $this->tableauService->ajouterMembre($idTableau, $loginUtilisateurConnecte, $loginUtilisateurNouveau);
+        $this->tableauService->ajouterMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $user->getLogin());
     }
 
     public function testSupprimerMembreIdTableauVide(): void
@@ -507,10 +513,65 @@ class TableauServiceTest extends TestCase
         $this->tableauService->supprimerMembre(1, "proprietaire", "utilisateurInconnu");
     }
 
-    // Teste le cas où tout se passe bien
+    /**
+     * @throws ServiceException
+     */
+    public function testSupprimerParticipantNonProprietaire(): void
+    {
+        // Préparation des données de test
+        $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
+        $participant = Utilisateur::create("participant", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $proprietaire, [$participant]);
+
+        // Mock du tableauRepository pour retourner le tableau simulé
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
+
+        // Mock du utilisateurRepository pour retourner l'utilisateur à supprimer
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($participant->getLogin())
+            ->willReturn($participant);
+
+        // Appel de la méthode à tester
+        $resultat = $this->tableauService->supprimerMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $participant->getLogin());
+
+        // Vérification
+        $this->assertNotNull($resultat);
+        // Ajoutez d'autres assertions au besoin
+    }
+
+    public function testUtilisateurNonParticipantNiProprietaire(): void
+    {
+        // Préparation des données de test
+        $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
+        $autreUtilisateur = Utilisateur::create("autreUtilisateur", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $proprietaire, []);
+
+        // Mock du tableauRepository pour retourner le tableau simulé
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
+
+        // Mock du utilisateurRepository pour retourner l'utilisateur connecté
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($autreUtilisateur->getLogin())
+            ->willReturn($autreUtilisateur);
+
+        // Appel de la méthode à tester
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_CONFLICT);
+        $this->expectExceptionMessage("L'utilisateur ne participe pas à ce tableau");
+
+        $this->tableauService->supprimerMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $autreUtilisateur->getLogin());
+    }
+
 
     /**
-     * TODO: setParticipant
      * @throws ServiceException
      */
     public function testVerifierParticipantSansParticipantOuProprietaire(): void
@@ -520,9 +581,8 @@ class TableauServiceTest extends TestCase
         $idTableau = 1; // ID de tableau valide
 
         // Création d'un objet Tableau simulé avec un propriétaire différent et sans participation de l'utilisateur connecté
-        $tableau = new Tableau();
-        $tableau->setProprietaireTableau(Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword"));
-        $tableau->setParticipants([]); // Initialise les participants avec un tableau vide
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
 
         // Mock de la méthode recupererParClePrimaire pour retourner le tableau simulé
         $this->tableauRepository->expects($this->once())
@@ -538,26 +598,29 @@ class TableauServiceTest extends TestCase
         $this->tableauService->verifierParticipant($loginUtilisateurConnecte, $idTableau);
     }
 
-    //TODO: prbl ave participant
     public function testVerifierParticipantAvecParticipantOuProprietaire(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
-        $idTableau = 1; // ID de tableau valide
 
-        // Mock de la méthode recupererParClePrimaire pour simuler un tableau inexistant
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
+
+        // Mock de la méthode recupererParClePrimaire pour retourner le tableau simulé
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($idTableau)
-            ->willReturn(null);
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
 
-        // Attendre une exception ServiceException indiquant que le tableau n'existe pas
+        // Attendre une exception ServiceException indiquant que vous n'êtes pas un participant du tableau
         $this->expectException(ServiceException::class);
         $this->expectExceptionMessage("Vous n'êtes pas un participant de ce tableau.");
 
         // Exécution de la méthode à tester
-        $this->tableauService->verifierParticipant($loginUtilisateurConnecte, $idTableau);
+        $this->tableauService->verifierParticipant($loginUtilisateurConnecte, $tableau->getIdTableau());
     }
+
+
 
     public function testQuitterTableauProprietaire(): void
     {
@@ -587,26 +650,14 @@ class TableauServiceTest extends TestCase
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
-        $idTableau = 1; // ID de tableau valide
 
         // Création d'un tableau simulé sans l'utilisateur connecté comme participant
-        $tableau = new Tableau();
-        $tableau->setIdTableau($idTableau);
-        $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword"));
-        $tableau->setCodeTableau(1);
-        $tableau->setTitreTableau("test");
-
-        $this->tableauRepository->expects($this->once())
-            ->method('ajouterParticipant')
-            ->willReturnCallback(function ($loginUtilisateur, $idTableau) use ($tableau) {
-                // Ajoutez les participants au tableau simulé
-                $this->tableauRepository->ajouterParticipant($loginUtilisateur, $idTableau);
-                return $tableau;
-            });
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
 
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
-            ->with($idTableau)
+            ->with($tableau->getIdTableau())
             ->willReturn($tableau);
 
         // Attendre une exception ServiceException avec un code HTTP 400 (BAD REQUEST)
@@ -617,22 +668,17 @@ class TableauServiceTest extends TestCase
         $this->tableauService->quitterTableau($loginUtilisateurConnecte, $tableau->getIdTableau());
     }
 
-
-
-
     /**
      * @throws ServiceException
      */
     public function testQuitterTableauParticipant(): void
     {
         // Préparation des données de test
-        $loginUtilisateurConnecte = "johnDoe";
+        $proprio = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $utilisateurConnecte = Utilisateur::create("johnDoe", "Doe", "Jane", "jane@example.com", "hashedPassword");
 
         // Création d'un tableau simulé avec l'utilisateur connecté comme participant
-        $tableau = new Tableau();
-        $tableau->setIdTableau(1);
-
-        $this->tableauRepository->ajouterParticipant($loginUtilisateurConnecte, 1);
+        $tableau = Tableau::create(1, "code", "titre", $proprio, [$utilisateurConnecte]);
 
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
@@ -646,6 +692,213 @@ class TableauServiceTest extends TestCase
             ->method('supprimerParticipant');
 
         // Exécution de la méthode à tester avec le tableau simulé
-        $this->tableauService->quitterTableau($loginUtilisateurConnecte, $tableau->getIdTableau());
+        $this->tableauService->quitterTableau($utilisateurConnecte->getLogin(), $tableau->getIdTableau());
+    }
+
+    public function testSupprimerTableauProprietaireExistant(): void
+    {
+        // Préparation des données de test
+        $loginUtilisateurConnecte = "johnDoe";
+        $idTableau = 1;
+
+        // Création d'un tableau simulé avec l'utilisateur connecté comme propriétaire
+        $user = Utilisateur::create($loginUtilisateurConnecte, "Doe", "John", "john@example.com", "hashedPassword");
+        $tableau = Tableau::create($idTableau, "code", "titre", $user, []);
+
+        // Mock de la méthode recupererParClePrimaire pour retourner le tableau simulé
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn($tableau);
+
+        // Mock de la méthode supprimer dans le repository
+        $this->tableauRepository->expects($this->once())
+            ->method('supprimer')
+            ->with($idTableau);
+
+        // Exécution de la méthode à tester
+        $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
+    }
+
+    public function testSupprimerTableauNonProprietaireExistant(): void
+    {
+        // Préparation des données de test
+        $loginUtilisateurConnecte = "johnDoe";
+        $idTableau = 1;
+
+        // Création d'un tableau simulé avec un autre utilisateur comme propriétaire
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create($idTableau, "code", "titre", $user, []);
+
+        // Mock de la méthode recupererParClePrimaire pour retourner le tableau simulé
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn($tableau);
+
+        // Attendre une exception ServiceException indiquant que l'utilisateur n'est pas propriétaire du tableau
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_NOT_FOUND); // Attendre le code d'exception 403
+
+        // Exécution de la méthode à tester
+        $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
+    }
+
+
+    public function testSupprimerTableauInexistant(): void
+    {
+        // Préparation des données de test
+        $loginUtilisateurConnecte = "johnDoe";
+        $idTableau = 1;
+
+        // Mock de la méthode recupererParClePrimaire pour retourner null
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn(null);
+
+        // Attendre une exception ServiceException indiquant que le tableau n'existe pas
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_NOT_FOUND);
+
+        // Exécution de la méthode à tester
+        $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
+    }
+
+    public function testSupprimerTableauNonProprietaireInexistant(): void
+    {
+        // Préparation des données de test
+        $loginUtilisateurConnecte = "johnDoe";
+        $idTableau = 1;
+
+        // Mock de la méthode recupererParClePrimaire pour retourner null
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($idTableau)
+            ->willReturn(null);
+
+        // Attendre une exception ServiceException indiquant que le tableau n'existe pas
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionCode(Response::HTTP_NOT_FOUND);
+
+        // Exécution de la méthode à tester
+        $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function testVerifierProprietaireProprietaireExistant(): void
+    {
+
+        // Création d'un tableau simulé avec l'utilisateur connecté comme propriétaire
+        $user = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
+
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
+
+        // Appel de la méthode à tester
+        $resultat = $this->tableauService->verifierProprietaire($user->getLogin(), $tableau->getIdTableau());
+
+        // Vérification que la méthode retourne le tableau
+        $this->assertSame($tableau, $resultat);
+    }
+
+    public function testVerifierProprietaireNonProprietaireExistant(): void
+    {
+        // Préparation des données de test
+        $loginUtilisateurConnecte = "johnDoe";
+
+        // Création d'un tableau simulé avec un autre utilisateur comme propriétaire
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
+
+        $this->tableauRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($tableau->getIdTableau())
+            ->willReturn($tableau);
+
+        // Attendre une exception ServiceException indiquant que l'utilisateur n'est pas propriétaire du tableau
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Vous n'êtes pas le propriétaire de ce tableau.");
+
+        // Appel de la méthode à tester
+        $this->tableauService->verifierProprietaire($loginUtilisateurConnecte, $tableau->getIdTableau());
+    }
+
+    public function testRecupererColonnesEtCartesDuTableau(): void
+    {
+        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
+        $tableau = Tableau::create(1, "code", "titre", $user, []);
+
+        $colonne1 = Colonne::create(1, "colonne1", $tableau);
+        $colonne2 = Colonne::create(2, "colonne2", $tableau);
+
+        $carte1 = Carte::create(1, "carte1", "carte", "rouge", $colonne1, []);
+        $carte2 = Carte::create(2, "carte2", "carte", "rouge", $colonne1, []);
+        $carte3 = Carte::create(3, "carte3", "carte", "rouge", $colonne2, []);
+        $carte4 = Carte::create(4, "carte4", "carte", "rouge", $colonne2, []);
+
+        // Configurer le mock pour la colonneRepository
+        $this->colonneRepository->expects($this->once())
+            ->method('recupererColonnesTableau')
+            ->with($tableau->getIdTableau())
+            ->willReturn([$colonne1, $colonne2]);
+
+        // Configurer le mock pour la carteRepository pour les deux colonnes
+        $this->carteRepository->expects($this->exactly(2))
+            ->method('recupererCartesColonne')
+            ->willReturnOnConsecutiveCalls([$carte1, $carte2], [$carte3, $carte4]);
+
+
+        // Appeler la méthode à tester
+        $resultat = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
+
+        // Vérifier le résultat
+        $this->assertCount(2, $resultat["colonnes"]);
+        $this->assertCount(2, $resultat["associations"]["1"]);
+        $this->assertCount(2, $resultat["associations"]["2"]);
+        // Ajouter d'autres assertions au besoin pour vérifier les données renvoyées
+    }
+
+    public function testInformationsAffectationsCartes(): void
+    {
+        // Préparation des données de test
+        $user1 = Utilisateur::create("utilisateur1", "Doe", "John", "john@example.com", "hashedPassword");
+        $user2 = Utilisateur::create("utilisateur2", "Doe", "Jane", "jane@example.com", "hashedPassword");
+
+        $tableau = Tableau::create(1, "code", "titre", $user1, []);
+
+        $colonne1 = Colonne::create(1, "colonne1", $tableau);
+        $colonne2 = Colonne::create(2, "colonne2", $tableau);
+
+        $carte1 = Carte::create(1, "carte1", "carte", "rouge", $colonne1, [$user1, $user2]);
+        $carte2 = Carte::create(2, "carte2", "carte", "rouge", $colonne2, [$user1]);
+        $carte3 = Carte::create(3, "carte3", "carte", "rouge", $colonne2, [$user2]);
+
+        // Configurer le mock pour la carteRepository
+        $this->carteRepository->expects($this->once())
+            ->method('recupererCartesTableau')
+            ->with($tableau->getIdTableau())
+            ->willReturn([$carte1, $carte2, $carte3]);
+
+        // Appeler la méthode à tester
+        $resultat = $this->tableauService->informationsAffectationsCartes($tableau->getIdTableau());
+
+        // Vérifier le résultat
+        $this->assertCount(2, $resultat);
+
+        $this->assertArrayHasKey('utilisateur1', $resultat);
+        $this->assertCount(2, $resultat['utilisateur1']['colonnes']);
+        $this->assertEquals(1, $resultat['utilisateur1']['colonnes'][1]);
+        $this->assertEquals(1, $resultat['utilisateur1']['colonnes'][2]);
+
+        $this->assertArrayHasKey('utilisateur2', $resultat);
+        $this->assertCount(2, $resultat['utilisateur2']['colonnes']);
+        $this->assertEquals(1, $resultat['utilisateur2']['colonnes'][1]);
+        $this->assertEquals(1, $resultat['utilisateur2']['colonnes'][2]);
     }
 }
