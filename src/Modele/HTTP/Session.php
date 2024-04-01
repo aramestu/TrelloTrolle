@@ -60,7 +60,6 @@ class Session
     {
         unset($_SESSION[$nom]);
     }
-
     public function detruire() : void
     {
         session_unset();

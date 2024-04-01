@@ -4,15 +4,16 @@
 
 {% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
+{% set estParticipantOuProprietaire = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte)%}
 
 {% block page_content %}
     <div class="trello-main">
         <aside>
             <div class="utilisateur icons_menu">
-                <span>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</span>
+                <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
                 {% if estProprietaire %}
                     <span>
-                        <a href="{{ route('mise_a_jour_utilisateur') }}">
+                        <a href="{{ route('mise_a_jour_utilisateur', {login: tableau.proprietaireTableau.login}) }}">
                             <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Modifier l'utilisateur">
                         </a>
                     </span>
@@ -25,7 +26,7 @@
                 <div class="participants">
                     Membres :
                     <ul>
-                        <li>{{ tableau.utilisateur.prenom }} {{ tableau.utilisateur.nom }}</li>
+                        <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
                         {% for participant in tableau.participants %}
                             <li>
                                 <div class="icons_menu_stick">
@@ -42,7 +43,7 @@
                         {% endfor %}
                         {% if estProprietaire %}
                             <li>
-                                <a href="{{ route('ajouter_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                                <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
                             </li>
                         {% endif %}
                     </ul>
@@ -50,17 +51,19 @@
                 <div class="participants">
                     Travail en cours :
                     <ul>
-                        {% for participant in participants %}
+                        {% for participant in informationsAffectation %}
                             <li>
                                 <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
                                 <ul>
-                                    {% for colonne in participant['colonnes'] %}
-                                        <li>{{ colonne[1] }} {{ colonne[0] }}</li>
+                                    {% for colonne in associationColonneCarte['colonnes'] %}
+                                        {% if informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] is defined and informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] > 0 %}
+                                            <li>{{ informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] }} {{ colonne.titreColonne }}</li>
+                                        {% endif %}
                                     {% endfor %}
                                 </ul>
                             </li>
                         {% endfor %}
-                        {% if participants is empty %}
+                        {% if informationsAffectation is empty %}
                             <span><strong>Pas de travail en cours</strong></span>
                         {% endif %}
                     </ul>
@@ -71,7 +74,7 @@
             <div class="tableau">
                 <div class="titre icons_menu">
                     {{ tableau.titreTableau }}
-                    {% if estParticipant %}
+                    {% if estParticipantOuProprietaire %}
                         <span class="actions">
                             <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
                                 <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
@@ -80,11 +83,11 @@
                     {% endif %}
                 </div>
                 <div class="corps">
-                    {% for colonne in colonnes %}
-                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, estParticipant: estParticipant} %}
+                    {% for colonne in associationColonneCarte['colonnes'] %}
+                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipantOuProprietaire: estParticipantOuProprietaire} %}
                     {% endfor %}
 
-                    {% if estParticipant %}
+                    {% if estParticipantOuProprietaire %}
                         <a class="ajout-tableau" href="{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}">
                             <div class="colonne">
                                 <div class="titre icons_menu btn-ajout">

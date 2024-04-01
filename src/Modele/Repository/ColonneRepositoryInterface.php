@@ -2,19 +2,11 @@
 
 namespace App\Trellotrolle\Modele\Repository;
 
-use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
-use Exception;
-
-interface ColonneRepositoryInterface extends AbstractRepositoryInterface
+interface ColonneRepositoryInterface
 {
     public function recupererColonnesTableau(int $idTableau): array;
 
-    public function getNextIdColonne(): int;
-
     public function getNombreColonnesTotalTableau(int $idTableau): int;
 
-    /**
-     * @throws Exception
-     */
-    public function ajouter(AbstractDataObject $object): bool;
+    public function supprimer(string $valeurClePrimaire): bool;
 }

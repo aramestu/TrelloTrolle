@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Trellotrolle\Service;
+
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
 use App\Trellotrolle\Lib\MotDePasse;
 use App\Trellotrolle\Modele\DataObject\Tableau;
@@ -8,6 +10,7 @@ use App\Trellotrolle\Modele\Repository\TableauRepositoryInterface;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 use App\Trellotrolle\Modele\Repository\UtilisateurRepositoryInterface;
 use App\Trellotrolle\Lib\MotDePasseInterface;
+use Exception;
 use Symfony\Component\HttpFoundation\Response;
 use App\Trellotrolle\Service\Exception\ServiceException;
 
@@ -20,19 +23,28 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      */
-    public function getUtilisateur(?int $idUtilisateurConnecte) :?Utilisateur{
-        if(is_null($idUtilisateurConnecte)){
-            throw new ServiceException( "L'identifiant n'est pas renseigné", Response::HTTP_BAD_REQUEST);
+    public function getUtilisateur(?string $loginUtilisateurConnecte) :?Utilisateur{
+        if(is_null($loginUtilisateurConnecte)){
+            throw new ServiceException( "Le login n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
         /**
          * @var Utilisateur $utilisateur
          */
-        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire($idUtilisateurConnecte);
+        $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
 
         if(is_null($utilisateur)){
             throw new ServiceException( "L'utilisateur n'existe pas", Response::HTTP_NOT_FOUND);
         }
         return $utilisateur;
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function recupererTableauxOuUtilisateurEstMembre(?string $loginUtilisateurConnecte): array{
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+
+        return $this->utilisateurRepository->recupererTableauxOuUtilisateurEstMembre($loginUtilisateurConnecte);
     }
 
     /**
@@ -99,62 +111,89 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * @throws ServiceException
      * @throws Exception
+     *
      */
     public function creerUtilisateur($login, $nom, $prenom, $email, $mdp, $mdp2): void{
         if(is_null($login) || is_null($mdp) || is_null($email) || is_null($nom) || is_null($prenom) || is_null($mdp2)){
             throw new ServiceException("le login ou le mdp ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
 
+
         // Throw une erreur si une donnée n'est pas correcte
         $this->verifierToutesInfosCorrectes($login, $nom, $prenom, $email, $mdp, $mdp2);
 
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($login);
-        if ($utilisateur != null) {
+        if (! is_null($utilisateur)) {
             throw new ServiceException( "Ce login est déjà pris!", Response::HTTP_CONFLICT);
         }
 
-        $utilisateur = $this->utilisateurRepository->recupererUtilisateursParEmail($email);
-        if ($utilisateur != null) {
+        $tabUser = $this->utilisateurRepository->recupererUtilisateursParEmail($email);
+        // S'il existe déjà des utilisateurs avec cette adresse mail
+        if (count($tabUser) > 0) {
             throw new ServiceException("Un compte est déjà enregistré avec cette adresse mail!", Response::HTTP_CONFLICT);
         }
 
         $mdpHache = $this->motDePasse->hacher($mdp);
 
-        $utilisateur = new Utilisateur($login, $nom, $prenom, $email, $mdpHache);
+        $utilisateur = Utilisateur::create($login, $nom, $prenom, $email, $mdpHache);
         $this->utilisateurRepository->ajouter($utilisateur);
     }
 
     /**
      * @throws ServiceException
      */
-    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp = null, $mdp2 = null): void{
+    public function modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $email, $mdpAncien, $mdp = null, $mdp2 = null): Utilisateur{
         if(is_null($loginUtilisateurConnecte) || is_null($nom) || is_null($prenom)){
             throw new ServiceException("le login ou l'email ou le nom ou le prenom n'a pas été renseigné", Response::HTTP_NOT_FOUND);
         }
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
         $this->verifierNomEtPrenomCorrecte($nom, $prenom);
 
-
+        /**
+         * @var Utilisateur $utilisateur
+         */
         $utilisateur = $this->utilisateurRepository->recupererParClePrimaire($loginUtilisateurConnecte);
         if (is_null($utilisateur)) {
             throw new ServiceException( "Ce login n'existe pas!", Response::HTTP_NOT_FOUND);
         }
 
         // Pour ne pas throw d'erreurs s'il n'y a pas de mdp renseignés, on garde l'ancien
-        if(! is_null($mdp) && ! is_null($mdp2)) {
+        if((!is_null($mdp) && strlen($mdp) > 0) || (!is_null($mdp2) && strlen($mdp2) > 0)) {
             $this->verifier2MdpIdentiques($mdp, $mdp2);
             $this->verifierMotDePasseClair($mdp);
 
-            // Si l'utilisateur décide de changer de mdp
-            if(! $this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())){
-                $mdpHache = $this->motDePasse->hacher($mdp);
-                $utilisateur->setMdpHache($mdpHache);
+            if(! $this->motDePasse->verifier($mdpAncien, $utilisateur->getMdpHache())){
+                throw new ServiceException("Impossible de changer le mot de passe, l'ancien mot de passe est erroné", Response::HTTP_FORBIDDEN);
             }
+            $mdpHache = $this->motDePasse->hacher($mdp);
+            $utilisateur->setMdpHache($mdpHache);
         }
 
         $utilisateur->setNom($nom);
-        $utilisateur->setPrenom($nom);
+        $utilisateur->setPrenom($prenom);
+        $utilisateur->setEmail($email);
         $this->utilisateurRepository->mettreAJour($utilisateur);
+
+        return $utilisateur;
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierIdentifiantUtilisateur($login, $mdp): Utilisateur
+    {
+        if (is_null($login) || is_null($mdp)) {
+            throw new ServiceException( "Login ou mot de passe manquant.", Response::HTTP_BAD_REQUEST);
+        }
+
+        /** @var Utilisateur $utilisateur */
+        $utilisateur = $this->getUtilisateur($login);
+
+        if (!$this->motDePasse->verifier($mdp, $utilisateur->getMdpHache())) {
+            throw new ServiceException( "Mot de passe incorrect.", Response::HTTP_UNAUTHORIZED);
+        }
+
+        return $utilisateur;
     }
 
     /**
@@ -166,21 +205,33 @@ class UtilisateurService implements UtilisateurServiceInterface
         }
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
 
-        //TODO : Redéfinir la méthode supprimer dans UtilisateurRepository pour qu'elle appelle supprimer de TableauRep
         $this->utilisateurRepository->supprimer($loginUtilisateurConnecte);
     }
+
+    /**
+     * @throws ServiceException
+     */
+    public function verifierLoginConnecteEstLoginRenseigne(?string $loginConnecte, ?string $loginRenseigne): void{
+        $this->verifierLoginCorrect($loginConnecte);
+        $this->verifierLoginCorrect($loginRenseigne);
+
+        if($loginConnecte != $loginRenseigne){
+            throw new ServiceException("Vous n'avez pas accès à cet utilisateur", Response::HTTP_UNAUTHORIZED);
+        }
+    }
+
 
     //TODO : Rajouter un système pour récupérer le mdp via l'email (mot de passe perdu)
 
 
     /**
      * @throws ServiceException
-     */
+
     public function getUtilisateursPasMembreOuPasProprioTableau(?int $idTableau): array{
         if(is_null($idTableau)){
             throw new ServiceException("L'idTableau n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
         }
 
         return $this->utilisateurRepository->recupererUtilisateursPasMembreOuPasProprio($idTableau); // TODO : ajouter cette fonction dans le Repository
-    }
+    }*/
 }

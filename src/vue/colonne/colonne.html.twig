@@ -1,7 +1,7 @@
 <div class="colonne">
     <div class="titre icons_menu">
         <span>{{ colonne.titreColonne }}</span>
-        {% if estParticipant %}
+        {% if estParticipantOuProprietaire %}
             <span class="actions">
                 <a href="{{ route('mise_a_jour_colonne', {idColonne: colonne.idColonne}) }}">
                     <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la colonne">
@@ -13,8 +13,17 @@
         {% endif %}
     </div>
     <div class="corps">
-        {% for carte in data[colonne.idColonne] %}
-            {% include 'carte/carte.html.twig' with {carte: carte, idColonne: colonne.idColonne, estParticipant: estParticipant} %}
+        {% for carte in cartes %}
+            {% include 'carte/carte.html.twig' with {carte: carte, estParticipant: estParticipantOuProprietaire} %}
         {% endfor %}
     </div>
+    {% if estParticipantOuProprietaire %}
+        <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: colonne.idColonne}) }}">
+            <div>
+                <div class="titre icons_menu btn-ajout">
+                    <span>Ajouter une carte</span>
+                </div>
+            </div>
+        </a>
+    {% endif %}
 </div>

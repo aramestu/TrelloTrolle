@@ -7,14 +7,30 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Twig\Environment;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class ControleurGenerique {
 
-    private ContainerInterface $container;
+    protected ContainerInterface $container;
 
     public function __construct(ContainerInterface $container)
     {
         $this->container = $container;
+    }
+
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    protected function afficherTwig(string $cheminVue, array $parametres = []): Response
+    {
+        /** @var Environment $twig */
+        $twig = $this->container->get("twig");
+        $corpsReponse = $twig->render($cheminVue, $parametres);
+        return new Response($corpsReponse);
     }
 
     protected function afficherVuePHP(string $cheminVue, array $parametres = []): Response {
@@ -61,9 +77,14 @@ class ControleurGenerique {
         exit();
     }
 
-    public function afficherErreur($messageErreur = ""): Response
+    /**
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    public function afficherErreur($messageErreur = "", $controleur = ""): Response
     {
-        return ControleurGenerique::afficherVue('erreur.html.twig', [
+        return ControleurGenerique::afficherTwig('erreur.html.twig', [
             "messageErreur" => $messageErreur
         ]);
     }
@@ -76,5 +97,4 @@ class ControleurGenerique {
         }
         return true;
     }
-
 }

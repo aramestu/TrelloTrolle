@@ -3,8 +3,9 @@
 namespace App\Trellotrolle\Modele\Repository;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
+use PDOException;
 
-interface CarteRepositoryInterface extends AbstractRepositoryInterface
+interface CarteRepositoryInterface
 {
     public function recupererCartesColonne(int $idcolonne): array;
 
@@ -17,5 +18,16 @@ interface CarteRepositoryInterface extends AbstractRepositoryInterface
 
     public function getNombreCartesTotalUtilisateur(string $login): int;
 
-    public function getNextIdCarte(): int;
+    public function recupererAffectationsCartes(string $idCarte): array;
+
+    public function supprimerToutesAffectationsCarte($idCarte): bool;
+
+    /**
+     * @throws PDOException
+     */
+    public function ajouterAffectation($login, $idCarte): bool;
+
+    public function supprimerAffectation($login, $idCarte): bool;
+
+    public function supprimer(string $valeurClePrimaire): bool;
 }
