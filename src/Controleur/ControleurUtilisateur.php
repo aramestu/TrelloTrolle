@@ -209,9 +209,9 @@ class ControleurUtilisateur extends ControleurGenerique
         return $this->afficherTwig("utilisateur/resetCompte.html.twig", ["pagetitle" => "Récupérer mon compte"]);
     }
 
-    /*#[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])] // TODO
+    #[Route(path: '/utilisateur/back-up', name:'recuperer_compte', methods:["POST"])] // TODO
     public function recupererCompte(): Response {
-        if(ConnexionUtilisateur::estConnecte()) {
+        /*if(ConnexionUtilisateur::estConnecte()) {
             return $this->rediriger("mes_tableaux");
         }
         if (!ControleurUtilisateur::issetAndNotNull(["email"])) {
@@ -223,11 +223,7 @@ class ControleurUtilisateur extends ControleurGenerique
         if(empty($utilisateurs)) {
             MessageFlash::ajouter("warning", "Aucun compte associé à cette adresse email");
             return $this->rediriger("connexion");
-        }
-        return $this->afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resultatResetCompte.php",
-            "utilisateurs" => $utilisateurs
-        ]);
-    }*/
+        }*/
+        return $this->afficherTwig("utilisateur/resultatResetCompte.html.twig");
+    }
 }
