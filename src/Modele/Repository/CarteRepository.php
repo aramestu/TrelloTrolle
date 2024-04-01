@@ -50,6 +50,11 @@ class CarteRepository extends AbstractRepository implements CarteRepositoryInter
         return Carte::construireDepuisTableau($objetFormatTableau);
     }
 
+    public function lastInsertId(): false|string
+    {
+        return $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+    }
+
     public function recupererCartesColonne(int $idcolonne): array {
         return $this->recupererPlusieursPar("idColonne", $idcolonne);
     }
