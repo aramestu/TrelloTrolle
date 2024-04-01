@@ -31,7 +31,7 @@ class ControleurTableau extends ControleurGenerique
 
     public function __construct(ContainerInterface $container, private readonly TableauServiceInterface $tableauService,
                                  private ConnexionUtilisateurInterface $connexionUtilisateurSession, private ColonneServiceInterface $colonneService,
-                                 private CarteServiceInterface $carteService, private TableauRepositoryInterface $tableauRepository,
+                                 private CarteServiceInterface $carteService,
                                  private UtilisateurServiceInterface $utilisateurService){
         parent::__construct($container);
     }
