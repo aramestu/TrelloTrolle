@@ -30,6 +30,7 @@ class Cookie
      * @param mixed $valeur La valeur du cookie.
      * @param int|null $dureeExpiration La durée d'expiration du cookie en secondes (optionnelle).
      * @return void
+     * @throws Exception
      */
     public static function enregistrer(string $cle, mixed $valeur, ?int $dureeExpiration = null): void
     {
