@@ -13,8 +13,7 @@ class CarteService implements CarteServiceInterface
 {
     public function __construct(private CarteRepositoryInterface  $carteRepository,
                                 private ColonneServiceInterface $colonneService,
-                                private TableauServiceInterface $tableauService,
-                                private ConnexionBaseDeDonnees $connexionBaseDeDonnees) {}
+                                private TableauServiceInterface $tableauService) {}
 
     /**
      * @throws ServiceException
@@ -118,7 +117,7 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau{
+    public function creerCarte(?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :int{
         $this->verifierTitreCarteCorrect($titreCarte);
         $this->verifierDescriptifCarteCorrect($descriptifCarte);
         $this->verifierCouleurCarteCorrect($couleurCarte);
@@ -135,18 +134,18 @@ class CarteService implements CarteServiceInterface
 
         $carte = Carte::create(1, $titreCarte, $descriptifCarte, $couleurCarte, $colonne, $affectations ?? []);
         $this->carteRepository->ajouter($carte);
-        $idCarte = $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+        $idCarte = $this->carteRepository->lastInsertId();
         foreach ($affectations as $login){
             $this->carteRepository->ajouterAffectation($login, $idCarte);
         }
 
-        return $tableau;
+        return $idCarte;
     }
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Tableau{
+    public function mettreAJourCarte(?int $idCarte, ?int $idColonne, ?string $titreCarte, ?string $descriptifCarte, ?string $couleurCarte, ?string $loginUtilisateurConnecte, ?array $affectations) :Carte{
         $this->verifierIdCarteCorrect($idCarte);
         $this->verifierIdColonneCorrect($idColonne);
         $this->verifierTitreCarteCorrect($titreCarte);
@@ -180,15 +179,6 @@ class CarteService implements CarteServiceInterface
             $this->carteRepository->ajouterAffectation($login, $idCarte);
         }
 
-        return $tableau;
-    }
-
-    /**
-     * @throws ServiceException
-     */
-    public function getCartesParIdColonne(?int $idColonne): ?array{
-        $this->verifierIdColonneCorrect($idColonne);
-
-        return $this->carteRepository->recupererCartesColonne($idColonne);
+        return $carte;
     }
 }
