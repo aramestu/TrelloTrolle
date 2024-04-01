@@ -80,14 +80,6 @@ class ColonneService implements ColonneServiceInterface
         }
     }
 
-    /**
-     * @throws ServiceException
-     */
-    private function verifierLoginCorrect(?string $login): void{
-        if (strlen($login) < 4 || strlen($login) > 32) {
-            throw new ServiceException( "Le login doit être compris entre 4 et 32 caractères!", Response::HTTP_BAD_REQUEST);
-        }
-    }
 
     /**
      * @throws ServiceException
