@@ -30,4 +30,6 @@ interface CarteRepositoryInterface
     public function supprimerAffectation($login, $idCarte): bool;
 
     public function supprimer(string $valeurClePrimaire): bool;
+
+    public function lastInsertId(): false|string;
 }

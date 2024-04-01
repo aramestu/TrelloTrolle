@@ -67,7 +67,7 @@ services:
 
   carte_service:
     class: App\Trellotrolle\Service\CarteService
-    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service', '@connexion_base_de_donnees']
+    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service']
 
 
 
