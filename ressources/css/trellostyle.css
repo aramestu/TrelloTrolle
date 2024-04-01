@@ -22,6 +22,52 @@ body {
 
 }
 
+.trello-overlay
+{
+    position: fixed;
+    pointer-events: none;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+}
+
+.trello-overlay div.card-view-background
+{
+    height: 100%;
+    background: #0000007F;
+    pointer-events: auto;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: baseline;
+}
+
+.trello-overlay div.card-view-background div.card-frame
+{
+    border-radius: 8px;
+    background-color: white;
+    padding: 16px;
+
+    width: 50%;
+    height: fit-content;
+    margin-top: 32px;
+}
+
+.trello-overlay div.card-frame div.card-header
+{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.trello-overlay button#close-card-view
+{
+    background: none;
+    border: none;
+}
+
 .trello-main {
     display: flex;
     flex-direction: row;
@@ -32,8 +78,7 @@ body {
 aside {
     width: 250px;
     background-color: #F0F0F0;
-    padding: 8px;
-    padding-top: 15px;
+    padding: 15px 8px 8px;
     display: flex;
     flex-direction: column;
 
@@ -53,6 +98,47 @@ aside {
         justify-content: center;
         flex-grow: 1;
     }
+
+    div.member-selector
+    {
+        width: 100%;
+        position: relative;
+
+        input#member-add
+        {
+            width: 100%;
+        }
+
+        div.autocompletion
+        {
+
+            background-color: white;
+            border: 1px solid grey;
+            line-height:1.5;
+            position: absolute;
+            box-sizing: border-box;
+            width: 100%;
+
+            p
+            {
+                margin: 0 0 0 0;
+                padding: 0 5px 0 5px;
+                overflow: hidden;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+            }
+
+            p.search-label
+            {
+                font-size: 11pt;
+                font-style: italic;
+                color: dimgray;
+            }
+
+        }
+
+    }
+
 }
 
 img.icon {

@@ -2,22 +2,51 @@
 
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
+{% block header_additions %}
+    <script src="{{ asset('../ressources/js/cardView.js') }}" defer></script>
+    <script src="{{ asset('../ressources/js/autocompletion.js') }}" defer></script>
+{% endblock %}
+
 {% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipantOuProprietaire = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte)%}
 
 {% block page_content %}
+    <template class="card-view-overlay">
+        <div class="card-view-background">
+            <div class="card-frame">
+                <div class="card-header">
+                    <label>
+                        <input type="text" id="titreCarte" name="titreCarte" value="" placeholder="Titre de la carte..."
+                               minlength="1" maxlength="50">
+                    </label>
+                    <button id="close-card-view" onclick="closeCardView()">
+                        <img src="{{ asset('../ressources/img/x.png') }}" alt="Fermer" width="24" height="24">
+                    </button>
+                </div>
+                <p>
+                    <label for="descriptifCarte">Description de la carte&#42; :</label>
+                    <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte"></textarea>
+                </p>
+                <p>
+                    <label for="couleurCarte">Couleur de la carte&#42; :</label>
+                    <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte">
+                </p>
+                <p>
+                    <label for="affectationsCarte">Membres affectés :</label>
+                    <select multiple name="affectationsCarte[]" id="affectationsCarte"></select>
+                </p>
+            </div>
+        </div>
+    </template>
+
+    <div class="trello-overlay">
+
+    </div>
     <div class="trello-main">
         <aside>
             <div class="utilisateur icons_menu">
                 <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
-                {% if estProprietaire %}
-                    <span>
-                        <a href="{{ route('mise_a_jour_utilisateur', {login: tableau.proprietaireTableau.login}) }}">
-                            <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Modifier l'utilisateur">
-                        </a>
-                    </span>
-                {% endif %}
             </div>
             <div class="tableau">
                 <div class="icons_menu">
@@ -25,7 +54,7 @@
                 </div>
                 <div class="participants">
                     Membres :
-                    <ul>
+                    <ul data-htmlfun="listBoardMembers">
                         <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
                         {% for participant in tableau.participants %}
                             <li>
@@ -41,12 +70,14 @@
                                 </div>
                             </li>
                         {% endfor %}
-                        {% if estProprietaire %}
-                            <li>
-                                <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
-                            </li>
-                        {% endif %}
                     </ul>
+                    {% if estProprietaire %}
+                        <div class="member-selector">
+                            <label for="member-add">Ajouter un membre :</label>
+                            <input id="member-add" autocomplete="off" type="text" placeholder="Entrez au moins 2 caractères...">
+                            <div class="autocompletion" hidden=""></div>
+                        </div>
+                    {% endif %}
                 </div>
                 <div class="participants">
                     Travail en cours :
