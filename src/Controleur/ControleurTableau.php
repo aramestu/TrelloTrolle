@@ -134,12 +134,11 @@ class ControleurTableau extends ControleurGenerique
         }
         try{
             $tableau = $this->tableauService->verifierProprietaire($this->connexionUtilisateurSession->getIdUtilisateurConnecte() , $idTableau);
-            $utilisateurs = $this->tableauService->recupererUtilisateursPasMembreOuPasProprietaireTableau($tableau);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("accueil");
         }
-        return $this->afficherTwig("tableau/formulaireAjoutMembreTableau.html.twig", ["tableau" => $tableau, "utilisateurs" => $utilisateurs]);
+        return $this->afficherTwig("tableau/formulaireAjoutMembreTableau.html.twig", ["tableau" => $tableau]);
     }
 
     #[Route(path: '/tableau/ajout-membre', name:'ajouter_membre', methods:["POST"])]
@@ -147,11 +146,13 @@ class ControleurTableau extends ControleurGenerique
         if(! $this->estConnecte()) {
             return $this->rediriger("connexion");
         }
+        $idTableau = $_POST["idTableau"] ?? null;
+        $login = $_POST["login"] ?? null;
         try{
-            $tableau = $this->tableauService->ajouterMembre($_POST["idTableau"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte() ,$_POST["login"]);
+            $tableau = $this->tableauService->ajouterMembre($idTableau, $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $login);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
-            return $this->rediriger("mes_tableaux");
+            return $this->rediriger("ajout_membre", ["idTableau" => $idTableau]);
         }
         return $this->rediriger("afficher_tableau", ["codeTableau" => $tableau->getCodeTableau()]);
     }

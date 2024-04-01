@@ -163,7 +163,7 @@ class UtilisateurService implements UtilisateurServiceInterface
             $this->verifierMotDePasseClair($mdp);
 
             if(! $this->motDePasse->verifier($mdpAncien, $utilisateur->getMdpHache())){
-                throw new ServiceException("Impossible de changer le mot de passe, l'ancien mot de passe est erroné");
+                throw new ServiceException("Impossible de changer le mot de passe, l'ancien mot de passe est erroné", Response::HTTP_FORBIDDEN);
             }
             $mdpHache = $this->motDePasse->hacher($mdp);
             $utilisateur->setMdpHache($mdpHache);
