@@ -22,6 +22,15 @@ use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Classe de test pour le service TableauService.
+ *
+ * Convention de nommage des tests : HappyPath/TriggerException_method/class/create_nom_Explication
+ * Cette classe contient des méthodes de test pour les différentes fonctionnalités du service TableauService.
+ * Chaque méthode de test est annotée avec des commentaires décrivant le scénario de test, les données de test préparées,
+ * les comportements attendus des repositories et les assertions pour vérifier les résultats.
+ * Les méthodes de test couvrent les cas heureux ainsi que les cas d'exception attendus.
+ */
 class TableauServiceTest extends TestCase
 {
 
@@ -61,7 +70,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testGetByCodeTableauAvecCodeValide(): void
+    public function testHappyPath_method_getByCodeTableau_ValidCode(): void
     {
         // Préparez les données pour le test
         $codeTableau = 'ABC123';
@@ -80,7 +89,7 @@ class TableauServiceTest extends TestCase
         $this->assertSame($tableauAttendu, $resultat);
     }
 
-    public function testGetByCodeTableauAvecCodeInvalide(): void
+    public function testTriggerException_method_getByCodeTableau_InvalidCode(): void
     {
         // Préparez les données pour le test
         $codeTableauInvalide = 'XYZ987';
@@ -99,7 +108,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->getByCodeTableau($codeTableauInvalide);
     }
 
-    public function testGetByCodeTableauAvecCodeNull(): void
+    public function testTriggerException_method_getByCodeTableau_NullCode(): void
     {
         // Assurez-vous que l'exception appropriée est levée si le code du tableau est null
         $this->expectException(ServiceException::class);
@@ -112,7 +121,7 @@ class TableauServiceTest extends TestCase
     /**
     * @throws ServiceException
     */
-    public function testGetByIdTableauHappyPath(): void
+    public function testHappyPath_method_getByIdTableau_ValidId(): void
     {
         // Préparation de l'ID de tableau
         $idTableau = 1;
@@ -135,7 +144,7 @@ class TableauServiceTest extends TestCase
      * Teste le cas où aucun tableau n'existe avec l'ID donné.
      * @throws ServiceException
      */
-    public function testGetByIdTableauTriggerException(): void
+    public function testTriggerException_method_getByIdTableau_InvalidId(): void
     {
         // Préparation de l'ID de tableau
         $idTableau = 999; // Un ID qui ne correspond à aucun tableau existant
@@ -154,7 +163,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->getByIdTableau($idTableau);
     }
 
-    public function testTriggerException_method_getByIdTableau_InvalidIdTableau(){
+    public function testTriggerException_method_getByIdTableau_IdIsNull(){
         $idTableau = null;
 
         $this->expectException(ServiceException::class);
@@ -167,7 +176,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testCreerTableauHappyPath(): void
+    public function testHappyPath_method_creerTableau_ValidParameter(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -192,9 +201,7 @@ class TableauServiceTest extends TestCase
         $this->assertInstanceOf(Tableau::class, $tableau);
     }
 
-
-
-    public function testCreerTableauUtilisateurInexistant(): void
+    public function testTriggerException_method_creerTableau_InvalidUser(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "utilisateurInexistant";
@@ -211,7 +218,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->creerTableau($loginUtilisateurConnecte, $nomTableau);
     }
 
-    public function testCreerTableauNomTableauVide(): void
+    public function testTriggerException_method_creerTableau_InvalidNameTableau(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -222,7 +229,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->creerTableau($loginUtilisateurConnecte, $nomTableau);
     }
 
-    public function testCreerTableauNomTableauTropLong(): void
+    public function testTriggerException_method_creerTableau_TableauNameTooLong(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -243,7 +250,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testMettreAJourTableau(): void
+    public function testHappyPath_method_mettreAJourTableau_ValidParameter(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -269,7 +276,7 @@ class TableauServiceTest extends TestCase
         $this->assertEquals($nomTableau, $result->getTitreTableau());
     }
 
-    public function testMettreAJourTableauTableauInexistant(): void
+    public function testTriggerException_method_mettreAJourTableau_InvalidTableau(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -286,7 +293,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->mettreAJourTableau($idTableau, $loginUtilisateurConnecte, $nomTableau);
     }
 
-    public function testMettreAJourTableauNonProprietaire(): void
+    public function testTriggerException_method_mettreAJourTableau_NotTheProprietaire(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -314,7 +321,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testAjouterMembreAvecSucces(): void
+    public function testHappyPath_method_ajouterMembre_Success(): void
     {
 
         $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
@@ -346,7 +353,7 @@ class TableauServiceTest extends TestCase
     }
 
 
-    public function testAjouterMembreTableauInexistant(): void
+    public function testTriggerException_method_ajouterMembre_InvalidTableau(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -367,7 +374,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->ajouterMembre($idTableau, $loginUtilisateurConnecte, $loginUtilisateurNouveau);
     }
 
-    public function testAjouterMembreUtilisateurNonProprietaire(): void
+    public function testTriggerException_method_ajouterMembre_UserNotTheProprietaire(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -391,7 +398,7 @@ class TableauServiceTest extends TestCase
     }
 
 
-    public function testAjouterMembreUtilisateurInexistant(): void
+    public function testTriggerException_method_ajouterMembre_InvalidUser(): void
     {
         // Préparation des données de test
         $idTableau = 1;
@@ -420,7 +427,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->ajouterMembre($idTableau, $loginUtilisateurConnecte, $loginUtilisateurNouveau);
     }
 
-    public function testAjouterMembreDejaParticipantOuProprietaire(): void
+    public function testTriggerException_method_ajouterMembre_AlreadyParticipanntOrProprietaire(): void
     {
         $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
         $user = Utilisateur::create("participantDejaPresent", "Doe", "Jane", "jane@example.com", "hashedPassword");
@@ -446,7 +453,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->ajouterMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $user->getLogin());
     }
 
-    public function testSupprimerMembreIdTableauVide(): void
+    public function testTriggerException_method_supprimerMembre_InvalidIdTableau(): void
     {
         $this->expectException(ServiceException::class);
         $this->expectExceptionMessage("L'idTableau ou le login de l'user connecté ou le login a ajouté ne peut pas être vide");
@@ -454,7 +461,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->supprimerMembre(null, "userConnecte", "userDelete");
     }
 
-    public function testSupprimerMembreTableauInexistant(): void
+    public function testTriggerException_method_supprimerMembre_InvalidTableau(): void
     {
         $this->tableauRepository->expects($this->once())
             ->method('recupererParClePrimaire')
@@ -466,7 +473,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->supprimerMembre(1, "userConnecte", "userDelete");
     }
 
-    public function testSupprimerMembreNonProprietaire(): void
+    public function testTriggerException_method_supprimerMembre_NotTheProprietaire(): void
     {
         $tableau = new Tableau();
         $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword"));
@@ -482,7 +489,7 @@ class TableauServiceTest extends TestCase
     }
 
     // Teste le cas où l'utilisateur à supprimer est le propriétaire du tableau
-    public function testSupprimerMembreProprietaire(): void
+    public function testTriggerException_method_supprimerMembre_UserIsTheProprietaire(): void
     {
         $tableau = new Tableau();
         $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword"));
@@ -498,7 +505,7 @@ class TableauServiceTest extends TestCase
     }
 
     // Teste le cas où l'utilisateur à supprimer ne participe pas au tableau
-    public function testSupprimerMembreUtilisateurNonParticipant(): void
+    public function testTriggerException_method_supprimerMembre_UserNotParticipant(): void
     {
         $tableau = new Tableau();
         $tableau->setProprietaireTableau(Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword"));
@@ -516,7 +523,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testSupprimerParticipantNonProprietaire(): void
+    public function testHappyPath_method_supprimerMembre_Success(): void
     {
         // Préparation des données de test
         $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
@@ -540,10 +547,9 @@ class TableauServiceTest extends TestCase
 
         // Vérification
         $this->assertNotNull($resultat);
-        // Ajoutez d'autres assertions au besoin
     }
 
-    public function testUtilisateurNonParticipantNiProprietaire(): void
+    public function testTriggerException_method_supprimerMembre_UserNotInTheTableau(): void
     {
         // Préparation des données de test
         $proprietaire = Utilisateur::create("proprietaire", "Doe", "John", "john@example.com", "hashedPassword");
@@ -570,35 +576,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->supprimerMembre($tableau->getIdTableau(), $proprietaire->getLogin(), $autreUtilisateur->getLogin());
     }
 
-
-    /**
-     * @throws ServiceException
-     */
-    public function testVerifierParticipantSansParticipantOuProprietaire(): void
-    {
-        // Préparation des données de test
-        $loginUtilisateurConnecte = "johnDoe";
-        $idTableau = 1; // ID de tableau valide
-
-        // Création d'un objet Tableau simulé avec un propriétaire différent et sans participation de l'utilisateur connecté
-        $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
-        $tableau = Tableau::create(1, "code", "titre", $user, []);
-
-        // Mock de la méthode recupererParClePrimaire pour retourner le tableau simulé
-        $this->tableauRepository->expects($this->once())
-            ->method('recupererParClePrimaire')
-            ->with($idTableau)
-            ->willReturn($tableau);
-
-        // Attendre une exception ServiceException indiquant que l'utilisateur n'est pas un participant du tableau
-        $this->expectException(ServiceException::class);
-        $this->expectExceptionMessage("Vous n'êtes pas un participant de ce tableau.");
-
-        // Exécution de la méthode à tester
-        $this->tableauService->verifierParticipant($loginUtilisateurConnecte, $idTableau);
-    }
-
-    public function testVerifierParticipantAvecParticipantOuProprietaire(): void
+    public function testTriggerException_method_verifierParticipant_UserNotParticipant(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -621,8 +599,7 @@ class TableauServiceTest extends TestCase
     }
 
 
-
-    public function testQuitterTableauProprietaire(): void
+    public function testTriggerException_method_quitterTableau_UserIsProprietaire(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -646,7 +623,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->quitterTableau($loginUtilisateurConnecte, $tableau->getIdTableau());
     }
 
-    public function testQuitterTableauNonParticipant(): void
+    public function testTriggerException_method_quitterTableau_UserIsNotParticipant(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -671,7 +648,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testQuitterTableauParticipant(): void
+    public function testHappyPath_method_quitterTableau_Success(): void
     {
         // Préparation des données de test
         $proprio = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
@@ -695,7 +672,10 @@ class TableauServiceTest extends TestCase
         $this->tableauService->quitterTableau($utilisateurConnecte->getLogin(), $tableau->getIdTableau());
     }
 
-    public function testSupprimerTableauProprietaireExistant(): void
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_method_supprimer_Success(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -720,7 +700,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
     }
 
-    public function testSupprimerTableauNonProprietaireExistant(): void
+    public function testTriggerException_method_supprimer_NotTheProprietaire(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -745,27 +725,7 @@ class TableauServiceTest extends TestCase
     }
 
 
-    public function testSupprimerTableauInexistant(): void
-    {
-        // Préparation des données de test
-        $loginUtilisateurConnecte = "johnDoe";
-        $idTableau = 1;
-
-        // Mock de la méthode recupererParClePrimaire pour retourner null
-        $this->tableauRepository->expects($this->once())
-            ->method('recupererParClePrimaire')
-            ->with($idTableau)
-            ->willReturn(null);
-
-        // Attendre une exception ServiceException indiquant que le tableau n'existe pas
-        $this->expectException(ServiceException::class);
-        $this->expectExceptionCode(Response::HTTP_NOT_FOUND);
-
-        // Exécution de la méthode à tester
-        $this->tableauService->supprimer($loginUtilisateurConnecte, $idTableau);
-    }
-
-    public function testSupprimerTableauNonProprietaireInexistant(): void
+    public function testTriggerException_method_supprimer_InvalidTableau(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -788,7 +748,7 @@ class TableauServiceTest extends TestCase
     /**
      * @throws ServiceException
      */
-    public function testVerifierProprietaireProprietaireExistant(): void
+    public function testHappyPath_method_verifierProprietaire_Success(): void
     {
 
         // Création d'un tableau simulé avec l'utilisateur connecté comme propriétaire
@@ -807,7 +767,7 @@ class TableauServiceTest extends TestCase
         $this->assertSame($tableau, $resultat);
     }
 
-    public function testVerifierProprietaireNonProprietaireExistant(): void
+    public function testTriggerException_method_verifierProprietaire_InvalidParameter(): void
     {
         // Préparation des données de test
         $loginUtilisateurConnecte = "johnDoe";
@@ -829,7 +789,7 @@ class TableauServiceTest extends TestCase
         $this->tableauService->verifierProprietaire($loginUtilisateurConnecte, $tableau->getIdTableau());
     }
 
-    public function testRecupererColonnesEtCartesDuTableau(): void
+    public function testHappyPath_method_recupererColonnesEtCartesDuTableau_Success(): void
     {
         $user = Utilisateur::create("autreProprietaire", "Doe", "Jane", "jane@example.com", "hashedPassword");
         $tableau = Tableau::create(1, "code", "titre", $user, []);
@@ -864,7 +824,7 @@ class TableauServiceTest extends TestCase
         // Ajouter d'autres assertions au besoin pour vérifier les données renvoyées
     }
 
-    public function testInformationsAffectationsCartes(): void
+    public function testHappyPath_method_informationsAffectationsCartes_Success(): void
     {
         // Préparation des données de test
         $user1 = Utilisateur::create("utilisateur1", "Doe", "John", "john@example.com", "hashedPassword");
