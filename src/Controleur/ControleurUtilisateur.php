@@ -34,7 +34,7 @@ class ControleurUtilisateur extends ControleurGenerique
         parent::__construct($container);
     }
 
-    public function afficherErreur($messageErreur = "", $controleur = ""): Response
+    public function afficherErreur(string $messageErreur = "", string $controleur = ""): Response
     {
         return parent::afficherErreur($messageErreur, "utilisateur");
     }
