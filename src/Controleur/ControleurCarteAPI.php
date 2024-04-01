@@ -30,21 +30,13 @@ class ControleurCarteAPI extends ControleurGenerique
         return $this->connexionUtilisateurJWT->estConnecte();
     }
 
-    private function recupererToutesInfosTableau(?string $codeTableau){
-        $tableau = $this->tableauService->getByCodeTableau($codeTableau);
-        $associationColonneCarte = $this->tableauService->recupererColonnesEtCartesDuTableau($tableau->getIdTableau());
-        $informationsAffectation = $this->tableauService->informationsAffectationsCartes($tableau->getIdTableau());
-
-        return ["tableau" => $tableau, "associationColonneCarte" => $associationColonneCarte, "informationsAffectation" => $informationsAffectation];
-    }
-
     #[Route(path: '/api/cartes/{idCarte}', name:'api_supprimer_carte', methods:["DELETE"])]
-    public function supprimerCarte(int $idCarte) : Response { // Fonctionne
+    public function supprimerCarte(string $idCarte) : Response { // Fonctionne
         if(! $this->estConnecte()){
             return new JsonResponse(["error" => "Vous devez "], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $this->carteService->supprimerCarte($idCarte, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte());
+            $this->carteService->supprimerCarte((int)$idCarte, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte());
             return new JsonResponse(true, Response::HTTP_OK); // True si ça a été supprimé
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
