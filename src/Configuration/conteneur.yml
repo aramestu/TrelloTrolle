@@ -13,7 +13,6 @@ services:
         autoescape: 'html'
         strict_variables: true
 
-
   configuration_bdd:
     class: App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees
 
@@ -22,8 +21,6 @@ services:
     arguments: ['@configuration_bdd']
 
   #Repositories
-  #TODO : ajouter les argument quand on aura injecter la base de données comme dans le td
-
   carte_repository:
     class: App\Trellotrolle\Modele\Repository\CarteRepository
     arguments: ['@container', '@connexion_base_de_donnees']
@@ -40,7 +37,6 @@ services:
     class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
     arguments: ['@container', '@connexion_base_de_donnees']
 
-
   #Lib
   mot_de_passe:
     class: App\Trellotrolle\Lib\MotDePasse
@@ -50,7 +46,6 @@ services:
 
   connexion_utilisateur_jwt:
     class: App\Trellotrolle\Lib\ConnexionUtilisateurJWT
-
 
   #Sercices
   utilisateur_service:
@@ -68,8 +63,6 @@ services:
   carte_service:
     class: App\Trellotrolle\Service\CarteService
     arguments: [ '@carte_repository', '@colonne_service', '@tableau_service', '@connexion_base_de_donnees']
-
-
 
   #Services
   request_stack:
