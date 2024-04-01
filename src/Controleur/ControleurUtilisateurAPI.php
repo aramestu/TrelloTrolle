@@ -80,7 +80,7 @@ class ControleurUtilisateurAPI extends ControleurGenerique
         }
     }
 
-    #[Route(path: '/api/utilisateurs', name:'api_modifier_utilisateur', methods:["POST"])]
+    #[Route(path: '/api/utilisateurs', name:'api_modifier_utilisateur', methods:["PATCH"])]
     public function mettreAJour(Request $request): Response{ // Fonctionne
         if(! $this->estConnecte()){
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
