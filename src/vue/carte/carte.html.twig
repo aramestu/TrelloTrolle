@@ -1,7 +1,7 @@
 <div class="carte" style="background-color: {{ carte.couleurCarte }};">
     <div class="titre icons_menu">
         <span>{{ carte.titreCarte }}</span>
-        {% if estParticipantOuProprietaire %}
+        {% if estParticipant %}
             <span class="actions">
                 <button onclick="openCardView({{ carte.idCarte }})">
                     <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la carte">

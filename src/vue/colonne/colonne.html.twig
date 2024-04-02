@@ -1,7 +1,7 @@
-<div class="colonne">
+<div class="colonne droppable">
     <div class="titre icons_menu">
         <span>{{ colonne.titreColonne }}</span>
-        {% if estParticipantOuProprietaire %}
+        {% if estParticipant %}
             <span class="actions">
                 <a href="{{ route('mise_a_jour_colonne', {idColonne: colonne.idColonne}) }}">
                     <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la colonne">
@@ -14,10 +14,10 @@
     </div>
     <div class="corps">
         {% for carte in cartes %}
-            {% include 'carte/carte.html.twig' with {carte: carte, estParticipant: estParticipantOuProprietaire} %}
+            {% include 'carte/carte.html.twig' with {carte: carte, estParticipant: estParticipant} %}
         {% endfor %}
     </div>
-    {% if estParticipantOuProprietaire %}
+    {% if estParticipant %}
         <a class="ajout-tableau" href="{{ route('creation_carte', {idColonne: colonne.idColonne}) }}">
             <div>
                 <div class="titre icons_menu btn-ajout">

@@ -3,13 +3,13 @@
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
 {% block header_additions %}
-    <script src="{{ asset('../ressources/js/cardView.js') }}" defer></script>
-    <script src="{{ asset('../ressources/js/autocompletion.js') }}" defer></script>
+    <script src="{{ asset('../ressources/js/board/cardView.js') }}" defer></script>
+    <script src="{{ asset('../ressources/js/board/autocompletion.js') }}" defer></script>
+    <script type="module" src="{{ asset('../ressources/js/board/boardDragAndDrop.js') }}"></script>
 {% endblock %}
 
 {% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
-{% set estParticipantOuProprietaire = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte)%}
 
 {% block page_content %}
     <template class="card-view-overlay">
@@ -43,7 +43,7 @@
     <div class="trello-overlay">
 
     </div>
-    <div class="trello-main">
+    <div class="trello-main" data-dnd="{{ estParticipant }}">
         <aside>
             <div class="utilisateur icons_menu">
                 <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
@@ -52,7 +52,7 @@
                 <div class="icons_menu">
                     <span>{{ tableau.titreTableau }}</span>
                 </div>
-                <div class="participants">
+                <div id="listeParticipants" class="participants">
                     Membres :
                     <ul data-htmlfun="listBoardMembers">
                         <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
@@ -63,7 +63,7 @@
                                     {% if estProprietaire %}
                                         <span class="actions">
                                             <a href="{{ route('supprimer_membre', {idTableau: tableau.idTableau, login: participant.login}) }}">
-                                                <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Retirer le membre">
+                                                <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Retirer">
                                             </a>
                                         </span>
                                     {% endif %}
@@ -79,9 +79,9 @@
                         </div>
                     {% endif %}
                 </div>
-                <div class="participants">
+                <div id="wip" class="participants">
                     Travail en cours :
-                    <ul>
+                    <ul data-htmlfun="getParticipants()">
                         {% for participant in informationsAffectation %}
                             <li>
                                 <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
@@ -105,7 +105,7 @@
             <div class="tableau">
                 <div class="titre icons_menu">
                     {{ tableau.titreTableau }}
-                    {% if estParticipantOuProprietaire %}
+                    {% if estParticipant %}
                         <span class="actions">
                             <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
                                 <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
@@ -115,10 +115,10 @@
                 </div>
                 <div class="corps">
                     {% for colonne in associationColonneCarte['colonnes'] %}
-                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipantOuProprietaire: estParticipantOuProprietaire} %}
+                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipant: estParticipant} %}
                     {% endfor %}
 
-                    {% if estParticipantOuProprietaire %}
+                    {% if estParticipant %}
                         <a class="ajout-tableau" href="{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}">
                             <div class="colonne">
                                 <div class="titre icons_menu btn-ajout">
