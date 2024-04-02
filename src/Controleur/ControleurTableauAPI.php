@@ -88,7 +88,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableau = $this->tableauService->ajouterMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
+            $tableau = $this->tableauService->ajouterMembre((int) $idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
             return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -101,7 +101,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableau = $this->tableauService->supprimerMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
+            $tableau = $this->tableauService->supprimerMembre((int) $idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
             return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -122,12 +122,12 @@ class ControleurTableauAPI extends ControleurGenerique
     }
 
     #[Route(path: '/api/tableaux/{idTableau}', name:'api_quitter_tableau', methods:["PATCH"])]
-    public function quitterTableau(int $idTableau){ // Fonctionne
+    public function quitterTableau(string $idTableau){ // Fonctionne
         if(! $this->estConnecte()){
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableaux = $this->tableauService->quitterTableau($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
+            $tableaux = $this->tableauService->quitterTableau($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), (int) $idTableau);
             return new JsonResponse($tableaux, Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -135,12 +135,12 @@ class ControleurTableauAPI extends ControleurGenerique
     }
 
     #[Route(path: '/api/tableaux/{idTableau}', name:'api_supprimer_tableau', methods:["DELETE"])]
-    public function supprimerTableau(int $idTableau){ // Fonctionne
+    public function supprimerTableau(string $idTableau){ // Fonctionne
         if(! $this->estConnecte()){
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $this->tableauService->supprimer($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
+            $this->tableauService->supprimer($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), (int) $idTableau);
             return new JsonResponse('', Response::HTTP_NO_CONTENT);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());

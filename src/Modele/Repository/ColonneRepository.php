@@ -5,6 +5,7 @@ namespace App\Trellotrolle\Modele\Repository;
 use App\Trellotrolle\Modele\DataObject\AbstractDataObject;
 use App\Trellotrolle\Modele\DataObject\Colonne;
 use App\Trellotrolle\Modele\DataObject\Tableau;
+use Exception;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -93,6 +94,11 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
         return Colonne::construireDepuisTableau($objetFormatTableau);
     }
 
+    public function lastInsertId(): false|string
+    {
+        return $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+    }
+
     /**
      * Récupère les colonnes d'un tableau en fonction de l'ID du tableau.
      *
@@ -131,7 +137,7 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
     {
         $carteRepository = $this->container->get("carte_repository");
         $cartes = $carteRepository->recupererPlusieursParOrdonne("idColonne", $valeurClePrimaire, ["idColonne"]);
-        foreach ($cartes as $carte) {
+        foreach ($cartes as $carte){
             $carteRepository->supprimer($carte->getIdCarte());
         }
         return parent::supprimer($valeurClePrimaire);

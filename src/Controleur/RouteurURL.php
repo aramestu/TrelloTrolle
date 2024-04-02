@@ -4,6 +4,7 @@ namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\AttributeRouteControllerLoader;
 use App\Trellotrolle\Lib\ConnexionUtilisateur;
+use App\Trellotrolle\Lib\ConnexionUtilisateurSession;
 use App\Trellotrolle\Lib\MessageFlash;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -47,8 +48,9 @@ class RouteurURL {
             $twig=$conteneur->get('twig');
             $twig->addFunction(new TwigFunction("route", [$generateurUrl, "generate"]));
             $twig->addFunction(new TwigFunction("asset", [$assistantUrl, "getAbsoluteUrl"]));
-            $twig->addGlobal('estConnecte', ConnexionUtilisateur::estConnecte());
-            $twig->addGlobal('loginUtilisateurConnecte', ConnexionUtilisateur::getLoginUtilisateurConnecte());
+            $connexionSess = new ConnexionUtilisateurSession();
+            $twig->addGlobal('estConnecte', $connexionSess->estConnecte());
+            $twig->addGlobal('loginUtilisateurConnecte', $connexionSess->getIdUtilisateurConnecte());
             $twig->addGlobal('messagesFlash', new MessageFlash());
 
             try{

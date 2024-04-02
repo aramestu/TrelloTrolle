@@ -33,4 +33,6 @@ interface ColonneRepositoryInterface
      * @return bool Retourne true si l'entrée a été supprimée avec succès, sinon false.
      */
     public function supprimer(string $valeurClePrimaire): bool;
+
+    public function lastInsertId(): false|string;
 }
