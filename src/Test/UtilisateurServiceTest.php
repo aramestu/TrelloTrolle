@@ -350,10 +350,6 @@ class UtilisateurServiceTest extends TestCase
 
     public function testTriggerException_method_modifierUtilisateur_MissingParameters(): void
     {
-        $login = null;
-        $nom = null;
-        $prenom = null;
-
         // Configurez le mock de repository pour ne pas être appelé
         $this->utilisateurRepository->expects($this->never())
             ->method('recupererParClePrimaire');
@@ -364,7 +360,7 @@ class UtilisateurServiceTest extends TestCase
         $this->expectExceptionCode(Response::HTTP_NOT_FOUND);
 
         // Appelez la méthode à tester
-        $this->utilisateurService->modifierUtilisateur($login, $nom, $prenom);
+        $this->utilisateurService->modifierUtilisateur(null, null, null, null, null);
     }
 
     public function testTriggerException_method_modifierUtilisateur_InvalidLogin(): void
@@ -389,6 +385,45 @@ class UtilisateurServiceTest extends TestCase
 
         $this->utilisateurService->modifierUtilisateur($loginUtilisateurConnecte, $nom, $prenom, $mdp, $mdp2);
     }
+
+    public function testTriggerException_method_modifierUtilisateur_OldPasswordIcorrect(): void
+    {
+        // Créer un utilisateur avec un ancien mot de passe correct
+        $utilisateur = Utilisateur::create("login", "Nom", "Prénom", "email@example.com", "AncienMdp");
+
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($utilisateur->getLogin())
+            ->willReturn($utilisateur);
+
+        // S'attendre à ce qu'une exception soit levée avec le message approprié
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Impossible de changer le mot de passe, l'ancien mot de passe est erroné");
+
+        // Appeler la méthode à tester avec le mot de passe incorrect
+        $this->utilisateurService->modifierUtilisateur($utilisateur->getLogin(), "NouveauNom", "NouveauPrénom", "nouveauemail@example.com", "AncienMdpIncorrect1", "NouveauMdp1", "NouveauMdp1");
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_method_modifierUtilisateur_OldPasswordCorrect(): void
+    {
+        // Créer un utilisateur avec un ancien mot de passe correct
+        $mdpClair = "AncienMdp1";
+        $mdpHache = password_hash($mdpClair, PASSWORD_DEFAULT); // Générer le hachage du mot de passe
+
+        $utilisateur = Utilisateur::create("login", "Nom", "Prénom", "email@example.com", $mdpHache);
+
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($utilisateur->getLogin())
+            ->willReturn($utilisateur);
+
+        // Appeler la méthode à tester avec le mot de passe correct
+        $this->utilisateurService->modifierUtilisateur($utilisateur->getLogin(), "NouveauNom", "NouveauPrénom", "nouveauemail@example.com", $mdpClair, "NouveauMdp1", "NouveauMdp1");
+    }
+
 
     /**
      * @throws ServiceException
@@ -488,5 +523,24 @@ class UtilisateurServiceTest extends TestCase
         $this->expectExceptionCode(Response::HTTP_BAD_REQUEST);
 
         $this->utilisateurService->supprimer(null);
+    }
+
+    /**
+     * @throws ServiceException
+     */
+    public function testHappyPath_method_verifierLoginConnecteEstLoginRenseigne_Success(): void
+    {
+        // Pas d'exception attendue
+        $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne("login", "login");
+        $this->assertTrue(true);
+    }
+
+    public function testTriggerException_method_verifierLoginConnecteEstLoginRenseigne_InvalidLogin(): void
+    {
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Vous n'avez pas accès à cet utilisateur");
+        $this->expectExceptionCode(Response::HTTP_UNAUTHORIZED);
+
+        $this->utilisateurService->verifierLoginConnecteEstLoginRenseigne("login1", "login2");
     }
 }
