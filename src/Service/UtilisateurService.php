@@ -246,6 +246,13 @@ class UtilisateurService implements UtilisateurServiceInterface
             throw new ServiceException("Ce login n'existe pas!", Response::HTTP_NOT_FOUND);
         }
 
+        $utilisateursEmail = $this->utilisateurRepository->recupererUtilisateursParEmail($email);
+        if(sizeof($utilisateursEmail)>0){
+            if($utilisateursEmail[0]->getLogin() !== $utilisateur->getLogin()){
+                throw new ServiceException( "Vous ne pouvez pas entrer un email déjà utilisé par un autre utilisateur", Response::HTTP_FORBIDDEN);
+            }
+        }
+
         // Pour ne pas throw d'erreurs s'il n'y a pas de mdp renseignés, on garde l'ancien
         if ((!is_null($mdp) && strlen($mdp) > 0) || (!is_null($mdp2) && strlen($mdp2) > 0)) {
             $this->verifier2MdpIdentiques($mdp, $mdp2);
