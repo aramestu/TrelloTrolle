@@ -1,6 +1,7 @@
 import {Board} from "./objects/Board.js";
 import {Column} from "./objects/Column.js";
 import {Card} from "./objects/Card.js";
+import {openCardView} from "./cardView.js";
 
 const columnTemplate = document.querySelector("template#column-template");
 const cardTemplate = document.querySelector("template#card-template");
@@ -45,7 +46,7 @@ function createColumn(columnInfo)
 
     boardBody.appendChild(clone);
 
-    let title = div.querySelector(".titre.icons_menu span")
+    let title = div.querySelector(".titre.icons_menu span");
     title.textContent = columnInfo.titreColonne;
 
     let column = new Column(columnId, columnInfo.titreColonne, div, dragElement => updateColumn(column, dragElement));
@@ -60,6 +61,7 @@ function createCard(column, cardInfo)
     div.id = "card-" + cardInfo.idCarte;
 
     let columnBody = column.element.querySelector("div.corps");
+    columnBody.addEventListener('click', () => openCardView(cardInfo.idCarte));
     columnBody.appendChild(clone);
 
     let title = div.querySelector(".titre.icons_menu span")
@@ -132,3 +134,5 @@ async function updateColumn(column, dragElement)
     body.appendChild(dragElement);
     //updateWIP();
 }
+
+export {board}

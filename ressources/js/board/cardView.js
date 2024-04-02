@@ -1,4 +1,5 @@
-import {flashMessage} from "./utils";
+import {flashMessage} from "./utils.js";
+import {board} from "./dynamicBoard.js";
 
 const contentTemplate = document.querySelector("template.card-view-content");
 const cardView = document.querySelector("div.card-view-background");
@@ -67,7 +68,7 @@ function createContent(result)
     couleurCarte.value = card.couleurCarte;
 
     let affectationSelect = content.querySelector("#affectationsCarte");
-    for(let member of members)
+    for(let member of board.members)
     {
         let option = document.createElement("option");
         option.value = member.login;
