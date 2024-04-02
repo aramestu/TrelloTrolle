@@ -305,22 +305,9 @@ class ControleurUtilisateur extends ControleurGenerique
      * @throws SyntaxError En cas d'erreur de syntaxe dans le template Twig.
      * @throws LoaderError En cas d'erreur de chargement du template Twig.
      */
-    #[Route(path: '/utilisateur/back-up', name: 'recuperer_compte', methods: ["POST"])] // TODO
+    #[Route(path: '/utilisateur/back-up', name: 'recuperer_compte', methods: ["POST"])]
     public function recupererCompte(): Response
     {
-        /*if(ConnexionUtilisateur::estConnecte()) {
-            return $this->rediriger("mes_tableaux");
-        }
-        if (!ControleurUtilisateur::issetAndNotNull(["email"])) {
-            MessageFlash::ajouter("warning", "Adresse email manquante");
-            return $this->rediriger("connexion");
-        }
-        $repository = new UtilisateurRepository();
-        $utilisateurs = $repository->recupererUtilisateursParEmail($_REQUEST["email"]);
-        if(empty($utilisateurs)) {
-            MessageFlash::ajouter("warning", "Aucun compte associé à cette adresse email");
-            return $this->rediriger("connexion");
-        }*/
         return $this->afficherTwig("utilisateur/resultatResetCompte.html.twig");
     }
 }

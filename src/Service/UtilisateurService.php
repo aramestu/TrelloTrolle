@@ -324,19 +324,4 @@ class UtilisateurService implements UtilisateurServiceInterface
             throw new ServiceException("Vous n'avez pas accès à cet utilisateur", Response::HTTP_UNAUTHORIZED);
         }
     }
-
-
-    //TODO : Rajouter un système pour récupérer le mdp via l'email (mot de passe perdu)
-
-
-    /**
-     * @throws ServiceException
-     *
-     * public function getUtilisateursPasMembreOuPasProprioTableau(?int $idTableau): array{
-     * if(is_null($idTableau)){
-     * throw new ServiceException("L'idTableau n'a pas été renseigné", Response::HTTP_BAD_REQUEST);
-     * }
-     *
-     * return $this->utilisateurRepository->recupererUtilisateursPasMembreOuPasProprio($idTableau); // TODO : ajouter cette fonction dans le Repository
-     * }*/
 }
