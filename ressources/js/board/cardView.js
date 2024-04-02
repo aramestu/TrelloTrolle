@@ -1,8 +1,7 @@
-import {cards} from "./Card.js";
+import {flashMessage} from "./utils";
 
 const contentTemplate = document.querySelector("template.card-view-content");
 const cardView = document.querySelector("div.card-view-background");
-const flashContainer = document.querySelector("header div#flash-container")
 
 const cardFrame = cardView.querySelector("div.card-frame");
 const loading = cardView.querySelector("div.loading");
@@ -95,25 +94,14 @@ function createContent(result)
 
         closeCardView();
 
-        let div = document.createElement("div");
-        div.classList.add('alert');
-
-        if(!res.ok)
+        if(res.ok)
         {
-            let message = await res.text();
-
-            div.classList.add('alert-danger');
-            div.textContent = 'Une erreur est survenue lors de la mise à jour du tableau : ' + message;
-        }
-        else
-        {
-            div.classList.add('alert-success');
-            div.textContent = 'Mise à jour du tableau réalisée avec succès !';
-
-            //cards[card.idCarte].update();
+            flashMessage('success', 'Mise à jour du tableau réalisée avec succès !');
+            return;
         }
 
-        flashContainer.appendChild(div);
+        let message = await res.text();
+        flashMessage('danger', `Une erreur est survenue lors de la mise à jour de la carte : ${message}`);
     });
 
     if (!isParticipant)

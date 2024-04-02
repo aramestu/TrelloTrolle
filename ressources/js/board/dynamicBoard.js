@@ -1,12 +1,13 @@
 import {Column} from "./Column.js";
 import {Card, cards} from "./Card.js";
 import {openCardView} from "./cardView.js";
+import {flashMessage} from "./utils";
 
 const columnElements = document.querySelectorAll(".trello-main div.colonne.droppable");
 const memberElements = document.querySelectorAll("div#listeParticipants > ul > li");
 const wip = document.querySelector("div#wip ul");
 
-function updateWIP()
+/*function updateWIP()
 {
     let html = '';
     members.forEach(member =>
@@ -17,7 +18,7 @@ function updateWIP()
         html += '</ul></li>'
     });
     wip.innerHTML = html;
-}
+}*/
 
 function getInfos(member)
 {
@@ -49,20 +50,39 @@ function getFromElement(element)
     return null;
 }
 
-function updateColumn(column, dragElement)
+async function updateColumn(column, dragElement)
 {
-    let corps = column.element.querySelector("div.corps");
-    corps.appendChild(dragElement);
-
     let card = getFromElement(dragElement);
-    if(card !== null)
+    if(card === null)
     {
-        card.column = column;
+        return;
     }
 
+    let res = await fetch(`${urlBase}/api/cartes`, {
+        method: "PATCH",
+        body: JSON.stringify({
+            idCarte: card.id,
+            titreCarte: titreCarte.value,
+            descriptifCarte: descriptifCarte.value,
+            couleurCarte: couleurCarte.value,
+            affectationsCarte: getOptions(affectationSelect),
+            idColonne: card.idColonne
+        })
+    });
 
+    if(!res.ok)
+    {
+        let message = await res.text();
+        flashMessage('danger', `Une erreur est survenue lors du déplacement de la carte : ${message}`);
+        return;
+    }
 
-    updateWIP();
+    card.column = column;
+
+    //TODO Remplacer par du réactif
+    let corps = column.element.querySelector("div.corps");
+    corps.appendChild(dragElement);
+    //updateWIP();
 }
 
 function initDragAndDrop()

@@ -8,6 +8,8 @@
 {% block header_additions %}
     <script type="module" src="{{ asset('../ressources/js/board/Member.js') }}"></script>
     <script type="text/javascript">
+        import {cards} from "../../../ressources/js/board/Card";
+
         class Member
         {
 
@@ -30,6 +32,12 @@
             new Member('{{ tableau.proprietaireTableau.login }}', '{{ tableau.proprietaireTableau.nom }}',
                 '{{ tableau.proprietaireTableau.prenom }}', '{{ tableau.proprietaireTableau.email }}')
         ];
+
+        cards = [
+            {% for colonnes in associationColonneCarte['associations'] %}
+
+            {% endfor %}
+        ]
     </script>
     <script src="{{ asset('../ressources/js/board/autocompletion.js') }}" defer></script>
     <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
