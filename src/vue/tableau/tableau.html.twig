@@ -12,7 +12,11 @@
         const boardCode = '{{ tableau.codeTableau }}';
 
         const columnCreationRoute = '{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}'
+        const columnModificationRoute = '{{ route('mise_a_jour_colonne', {idColonne: 'id'}) }}'
+        const columnDeletionRoute = '{{ route('supprimer_colonne', {idColonne: 'id'}) }}'
+
         const cardCreationRoute = '{{ route('creation_carte', {idColonne: 'id'}) }}'
+        const cardDeletionRoute = '{{ route('supprimer_carte', {idCarte: 'id'}) }}'
     </script>
     <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
 {% endblock %}
@@ -50,14 +54,34 @@
         <div class="colonne droppable">
             <div class="titre icons_menu">
                 <span></span>
+                <span class="actions">
+                    <a class="modify">
+                        <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la colonne">
+                    </a>
+                    <a class="delete">
+                        <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Supprimer la colonne">
+                    </a>
+                </span>
             </div>
             <div class="corps"></div>
+            <a class="ajout-tableau">
+                <div>
+                    <div class="titre icons_menu btn-ajout">
+                        <span>Ajouter une carte</span>
+                    </div>
+                </div>
+            </a>
         </div>
     </template>
     <template id="card-template">
         <div class="carte" style="background-color: white;">
             <div class="titre icons_menu">
                 <span></span>
+                <span class="actions">
+                    <a class="delete">
+                        <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Supprimer la carte">
+                    </a>
+                </span>
             </div>
             <div class="corps"></div>
             <div class="pied"></div>
@@ -68,15 +92,6 @@
             <div class="colonne">
                 <div class="titre icons_menu btn-ajout">
                     <span>Ajouter une colonne</span>
-                </div>
-            </div>
-        </a>
-    </template>
-    <template id="card-creation">
-        <a class="ajout-tableau">
-            <div>
-                <div class="titre icons_menu btn-ajout">
-                    <span>Ajouter une carte</span>
                 </div>
             </div>
         </a>

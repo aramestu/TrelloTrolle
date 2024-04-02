@@ -26,7 +26,6 @@ class Card extends DragElement
         this.participants.forEach(participant =>{
             result += `<span>${participant.prenom} ${participant.nom}</span>`;
         });
-        console.log(result);
         return result;
     }
 

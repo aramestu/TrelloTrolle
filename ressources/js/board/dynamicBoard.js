@@ -7,7 +7,6 @@ import {openCardView} from "./cardView.js";
 const columnTemplate = document.querySelector("template#column-template");
 const cardTemplate = document.querySelector("template#card-template");
 const columnCreationTemplate = document.querySelector("template#column-creation");
-const cardCreationTemplate = document.querySelector("template#card-creation");
 const boardBody = document.querySelector(".tableau div.corps")
 
 const board = await loadBoard(boardCode)
@@ -33,15 +32,6 @@ async function loadBoard(boardCode)
         for (let cardInfo of associations['associations'][column.id])
         {
             cards.push(createCard(column, cardInfo));
-        }
-
-        if(isParticipant)
-        {
-            let clone = cardCreationTemplate.content.cloneNode(true);
-            let a = clone.querySelector("a");
-            a.href = cardCreationRoute.replace('id', column.id)
-
-            column.element.appendChild(clone)
         }
 
     }
@@ -73,6 +63,21 @@ function createColumn(columnInfo)
     let title = div.querySelector(".titre.icons_menu span")
     title.setAttribute("data-textvar", `${columnName}.title`);
 
+    let addCardAction = div.querySelector("a.ajout-tableau");
+    let actions = div.querySelector(".titre.icons_menu span.actions")
+
+    if(!isParticipant)
+    {
+        div.removeChild(addCardAction);
+        div.querySelector(".titre.icons_menu").removeChild(actions);
+    }
+    else
+    {
+        actions.querySelector(".modify").href = columnModificationRoute.replace('id', columnId);
+        actions.querySelector(".delete").href = columnDeletionRoute.replace('id', columnId);
+        addCardAction.href = cardCreationRoute.replace('id', columnId)
+    }
+
     let column = new Column(columnId, columnInfo.titreColonne, div, dragElement => updateColumn(column, dragElement));
     return reactive(column, columnName);
 }
@@ -99,9 +104,28 @@ function createCard(column, cardInfo)
     let foot = div.querySelector(".pied")
     foot.setAttribute("data-htmlfun", `${cardName}.getParticipants()`);
 
+    let actions = div.querySelector(".titre.icons_menu span.actions")
+
+    if(!isParticipant)
+    {
+        div.querySelector(".titre.icons_menu").removeChild(actions);
+    }
+    else
+    {
+        actions.querySelector(".delete").href = cardDeletionRoute.replace('id', cardInfo.idCarte);
+    }
+
     let card = reactive(new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
         cardInfo.affectationsCarte, column, div), cardName);
-    div.addEventListener('click', () => openCardView(card));
+    div.addEventListener('click', (event) =>
+    {
+        console.log(event.target);
+        if(event.target.classList.contains('delete'))
+        {
+            return;
+        }
+        openCardView(card);
+    });
     return card;
 }
 

@@ -31,9 +31,6 @@ class ControleurTableauAPI extends ControleurGenerique
 
     #[Route(path: '/api/tableaux/{codeTableau}', name:'api_afficher_tableau', methods:["GET"])]
     public function getToutesInfosTableau(string $codeTableau) : Response { // Fonctionne
-        if(! $this->estConnecte()){
-            return new JsonResponse(["error" => "Vous devez "], Response::HTTP_UNAUTHORIZED);
-        }
         try {
             return new JsonResponse($this->recupererToutesInfosTableau($codeTableau), Response::HTTP_OK);
         } catch (Exception $exception) {
