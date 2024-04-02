@@ -7,9 +7,7 @@ use App\Trellotrolle\Service\CarteServiceInterface;
 use App\Trellotrolle\Service\ColonneServiceInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
-use App\Trellotrolle\Lib\MessageFlash;
 use App\Trellotrolle\Service\TableauServiceInterface;
-use App\Trellotrolle\Service\UtilisateurServiceInterface;
 use Exception;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,12 +30,12 @@ class ControleurCarteAPI extends ControleurGenerique
      * @param CarteServiceInterface $carteService L'interface du service de carte.
      * @param ConnexionUtilisateurInterface $connexionUtilisateurJWT L'interface de connexion de l'utilisateur JWT.
      */
-    public function __construct (
-        ContainerInterface $container,
-        private CarteServiceInterface $carteService,
-        private TableauServiceInterface $tableauService,
-        private ColonneServiceInterface $colonneService,
-        private ConnexionUtilisateurInterface $connexionUtilisateurJWT
+    public function __construct(
+        ContainerInterface                             $container,
+        private readonly CarteServiceInterface         $carteService,
+        private readonly TableauServiceInterface       $tableauService,
+        private readonly ColonneServiceInterface       $colonneService,
+        private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT
     )
     {
         parent::__construct($container);
@@ -55,8 +53,9 @@ class ControleurCarteAPI extends ControleurGenerique
         return $this->connexionUtilisateurJWT->estConnecte();
     }
 
-    #[Route(path: '/api/cartes/{idCarte}', name:'api_details_carte', methods:["GET"])]
-    public function detailsCarte(string $idCarte) : Response { // Fonctionne
+    #[Route(path: '/api/cartes/{idCarte}', name: 'api_details_carte', methods: ["GET"])]
+    public function detailsCarte(string $idCarte): Response
+    { // Fonctionne
         try {
             $carte = $this->carteService->getCarte((int)$idCarte);
             $colonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
@@ -76,9 +75,10 @@ class ControleurCarteAPI extends ControleurGenerique
      * @param string $idCarte L'identifiant de la carte à supprimer.
      * @return Response La réponse JSON indiquant si la carte a été supprimée avec succès ou une erreur avec un message d'erreur.
      */
-    #[Route(path: '/api/cartes/{idCarte}', name:'api_supprimer_carte', methods:["DELETE"])]
-    public function supprimerCarte(string $idCarte) : Response { // Fonctionne
-        if(! $this->estConnecte()){
+    #[Route(path: '/api/cartes/{idCarte}', name: 'api_supprimer_carte', methods: ["DELETE"])]
+    public function supprimerCarte(string $idCarte): Response
+    { // Fonctionne
+        if (!$this->estConnecte()) {
             return new JsonResponse(["error" => "Vous devez "], Response::HTTP_UNAUTHORIZED);
         }
         try {

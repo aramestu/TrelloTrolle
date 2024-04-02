@@ -3,7 +3,6 @@
 namespace App\Trellotrolle\Controleur;
 
 use App\Trellotrolle\Lib\ConnexionUtilisateurInterface;
-use App\Trellotrolle\Lib\MessageFlash;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use App\Trellotrolle\Service\TableauServiceInterface;
 use App\Trellotrolle\Service\UtilisateurServiceInterface;
@@ -31,10 +30,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class ControleurTableauAPI extends ControleurGenerique
 {
     public function __construct (
-        ContainerInterface $container,
-        private TableauServiceInterface $tableauService,
-        private UtilisateurServiceInterface $utilisateurService,
-        private ConnexionUtilisateurInterface $connexionUtilisateurJWT
+        ContainerInterface                           $container,
+        private readonly TableauServiceInterface     $tableauService,
+        private readonly UtilisateurServiceInterface $utilisateurService,
+        private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT
     )
     {
         parent::__construct($container);
@@ -154,7 +153,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableau = $this->tableauService->ajouterMembre((int) $idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
+            $tableau = $this->tableauService->ajouterMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
             return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -175,7 +174,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableau = $this->tableauService->supprimerMembre((int) $idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
+            $tableau = $this->tableauService->supprimerMembre($idTableau, $this->connexionUtilisateurJWT->getIdUtilisateurConnecte() , $login);
             return new JsonResponse($this->recupererToutesInfosTableau($tableau->getCodeTableau()), Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -218,7 +217,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $tableaux = $this->tableauService->quitterTableau($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), (int) $idTableau);
+            $tableaux = $this->tableauService->quitterTableau($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
             return new JsonResponse($tableaux, Response::HTTP_OK);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
@@ -238,7 +237,7 @@ class ControleurTableauAPI extends ControleurGenerique
             return new JsonResponse(["error" => "Vous devez être connecté!"], Response::HTTP_UNAUTHORIZED);
         }
         try {
-            $this->tableauService->supprimer($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), (int) $idTableau);
+            $this->tableauService->supprimer($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $idTableau);
             return new JsonResponse('', Response::HTTP_NO_CONTENT);
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
