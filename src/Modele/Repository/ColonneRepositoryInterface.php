@@ -9,4 +9,6 @@ interface ColonneRepositoryInterface
     public function getNombreColonnesTotalTableau(int $idTableau): int;
 
     public function supprimer(string $valeurClePrimaire): bool;
+
+    public function lastInsertId(): false|string;
 }
