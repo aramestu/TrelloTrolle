@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trellotrolle\Test;
+namespace App\Trellotrolle\Test\BDDSiNecessaireFutur;
 
 use App\Trellotrolle\Configuration\ConfigurationBaseDeDonneesInterface;
 
@@ -8,17 +8,18 @@ class ConfigurationBDDTest implements ConfigurationBaseDeDonneesInterface
 {
     public function getLogin(): string
     {
-        return "lemoinem";
+        return "mon_utilisateur";
     }
 
     public function getMotDePasse(): string
     {
-        return "19102004";
+        return "mon_mot_de_passe";
     }
 
     public function getDSN(): string
     {
-        return "pgsql:host=162.38.222.142;port=5673;dbname=iut;user=mon_utilisateur;password=mon_mot_de_passe";
+        //changer les informations
+        return "pgsql:host=ip;port=5236;dbname=postgres;user=mon_utilisateur;password=mon_mot_de_passe";
     }
 
     public function getOptions(): array
