@@ -30,8 +30,6 @@ class ConfigurationBaseDeDonnees implements ConfigurationBaseDeDonneesInterface
     public function getOptions() : array {
         // Option pour que toutes les chaines de caractères
         // en entrée et sortie de MySql soit dans le codage UTF-8
-        return array(
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"
-        );
+        return [];
     }
 }
