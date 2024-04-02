@@ -3,6 +3,7 @@ import {Column} from "./objects/Column.js";
 import {Card} from "./objects/Card.js";
 import {reactive, startReactiveDom} from "../reactive.js";
 import {openCardView} from "./cardView.js";
+import {flashMessage} from "./utils.js";
 
 const columnTemplate = document.querySelector("template#column-template");
 const cardTemplate = document.querySelector("template#card-template");
@@ -93,7 +94,6 @@ function createCard(column, cardInfo)
     div.setAttribute("data-stylefun", `${cardName}.getColor()`);
     div.id = cardName;
 
-
     let columnBody = column.element.querySelector("div.corps");
     columnBody.appendChild(clone);
 
@@ -106,7 +106,7 @@ function createCard(column, cardInfo)
     let foot = div.querySelector(".pied")
     foot.setAttribute("data-htmlfun", `${cardName}.getParticipants()`);
 
-    let actions = div.querySelector(".titre.icons_menu span.actions")
+    let actions = div.querySelector(".titre.icons_menu span.actions");
 
     if(!isParticipant)
     {
@@ -151,15 +151,15 @@ async function updateColumn(column, dragElement)
         return;
     }
 
-    /*let res = await fetch(`${urlBase}/api/cartes`, {
+    let res = await fetch(`${urlBase}/api/cartes`, {
         method: "PATCH",
         body: JSON.stringify({
             idCarte: card.id,
-            titreCarte: titreCarte.value,
-            descriptifCarte: descriptifCarte.value,
-            couleurCarte: couleurCarte.value,
-            affectationsCarte: getOptions(affectationSelect),
-            idColonne: card.idColonne
+            titreCarte: card.title,
+            descriptifCarte: card.description,
+            couleurCarte: card.color,
+            affectationsCarte: card.participants.map((participant) => participant.login),
+            idColonne: column.id
         })
     });
 
@@ -168,14 +168,12 @@ async function updateColumn(column, dragElement)
         let message = await res.text();
         flashMessage('danger', `Une erreur est survenue lors du déplacement de la carte : ${message}`);
         return;
-    }*/
+    }
 
     card.column = column;
 
-    //TODO Remplacer par du réactif
     let body = column.element.querySelector("div.corps");
     body.appendChild(dragElement);
-    //updateWIP();
 }
 
 export {board}
