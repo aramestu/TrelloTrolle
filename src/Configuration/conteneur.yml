@@ -120,7 +120,7 @@ services:
 
   controleur_carte_api:
     class: App\Trellotrolle\Controleur\ControleurCarteAPI
-    arguments: [ '@container', '@carte_service', '@connexion_utilisateur_jwt' ]
+    arguments: [ '@container', '@carte_service', '@tableau_service', '@colonne_service', '@connexion_utilisateur_jwt' ]
 
   controleur_colonne_api:
     class: App\Trellotrolle\Controleur\ControleurColonneAPI

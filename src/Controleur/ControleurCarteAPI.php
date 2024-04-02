@@ -19,6 +19,8 @@ class ControleurCarteAPI extends ControleurGenerique
     public function __construct (
         ContainerInterface $container,
         private CarteServiceInterface $carteService,
+        private TableauServiceInterface $tableauService,
+        private ColonneServiceInterface $colonneService,
         private ConnexionUtilisateurInterface $connexionUtilisateurJWT
     )
     {
@@ -27,6 +29,19 @@ class ControleurCarteAPI extends ControleurGenerique
 
     private function estConnecte(): bool{
         return $this->connexionUtilisateurJWT->estConnecte();
+    }
+
+    #[Route(path: '/api/cartes/{idCarte}', name:'api_details_carte', methods:["GET"])]
+    public function detailsCarte(string $idCarte) : Response { // Fonctionne
+        try {
+            $carte = $this->carteService->getCarte((int)$idCarte);
+            $colonne = $this->colonneService->getColonne($carte->getColonne()->getIdColonne());
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
+
+            return new JsonResponse(["carte" => $carte, "tableau" => $tableau], Response::HTTP_OK); // True si ça a été supprimé
+        } catch (Exception $exception) {
+            return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
+        }
     }
 
     #[Route(path: '/api/cartes/{idCarte}', name:'api_supprimer_carte', methods:["DELETE"])]
