@@ -72,7 +72,6 @@ function createColumn(columnInfo)
 
     let title = div.querySelector(".titre.icons_menu span")
     title.setAttribute("data-textvar", `${columnName}.title`);
-    title.textContent = columnInfo.titreColonne;
 
     let column = new Column(columnId, columnInfo.titreColonne, div, dragElement => updateColumn(column, dragElement));
     return reactive(column, columnName);
@@ -80,10 +79,11 @@ function createColumn(columnInfo)
 
 function createCard(column, cardInfo)
 {
+    let cardName = "card-" + cardInfo.idCarte;
+
     let clone = cardTemplate.content.cloneNode(true);
     let div = clone.querySelector("div.carte");
-    div.style.backgroundColor = cardInfo.couleurCarte;
-    let cardName = "card-" + cardInfo.idCarte;
+    div.setAttribute("data-stylefun", `${cardName}.getColor()`);
     div.id = cardName;
 
 
@@ -92,23 +92,17 @@ function createCard(column, cardInfo)
 
     let title = div.querySelector(".titre.icons_menu span")
     title.setAttribute("data-textvar", `${cardName}.title`);
-    title.textContent = cardInfo.titreCarte;
 
     let body = div.querySelector(".corps");
     body.setAttribute("data-textvar", `${cardName}.description`);
-    body.textContent = cardInfo.descriptifCarte;
 
     let foot = div.querySelector(".pied")
     foot.setAttribute("data-htmlfun", `${cardName}.getParticipants()`);
-    for(let user of cardInfo.affectationsCarte)
-    {
-        foot.appendChild(createUserLabel(user))
-    }
 
-    let card = new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
-        cardInfo.affectationsCarte, column, div)
+    let card = reactive(new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
+        cardInfo.affectationsCarte, column, div), cardName);
     div.addEventListener('click', () => openCardView(card));
-    return reactive(card, cardName);
+    return card;
 }
 
 function createUserLabel(user)

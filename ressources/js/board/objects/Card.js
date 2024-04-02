@@ -30,6 +30,10 @@ class Card extends DragElement
         return result;
     }
 
+    getColor(){
+        return {backgroundColor: this.color};
+    }
+
 }
 
 export {Card}
