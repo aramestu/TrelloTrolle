@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trellotrolle\Test;
+namespace App\Trellotrolle\Test\ServiceTest;
 
 use App\Trellotrolle\Modele\DataObject\Carte;
 use App\Trellotrolle\Modele\DataObject\Colonne;

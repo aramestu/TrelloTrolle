@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Trellotrolle\Test;
+namespace App\Trellotrolle\Test\LibTest;
 
 use App\Trellotrolle\Lib\MotDePasse;
 use PHPUnit\Framework\TestCase;
