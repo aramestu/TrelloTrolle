@@ -120,11 +120,9 @@
                         {% endfor %}
                     </ul>
                     {% if estProprietaire %}
-                        <div class="member-selector">
-                            <label for="member-add">Ajouter un membre :</label>
-                            <input id="member-add" autocomplete="off" type="text" placeholder="Entrez au moins 2 caractères...">
-                            <div class="autocompletion" hidden=""></div>
-                        </div>
+                        <li>
+                            <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                        </li>
                     {% endif %}
                 </div>
                 <div id="wip" class="participants">
