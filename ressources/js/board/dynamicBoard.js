@@ -45,6 +45,8 @@ async function loadBoard(boardCode)
         boardBody.appendChild(clone);
     }
 
+    document.querySelector(".tableau > .corps > .loading").remove();
+
     return new Board(boardInfo.idTableau, boardInfo.titreTableau, boardInfo.proprietaireTableau,
         boardInfo.participants, columns, cards);
 }
