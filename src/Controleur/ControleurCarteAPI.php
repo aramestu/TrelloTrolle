@@ -42,7 +42,7 @@ class ControleurCarteAPI extends ControleurGenerique
             $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
 
             $this->tableauService->verifierParticipant($this->connexionUtilisateurJWT->getIdUtilisateurConnecte(), $tableau->getIdTableau());
-            return new JsonResponse($carte, Response::HTTP_OK); // True si ça a été supprimé
+            return new JsonResponse(["carte" => $carte, "idTableau" => $tableau->getIdTableau()], Response::HTTP_OK); // True si ça a été supprimé
         } catch (Exception $exception) {
             return new JsonResponse(["error" => $exception->getMessage()], $exception->getCode());
         }
