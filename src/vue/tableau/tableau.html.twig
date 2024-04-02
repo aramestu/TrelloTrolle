@@ -3,45 +3,48 @@
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
 {% block header_additions %}
-    <script src="{{ asset('../ressources/js/board/cardView.js') }}" defer></script>
     <script src="{{ asset('../ressources/js/board/autocompletion.js') }}" defer></script>
-    <script type="module" src="{{ asset('../ressources/js/board/boardDragAndDrop.js') }}"></script>
+    <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
 {% endblock %}
 
 {% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
 {% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
 
 {% block page_content %}
-    <template class="card-view-overlay">
-        <div class="card-view-background">
-            <div class="card-frame">
-                <div class="card-header">
-                    <label>
-                        <input type="text" id="titreCarte" name="titreCarte" value="" placeholder="Titre de la carte..."
-                               minlength="1" maxlength="50">
-                    </label>
-                    <button id="close-card-view" onclick="closeCardView()">
-                        <img src="{{ asset('../ressources/img/x.png') }}" alt="Fermer" width="24" height="24">
-                    </button>
-                </div>
-                <p>
-                    <label for="descriptifCarte">Description de la carte&#42; :</label>
-                    <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte"></textarea>
-                </p>
-                <p>
-                    <label for="couleurCarte">Couleur de la carte&#42; :</label>
-                    <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte">
-                </p>
-                <p>
-                    <label for="affectationsCarte">Membres affectés :</label>
-                    <select multiple name="affectationsCarte[]" id="affectationsCarte"></select>
-                </p>
+    <template class="card-view-content">
+        <div class="view-content">
+            <div class="card-header">
+                <label>
+                    <input type="text" id="titreCarte" name="titreCarte" value="" placeholder="Titre de la carte..."
+                           minlength="1" maxlength="50">
+                </label>
+                <button id="close-card-view">
+                    <img src="{{ asset('../ressources/img/x.png') }}" alt="Fermer" width="24" height="24">
+                </button>
             </div>
+            <p>
+                <label for="descriptifCarte">Description de la carte&#42; :</label>
+                <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte"></textarea>
+            </p>
+            <p>
+                <label for="couleurCarte">Couleur de la carte&#42; :</label>
+                <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte">
+            </p>
+            <p>
+                <label for="affectationsCarte">Membres affectés :</label>
+                <select multiple name="affectationsCarte[]" id="affectationsCarte"></select>
+            </p>
         </div>
     </template>
 
     <div class="trello-overlay">
-
+        <div class="card-view-background hidden">
+            <div class="card-frame">
+                <div class="loading">
+                    <img src="{{ asset('../ressources/img/loading.gif') }}" alt="Chargement..." width="32" height="32">
+                </div>
+            </div>
+        </div>
     </div>
     <div class="trello-main" data-dnd="{{ estParticipant }}">
         <aside>

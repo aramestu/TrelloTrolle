@@ -45,6 +45,11 @@ body {
     align-items: baseline;
 }
 
+.trello-overlay div.card-view-background.hidden
+{
+    display: none;
+}
+
 .trello-overlay div.card-view-background div.card-frame
 {
     border-radius: 8px;

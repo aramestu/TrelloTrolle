@@ -1,12 +1,8 @@
-<div class="carte" style="background-color: {{ carte.couleurCarte }};">
+<div data-id="{{ carte.idCarte }}" class="carte" style="background-color: {{ carte.couleurCarte }};">
     <div class="titre icons_menu">
         <span>{{ carte.titreCarte }}</span>
         {% if estParticipant %}
             <span class="actions">
-                <button onclick="openCardView({{ carte.idCarte }})">
-                    <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la carte">
-                </button>
-
                 <!--a href="{{ route('mise_a_jour_carte', {idCarte: carte.idCarte}) }}">
                     <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la carte">
                 </a-->

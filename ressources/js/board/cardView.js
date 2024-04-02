@@ -1,35 +1,75 @@
-const overlayBlock = document.querySelector("div.trello-overlay");
-const cardViewTemplate = document.querySelector("template.card-view-overlay");
+import {members} from "./dynamicBoard.js";
 
-let view = null;
+const overlayBlock = document.querySelector("div.trello-overlay");
+const contentTemplate = document.querySelector("template.card-view-content");
+const cardView = document.querySelector("div.card-view-background");
+const loading = cardView.querySelector("div.loading");
+
+const ROOT_URL = '/TrelloTrolle/web';
+
 let opened = false;
 
-function openCardView(cardID)
+async function openCardView(cardID)
 {
     if(opened)
     {
         return;
     }
 
-    createView(cardID);
+    try
+    {
+        showView();
+
+        let cardRes = await fetch(`${ROOT_URL}/api/cartes/${cardID}`, {method: "GET"});
+
+        loading.classList.add("hidden");
+
+        if(!cardRes.ok)
+        {
+            let errorMsg = document.createElement("p");
+            errorMsg.textContent = "Une erreur est survenue lors du chargement de la carte. Veuillez réessayer plus tard.";
+
+            cardView.appendChild(errorMsg);
+            return;
+        }
+
+        let cardJson = await cardRes.json();
+        createContent(cardJson)
+    }
+    catch (e)
+    {
+        console.log(e);
+    }
+
 }
 
-function createView(result)
+function showView()
 {
     opened = true;
 
-    let clone = cardViewTemplate.content.cloneNode(true);
-    overlayBlock.appendChild(clone);
+    cardView.classList.remove("hidden");
+}
 
-    view = overlayBlock.querySelector("div.card-view-background");
-    view.addEventListener("click", function (event)
+function createContent(result)
+{
+    let clone = contentTemplate.content.cloneNode(true);
+    cardView.appendChild(clone);
+
+    let content = overlayBlock.querySelector("div.view-content");
+    let card = result['carte'];
+
+    content.querySelector("#titreCarte").value = card.titreCarte;
+    content.querySelector("#descriptifCarte").value = card.descriptifCarte;
+    content.querySelector("#couleurCarte").value = card.couleurCarte;
+
+    let affectationSelect = content.querySelector("#affectationsCarte");
+    for(let member of members)
     {
-        if(event.target !== view)
-        {
-            return;
-        }
-        closeCardView();
-    });
+        let option = document.createElement("option");
+        option.value = member;
+
+        affectationSelect.appendChild(member);
+    }
 
 }
 
@@ -40,6 +80,22 @@ function closeCardView()
         return;
     }
 
+    while(cardView.lastElementChild)
+    {
+        cardView.removeChild(cardView.lastElementChild);
+    }
+    loading.classList.remove("hidden");
+    cardView.classList.add("hidden");
     opened = false;
-    overlayBlock.removeChild(view);
 }
+
+cardView.addEventListener("click", evt =>
+{
+   if(evt.target !== cardView && evt.target.id !== "close-card-view")
+   {
+       return;
+   }
+   closeCardView();
+});
+
+export {openCardView, closeCardView}
