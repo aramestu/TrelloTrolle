@@ -117,15 +117,7 @@ function createCard(column, cardInfo)
 
     let card = reactive(new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
         cardInfo.affectationsCarte, column, div), cardName);
-    div.addEventListener('click', (event) =>
-    {
-        console.log(event.target);
-        if(event.target.classList.contains('delete'))
-        {
-            return;
-        }
-        openCardView(card);
-    });
+    div.addEventListener('click', () => openCardView(card));
     return card;
 }
 

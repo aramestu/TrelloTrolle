@@ -80,9 +80,6 @@ function createContent(cardObj, result)
         option.value = member.login;
         option.textContent = member.prenom + ' ' + member.nom + ' (' + member.login + ')';
 
-        console.log(member);
-        console.log(cardObj.participants);
-
         if(logins.includes(member.login))
         {
             option.selected = true;
