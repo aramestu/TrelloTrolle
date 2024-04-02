@@ -152,9 +152,6 @@ class ControleurGenerique
      * @throws SyntaxError
      * @throws RuntimeError
      * @throws LoaderError
-     * @throws SyntaxError
-     * @throws RuntimeError
-     * @throws LoaderError
      */
 
     public function afficherErreur(string $messageErreur = "", string $controleur = ""): Response

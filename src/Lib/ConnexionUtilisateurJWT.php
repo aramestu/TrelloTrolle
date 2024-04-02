@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Lib;
 
 use App\Trellotrolle\Modele\HTTP\Cookie;
+use Exception;
 
 /**
  * Classe ConnexionUtilisateurJWT
@@ -23,6 +24,7 @@ class ConnexionUtilisateurJWT implements ConnexionUtilisateurInterface
      *
      * @param string $idUtilisateur L'identifiant de l'utilisateur
      * @return void
+     * @throws Exception
      */
     public function connecter(string $idUtilisateur): void
     {
