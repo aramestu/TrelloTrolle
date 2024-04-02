@@ -73,11 +73,11 @@ class UtilisateurService implements UtilisateurServiceInterface
     /**
      * Vérifie si le login est correct.
      *
-     * @param string $login Le login à vérifier.
+     * @param string|null $login Le login à vérifier.
      * @return void
      * @throws ServiceException Si le login n'a pas entre 4 et 32 caractères.
      */
-    private function verifierLoginCorrect(string $login): void
+    private function verifierLoginCorrect(string|null $login): void
     {
         if (strlen($login) < 4 || strlen($login) > 32) {
             throw new ServiceException("Le login doit être compris entre 4 et 32 caractères!", Response::HTTP_BAD_REQUEST);
