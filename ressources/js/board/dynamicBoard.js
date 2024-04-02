@@ -5,6 +5,8 @@ import {openCardView} from "./cardView.js";
 
 const columnTemplate = document.querySelector("template#column-template");
 const cardTemplate = document.querySelector("template#card-template");
+const columnCreationTemplate = document.querySelector("template#column-creation");
+const cardCreationTemplate = document.querySelector("template#card-creation");
 const boardBody = document.querySelector(".tableau div.corps")
 
 const board = await loadBoard(boardCode)
@@ -27,9 +29,27 @@ async function loadBoard(boardCode)
 
         for (let cardInfo of associations['associations'][column.id])
         {
-            cards.push(createCard(column, cardInfo))
+            cards.push(createCard(column, cardInfo));
         }
 
+        if(isParticipant)
+        {
+            let clone = cardCreationTemplate.content.cloneNode(true);
+            let a = clone.querySelector("a");
+            a.href = cardCreationRoute.replace('id', column.id)
+
+            column.element.appendChild(clone)
+        }
+
+    }
+
+    if(isParticipant)
+    {
+        let clone = columnCreationTemplate.content.cloneNode(true);
+        let a = clone.querySelector("a");
+        a.href = columnCreationRoute;
+
+        boardBody.appendChild(clone);
     }
 
     return new Board(boardInfo.idTableau, boardInfo.titreTableau, boardInfo.proprietaireTableau,
@@ -60,8 +80,8 @@ function createCard(column, cardInfo)
     div.style.backgroundColor = cardInfo.couleurCarte;
     div.id = "card-" + cardInfo.idCarte;
 
+
     let columnBody = column.element.querySelector("div.corps");
-    columnBody.addEventListener('click', () => openCardView(cardInfo.idCarte));
     columnBody.appendChild(clone);
 
     let title = div.querySelector(".titre.icons_menu span")
@@ -76,8 +96,10 @@ function createCard(column, cardInfo)
         foot.appendChild(createUserLabel(user))
     }
 
-    return new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
-        cardInfo.affectationsCarte, column, div);
+    let card = new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
+        cardInfo.affectationsCarte, column, div)
+    div.addEventListener('click', () => openCardView(card));
+    return card;
 }
 
 function createUserLabel(user)

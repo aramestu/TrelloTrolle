@@ -9,7 +9,7 @@ const loading = cardView.querySelector("div.loading");
 
 let opened = false;
 
-async function openCardView(cardID)
+async function openCardView(card)
 {
     if(opened)
     {
@@ -20,7 +20,7 @@ async function openCardView(cardID)
     {
         showView();
 
-        let cardRes = await fetch(`${urlBase}/api/cartes/${cardID}`, {method: "GET"});
+        let cardRes = await fetch(`${urlBase}/api/cartes/${card.id}`, {method: "GET"});
 
         loading.classList.add("hidden");
 
@@ -34,7 +34,7 @@ async function openCardView(cardID)
         }
 
         let cardJson = await cardRes.json();
-        createContent(cardJson)
+        createContent(card, cardJson)
     }
     catch (e)
     {
@@ -50,7 +50,7 @@ function showView()
     cardView.classList.remove("hidden");
 }
 
-function createContent(result)
+function createContent(cardObj, result)
 {
     let clone = contentTemplate.content.cloneNode(true);
     cardFrame.appendChild(clone);
@@ -80,15 +80,20 @@ function createContent(result)
     let updateButton = content.querySelector('#update');
     updateButton.addEventListener("click", async function()
     {
+        let title = titreCarte.value;
+        let desc = descriptifCarte.value;
+        let color = couleurCarte.value;
+        let affectations = getOptions(affectationSelect);
+
         let res = await fetch(urlBase + `/api/cartes`,
             {
                 method: "PATCH",
                 body: JSON.stringify({
                     idCarte: card.idCarte,
-                    titreCarte: titreCarte.value,
-                    descriptifCarte: descriptifCarte.value,
-                    couleurCarte: couleurCarte.value,
-                    affectationsCarte: getOptions(affectationSelect),
+                    titreCarte: title,
+                    descriptifCarte: desc,
+                    couleurCarte: color,
+                    affectationsCarte: affectations,
                     idColonne: card.idColonne
                 })
             });
@@ -97,6 +102,10 @@ function createContent(result)
 
         if(res.ok)
         {
+            cardObj.title = title;
+            cardObj.description = desc;
+            cardObj.color = color;
+            cardObj.participants = affectations;
             flashMessage('success', 'Mise à jour du tableau réalisée avec succès !');
             return;
         }
