@@ -15,7 +15,6 @@ class MotDePasseTest extends TestCase
         $motDePasse = new MotDePasse();
         $hashedString = $motDePasse->hacher($mdpClair);
 
-        var_dump($hashedString);
         $this->assertIsString($hashedString);
         $this->assertTrue(password_verify($mdpClair, $hashedString));
     }

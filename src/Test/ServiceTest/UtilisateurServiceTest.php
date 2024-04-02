@@ -411,7 +411,7 @@ class UtilisateurServiceTest extends TestCase
     {
         // Créer un utilisateur avec un ancien mot de passe correct
         $mdpClair = "AncienMdp1";
-        $mdpHache = password_hash($mdpClair, PASSWORD_DEFAULT); // Générer le hachage du mot de passe
+        $mdpHache = $this->motDePasse->hacher($mdpClair); // Générer le hachage du mot de passe
 
         $utilisateur = Utilisateur::create("login", "Nom", "Prénom", "email@example.com", $mdpHache);
 
@@ -422,6 +422,29 @@ class UtilisateurServiceTest extends TestCase
 
         // Appeler la méthode à tester avec le mot de passe correct
         $this->utilisateurService->modifierUtilisateur($utilisateur->getLogin(), "NouveauNom", "NouveauPrénom", "nouveauemail@example.com", $mdpClair, "NouveauMdp1", "NouveauMdp1");
+    }
+
+    public function testTriggerException_method_modifierUtilisateur_InvalidEmail()
+    {
+        $utilisateur = Utilisateur::create("login", "Nom", "Prénom", "email@example.com", "mdpHacheTKT");
+        $user = Utilisateur::create("autreLogin", "Nom", "Prénom", "t@t.com", "mdpHacheTKT");
+
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererParClePrimaire')
+            ->with($utilisateur->getLogin())
+            ->willReturn($utilisateur);
+
+        $this->utilisateurRepository->expects($this->once())
+            ->method('recupererUtilisateursParEmail')
+            ->with($utilisateur->getEmail())
+            ->willReturn([$user]);
+
+        $this->expectException(ServiceException::class);
+        $this->expectExceptionMessage("Vous ne pouvez pas entrer un email déjà utilisé par un autre utilisateur");
+        $this->expectExceptionCode(Response::HTTP_FORBIDDEN);
+
+        $this->utilisateurService->modifierUtilisateur($utilisateur->getLogin(), $utilisateur->getNom(), $utilisateur->getPrenom(), $utilisateur->getEmail(), $utilisateur->getMdpHache());
+
     }
 
 
