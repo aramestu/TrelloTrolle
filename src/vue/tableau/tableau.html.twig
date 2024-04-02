@@ -9,8 +9,10 @@
     <script type="text/javascript">
         const isParticipant = {{ estParticipant ? 'true':'false' }};
         const urlBase = '{{ asset('.') }}';
-        const boardID = '{{ tableau.idTableau }}';
         const boardCode = '{{ tableau.codeTableau }}';
+
+        const columnCreationRoute = '{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}'
+        const cardCreationRoute = '{{ route('creation_carte', {idColonne: 'id'}) }}'
     </script>
     <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
 {% endblock %}
@@ -60,6 +62,24 @@
             <div class="corps"></div>
             <div class="pied"></div>
         </div>
+    </template>
+    <template id="column-creation">
+        <a class="ajout-tableau">
+            <div class="colonne">
+                <div class="titre icons_menu btn-ajout">
+                    <span>Ajouter une colonne</span>
+                </div>
+            </div>
+        </a>
+    </template>
+    <template id="card-creation">
+        <a class="ajout-tableau">
+            <div>
+                <div class="titre icons_menu btn-ajout">
+                    <span>Ajouter une carte</span>
+                </div>
+            </div>
+        </a>
     </template>
 
     <div class="trello-overlay">
