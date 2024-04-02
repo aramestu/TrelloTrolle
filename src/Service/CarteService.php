@@ -35,8 +35,8 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierIdCarteCorrect(?int $idTableau): void{
-        if(is_null($idTableau)){
+    private function verifierIdCarteCorrect(?int $idCarte): void{
+        if(is_null($idCarte)){
             throw new ServiceException( "La carte n'est pas renseigné", Response::HTTP_BAD_REQUEST);
         }
     }
@@ -44,7 +44,8 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierTitreCarteCorrect(?string $titreCarte) {
+    private function verifierTitreCarteCorrect(?string $titreCarte): void
+    {
         $nb = strlen($titreCarte);
         if(is_null($titreCarte) || $nb == 0 || $nb > 64){
             throw new ServiceException( "Le nom de la carte ne peut pas faire plus de 64 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -54,7 +55,8 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierDescriptifCarteCorrect(?string $descriptifCarte) {
+    private function verifierDescriptifCarteCorrect(?string $descriptifCarte): void
+    {
         $nb = strlen($descriptifCarte);
         if(is_null($descriptifCarte) || $nb == 0){
             throw new ServiceException( "La description de la carte doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -64,7 +66,8 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierCouleurCarteCorrect(?string $couleurCarte) {
+    private function verifierCouleurCarteCorrect(?string $couleurCarte): void
+    {
         $nb = strlen($couleurCarte);
         if(is_null($couleurCarte) || $nb == 0 || $nb > 7){
             throw new ServiceException( "La couleur de la carte ne peut pas faire plus de 7 caractères et doit être renseigné", Response::HTTP_BAD_REQUEST);
@@ -75,7 +78,8 @@ class CarteService implements CarteServiceInterface
     /**
      * @throws ServiceException
      */
-    private function verifierAffectationsCorrect(?array $affectations, Tableau $tableau) {
+    private function verifierAffectationsCorrect(?array $affectations, Tableau $tableau): void
+    {
         $loginsParticipantsTableau = [];
         foreach ($tableau->getParticipants() as $participant){
             $loginsParticipantsTableau[] = $participant->getLogin();
