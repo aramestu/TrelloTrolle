@@ -5,41 +5,13 @@
 
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
-{% block header_additions %}
-    <script type="module" src="{{ asset('../ressources/js/board/Member.js') }}"></script>
+{% block header_additions %}->
     <script type="text/javascript">
-        import {cards} from "../../../ressources/js/board/Card";
-
-        class Member
-        {
-
-            constructor(login, nom, prenom, email)
-            {
-                this.login = login;
-                this.nom = nom;
-                this.prenom = prenom;
-                this.email = email;
-            }
-
-        }
-
         const isParticipant = {{ estParticipant ? 'true':'false' }};
         const urlBase = '{{ asset('.') }}';
-        const members = [
-            {% for participant in tableau.participants %}
-            new Member('{{ participant.login }}', '{{ participant.nom }}', '{{ participant.prenom }}', '{{ participant.email }}'),
-            {% endfor %}
-            new Member('{{ tableau.proprietaireTableau.login }}', '{{ tableau.proprietaireTableau.nom }}',
-                '{{ tableau.proprietaireTableau.prenom }}', '{{ tableau.proprietaireTableau.email }}')
-        ];
-
-        cards = [
-            {% for colonnes in associationColonneCarte['associations'] %}
-
-            {% endfor %}
-        ]
+        const boardID = '{{ tableau.idTableau }}';
+        const boardCode = '{{ tableau.codeTableau }}';
     </script>
-    <script src="{{ asset('../ressources/js/board/autocompletion.js') }}" defer></script>
     <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
 {% endblock %}
 
@@ -70,6 +42,23 @@
             <button id="update">
                 Mettre à jour
             </button>
+        </div>
+    </template>
+    <template id="column-template">
+        <div class="colonne droppable">
+            <div class="titre icons_menu">
+                <span></span>
+            </div>
+            <div class="corps"></div>
+        </div>
+    </template>
+    <template id="card-template">
+        <div class="carte" style="background-color: white;">
+            <div class="titre icons_menu">
+                <span></span>
+            </div>
+            <div class="corps"></div>
+            <div class="pied"></div>
         </div>
     </template>
 
@@ -153,19 +142,7 @@
                     {% endif %}
                 </div>
                 <div class="corps">
-                    {% for colonne in associationColonneCarte['colonnes'] %}
-                        {% include 'colonne/colonne.html.twig' with {colonne: colonne, cartes: associationColonneCarte['associations'][colonne.idColonne] , estParticipant: estParticipant} %}
-                    {% endfor %}
 
-                    {% if estParticipant %}
-                        <a class="ajout-tableau" href="{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}">
-                            <div class="colonne">
-                                <div class="titre icons_menu btn-ajout">
-                                    <span>Ajouter une colonne</span>
-                                </div>
-                            </div>
-                        </a>
-                    {% endif %}
                 </div>
             </div>
         </article>

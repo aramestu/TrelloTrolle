@@ -1,6 +1,4 @@
-import {DragElement} from "../DragElement.js";
-
-let cards = {};
+import {DragElement} from "../../DragElement.js";
 
 class Card extends DragElement
 {
@@ -21,10 +19,8 @@ class Card extends DragElement
         this.color = color;
         this.participants = participants;
         this.column = column;
-
-        cards[id] = this;
     }
 
 }
 
-export {Card, cards}
+export {Card}

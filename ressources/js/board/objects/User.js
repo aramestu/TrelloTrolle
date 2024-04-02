@@ -1,4 +1,4 @@
-class Member
+class User
 {
 
     constructor(login, nom, prenom, email)
@@ -11,4 +11,4 @@ class Member
 
 }
 
-export { Member }
+export { User }

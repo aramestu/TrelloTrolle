@@ -1,6 +1,4 @@
-import {DropElementArea} from "../DropElementArea.js";
-
-const columns = [];
+import {DropElementArea} from "../../DropElementArea.js";
 
 class Column extends DropElementArea
 {
@@ -12,12 +10,11 @@ class Column extends DropElementArea
     constructor(id, title, element, func)
     {
         super(element, func);
+        this.id = id;
         this.title = title;
         this.element = element;
-
-        columns.push(this);
     }
 
 }
 
-export {Column, columns}
+export {Column}
