@@ -31,42 +31,63 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: 2;
-}
 
-.trello-overlay div.card-view-background
-{
-    height: 100%;
-    background: #0000007F;
-    pointer-events: auto;
+    div.card-view-background
+    {
+        height: 100%;
+        background: #0000007F;
+        pointer-events: auto;
 
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: baseline;
-}
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: baseline;
 
-.trello-overlay div.card-view-background div.card-frame
-{
-    border-radius: 8px;
-    background-color: white;
-    padding: 16px;
+        div.card-frame
+        {
+            border-radius: 8px;
+            background-color: white;
+            padding: 16px;
 
-    width: 50%;
-    height: fit-content;
-    margin-top: 32px;
-}
+            width: 50%;
+            height: fit-content;
+            margin-top: 32px;
 
-.trello-overlay div.card-frame div.card-header
-{
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-}
+            .vertical
+            {
+                display: flex;
+                flex-direction: column;
+            }
 
-.trello-overlay button#close-card-view
-{
-    background: none;
-    border: none;
+            div.card-header
+            {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                button#close-card-view
+                {
+                    background: none;
+                    border: none;
+
+                    img
+                    {
+                        pointer-events: none;
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    .hidden
+    {
+        display: none !important;
+    }
+
 }
 
 .trello-main {
@@ -203,6 +224,16 @@ article {
             flex-grow: 1;
             gap: 20px;
             padding: 10px 20px;
+
+            > .loading
+            {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: center;
+                width: 100%;
+                height: 100%;
+            }
         }
     }
 }

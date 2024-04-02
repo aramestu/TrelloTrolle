@@ -30,20 +30,11 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 class ControleurTableauAPI extends ControleurGenerique
 {
-
-    /**
-     * Constructeur de la classe.
-     *
-     * @param ContainerInterface $container L'interface du conteneur de dépendances.
-     * @param TableauServiceInterface $tableauService L'interface du service de tableau.
-     * @param UtilisateurServiceInterface $utilisateurService L'interface du service d'utilisateur.
-     * @param ConnexionUtilisateurInterface $connexionUtilisateurJWT L'interface de connexion de l'utilisateur JWT.
-     */
-    public function __construct(
-        ContainerInterface                             $container,
-        private readonly TableauServiceInterface       $tableauService,
-        private readonly UtilisateurServiceInterface   $utilisateurService,
-        private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT
+    public function __construct (
+        ContainerInterface $container,
+        private TableauServiceInterface $tableauService,
+        private UtilisateurServiceInterface $utilisateurService,
+        private ConnexionUtilisateurInterface $connexionUtilisateurJWT
     )
     {
         parent::__construct($container);
@@ -69,12 +60,8 @@ class ControleurTableauAPI extends ControleurGenerique
      * @param string $codeTableau Le code du tableau à récupérer les informations.
      * @return Response La réponse JSON contenant les informations du tableau ou une erreur avec le message d'erreur correspondant.
      */
-    #[Route(path: '/api/tableaux/{codeTableau}', name: 'api_afficher_tableau', methods: ["GET"])]
-    public function getToutesInfosTableau(string $codeTableau): Response
-    { // Fonctionne
-        if (!$this->estConnecte()) {
-            return new JsonResponse(["error" => "Vous devez "], Response::HTTP_UNAUTHORIZED);
-        }
+    #[Route(path: '/api/tableaux/{codeTableau}', name:'api_afficher_tableau', methods:["GET"])]
+    public function getToutesInfosTableau(string $codeTableau) : Response { // Fonctionne
         try {
             return new JsonResponse($this->recupererToutesInfosTableau($codeTableau), Response::HTTP_OK);
         } catch (Exception $exception) {
