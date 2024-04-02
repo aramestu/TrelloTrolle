@@ -148,6 +148,8 @@ class TableauService implements TableauServiceInterface
      */
     public function ajouterMembre(?int $idTableau, ?string $loginUtilisateurConnecte, ?string $loginUtilisateurNouveau): Tableau
     {
+        $this->verifierLoginCorrect($loginUtilisateurConnecte);
+        $this->verifierLoginCorrect($loginUtilisateurNouveau);
         $this->verifierIdTableauCorrect($idTableau);
         /**
          * @var Tableau $tableau
@@ -157,8 +159,6 @@ class TableauService implements TableauServiceInterface
         if(is_null($tableau)){
             throw new ServiceException( "Le tableau n'existe pas", Response::HTTP_NOT_FOUND);
         }
-        if(is_null($loginUtilisateurNouveau))
-            throw new ServiceException("login du nouveau membre manquant", Response::HTTP_BAD_REQUEST);
         if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
             throw new ServiceException( "Seul le propriétaire du tableau peut ajouter des membres", Response::HTTP_UNAUTHORIZED);
         }
@@ -199,7 +199,7 @@ class TableauService implements TableauServiceInterface
         // Si l'utilisateur connecté veut supprimer qq d'autre (seul le proprio peut supprimer dans ce cas)
         if($loginUtilisateurConnecte != $loginUtilisateurDelete){
             if(! $tableau->estProprietaire($loginUtilisateurConnecte)){
-                throw new ServiceException( "Seul le propriétaire du tableau peut mettre supprimer des membres", Response::HTTP_UNAUTHORIZED);
+                throw new ServiceException( "Seul le propriétaire du tableau peut supprimer des membres", Response::HTTP_UNAUTHORIZED);
             }
         }
         else{ // Ca signifie que l'utilisateur connecté est le même que celui à supprimer (il a le droit de quitter le tableau)
@@ -248,6 +248,9 @@ class TableauService implements TableauServiceInterface
         $this->tableauRepository->supprimer($idTableau);
     }
 
+    /**
+     * @throws ServiceException
+     */
     public function verifierParticipant(?string $loginUtilisateurConnecte, ?int $idTableau): void
     {
         $this->verifierLoginCorrect($loginUtilisateurConnecte);
