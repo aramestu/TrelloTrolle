@@ -1,7 +1,8 @@
 import {Column} from "./Column.js";
 import {Card, cards} from "./Card.js";
 import {openCardView} from "./cardView.js";
-import {flashMessage} from "./utils";
+import {flashMessage} from "./utils.js";
+import {reactive, startReactiveDom} from "../reactive.js";
 
 const columnElements = document.querySelectorAll(".trello-main div.colonne.droppable");
 const memberElements = document.querySelectorAll("div#listeParticipants > ul > li");
@@ -100,6 +101,7 @@ function initDragAndDrop()
             let id = cardElement.dataset.id;
             let card = new Card(id, column, cardElement);
             card.setActive(isParticipant);
+            setReactiveCard(id, cardElement);
 
             cardElement.addEventListener("click", () => openCardView(id))
 
@@ -109,4 +111,18 @@ function initDragAndDrop()
     });
 }
 
+function setReactiveCard(id, card, cardElement){
+    let title = cardElement.querySelector(".titre span");
+    let description = cardElement.querySelector(".corps");
+    let affectations  = cardElement.querySelector("pied");
+
+    let nomCarte = "Carte" + id;
+
+    title.setAttribute("data-textvar", `${nomCarte}.id`);
+    description.setAttribute("data-textvar", `${nomCarte}.description`);
+    affectations.setAttribute("data-htmlfun", `${nomCarte}.getAssociations`);
+    reactive(card, nomCarte)
+}
+
 initDragAndDrop();
+startReactiveDom();
