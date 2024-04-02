@@ -82,7 +82,7 @@
                 </div>
                 <div id="listeParticipants" class="participants">
                     Membres :
-                    <ul data-htmlfun="listBoardMembers">
+                    <ul>
                         <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
                         {% for participant in tableau.participants %}
                             <li>
@@ -109,7 +109,7 @@
                 </div>
                 <div id="wip" class="participants">
                     Travail en cours :
-                    <ul data-htmlfun="getParticipants()">
+                    <ul>
                         {% for participant in informationsAffectation %}
                             <li>
                                 <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>

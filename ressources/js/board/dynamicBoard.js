@@ -1,6 +1,7 @@
 import {Board} from "./objects/Board.js";
 import {Column} from "./objects/Column.js";
 import {Card} from "./objects/Card.js";
+import {reactive, startReactiveDom} from "../reactive.js";
 import {openCardView} from "./cardView.js";
 
 const columnTemplate = document.querySelector("template#column-template");
@@ -8,6 +9,8 @@ const cardTemplate = document.querySelector("template#card-template");
 const boardBody = document.querySelector(".tableau div.corps")
 
 const board = await loadBoard(boardCode)
+
+startReactiveDom();
 
 async function loadBoard(boardCode)
 {
@@ -42,15 +45,17 @@ function createColumn(columnInfo)
 
     let clone = columnTemplate.content.cloneNode(true);
     let div = clone.querySelector("div.colonne.droppable");
-    div.id = "column-" + columnId;
+    let columnName = "column-" + columnId;
+    div.id =  columnName;
 
     boardBody.appendChild(clone);
 
-    let title = div.querySelector(".titre.icons_menu span");
+    let title = div.querySelector(".titre.icons_menu span")
+    title.setAttribute("data-textvar", `${columnName}.title`);
     title.textContent = columnInfo.titreColonne;
 
     let column = new Column(columnId, columnInfo.titreColonne, div, dragElement => updateColumn(column, dragElement));
-    return column;
+    return reactive(column, columnName);
 }
 
 function createCard(column, cardInfo)
@@ -58,26 +63,30 @@ function createCard(column, cardInfo)
     let clone = cardTemplate.content.cloneNode(true);
     let div = clone.querySelector("div.carte");
     div.style.backgroundColor = cardInfo.couleurCarte;
-    div.id = "card-" + cardInfo.idCarte;
+    let cardName = "card-" + cardInfo.idCarte;
+    div.id = cardName;
 
     let columnBody = column.element.querySelector("div.corps");
     columnBody.addEventListener('click', () => openCardView(cardInfo.idCarte));
     columnBody.appendChild(clone);
 
     let title = div.querySelector(".titre.icons_menu span")
+    title.setAttribute("data-textvar", `${cardName}.title`);
     title.textContent = cardInfo.titreCarte;
 
-    let body = div.querySelector(".corps")
+    let body = div.querySelector(".corps");
+    body.setAttribute("data-textvar", `${cardName}.description`);
     body.textContent = cardInfo.descriptifCarte;
 
     let foot = div.querySelector(".pied")
+    foot.setAttribute("data-htmlfun", `${cardName}.getParticipants()`);
     for(let user of cardInfo.affectationsCarte)
     {
         foot.appendChild(createUserLabel(user))
     }
 
-    return new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
-        cardInfo.affectationsCarte, column, div);
+    return reactive(new Card(cardInfo.idCarte, cardInfo.titreCarte, cardInfo.descriptifCarte, cardInfo.couleurCarte,
+        cardInfo.affectationsCarte, column, div), cardName);
 }
 
 function createUserLabel(user)

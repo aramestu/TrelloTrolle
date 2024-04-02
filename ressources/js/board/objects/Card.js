@@ -21,6 +21,15 @@ class Card extends DragElement
         this.column = column;
     }
 
+    getParticipants(){
+        let result = "";
+        this.participants.forEach(participant =>{
+            result += `<span>${participant.prenom} ${participant.nom}</span>`;
+        });
+        console.log(result);
+        return result;
+    }
+
 }
 
 export {Card}
