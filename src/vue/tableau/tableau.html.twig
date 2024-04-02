@@ -1,14 +1,39 @@
 {% extends "base.html.twig" %}
 
+{% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
+{% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
+
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
 {% block header_additions %}
+    <script type="module" src="{{ asset('../ressources/js/board/Member.js') }}"></script>
+    <script type="text/javascript">
+        class Member
+        {
+
+            constructor(login, nom, prenom, email)
+            {
+                this.login = login;
+                this.nom = nom;
+                this.prenom = prenom;
+                this.email = email;
+            }
+
+        }
+
+        const isParticipant = {{ estParticipant ? 'true':'false' }};
+        const urlBase = '{{ asset('.') }}';
+        const members = [
+            {% for participant in tableau.participants %}
+            new Member('{{ participant.login }}', '{{ participant.nom }}', '{{ participant.prenom }}', '{{ participant.email }}'),
+            {% endfor %}
+            new Member('{{ tableau.proprietaireTableau.login }}', '{{ tableau.proprietaireTableau.nom }}',
+                '{{ tableau.proprietaireTableau.prenom }}', '{{ tableau.proprietaireTableau.email }}')
+        ];
+    </script>
     <script src="{{ asset('../ressources/js/board/autocompletion.js') }}" defer></script>
     <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
 {% endblock %}
-
-{% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
-{% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
 
 {% block page_content %}
     <template class="card-view-content">
@@ -22,7 +47,7 @@
                     <img src="{{ asset('../ressources/img/x.png') }}" alt="Fermer" width="24" height="24">
                 </button>
             </div>
-            <p>
+            <p class="vertical">
                 <label for="descriptifCarte">Description de la carte&#42; :</label>
                 <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte"></textarea>
             </p>
@@ -30,10 +55,13 @@
                 <label for="couleurCarte">Couleur de la carte&#42; :</label>
                 <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte">
             </p>
-            <p>
+            <p class="vertical">
                 <label for="affectationsCarte">Membres affectés :</label>
                 <select multiple name="affectationsCarte[]" id="affectationsCarte"></select>
             </p>
+            <button id="update">
+                Mettre à jour
+            </button>
         </div>
     </template>
 
@@ -46,7 +74,7 @@
             </div>
         </div>
     </div>
-    <div class="trello-main" data-dnd="{{ estParticipant }}">
+    <div class="trello-main">
         <aside>
             <div class="utilisateur icons_menu">
                 <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>

@@ -1,6 +1,6 @@
 import {DragElement} from "../DragElement.js";
 
-const cards = [];
+const cards = {};
 
 class Card extends DragElement
 {
@@ -16,7 +16,7 @@ class Card extends DragElement
         this.column = column;
         this.participants = [];
 
-        cards.push(this)
+        cards[id] = this;
     }
 
 }

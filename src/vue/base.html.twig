@@ -43,7 +43,7 @@
             {% endif %}
         </ul>
     </nav>
-    <div>
+    <div id="flash-container">
         {% for type in ["success", "info", "warning", "danger"] %}
             {% for message in messagesFlash.lireMessages(type) %}
                 <div class="alert alert-{{ type }}">{{ message }}</div>

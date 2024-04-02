@@ -18,7 +18,7 @@ class DragElement{
     dragStart(event) {
         if(this.isActive){
             this.element.classList.add("currentDraggedElement");
-            Object.assign(this.element.style, {opacity : "0.2"});
+            Object.assign(this.element.style, {opacity : "0.6"});
         }
     }
 

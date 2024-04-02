@@ -1,11 +1,11 @@
-import {members} from "./dynamicBoard.js";
+import {cards} from "./Card.js";
 
-const overlayBlock = document.querySelector("div.trello-overlay");
 const contentTemplate = document.querySelector("template.card-view-content");
 const cardView = document.querySelector("div.card-view-background");
-const loading = cardView.querySelector("div.loading");
+const flashContainer = document.querySelector("header div#flash-container")
 
-const ROOT_URL = '/TrelloTrolle/web';
+const cardFrame = cardView.querySelector("div.card-frame");
+const loading = cardView.querySelector("div.loading");
 
 let opened = false;
 
@@ -20,7 +20,7 @@ async function openCardView(cardID)
     {
         showView();
 
-        let cardRes = await fetch(`${ROOT_URL}/api/cartes/${cardID}`, {method: "GET"});
+        let cardRes = await fetch(`${urlBase}/api/cartes/${cardID}`, {method: "GET"});
 
         loading.classList.add("hidden");
 
@@ -53,24 +53,93 @@ function showView()
 function createContent(result)
 {
     let clone = contentTemplate.content.cloneNode(true);
-    cardView.appendChild(clone);
+    cardFrame.appendChild(clone);
 
-    let content = overlayBlock.querySelector("div.view-content");
+    let content = cardFrame.querySelector("div.view-content");
     let card = result['carte'];
 
-    content.querySelector("#titreCarte").value = card.titreCarte;
-    content.querySelector("#descriptifCarte").value = card.descriptifCarte;
-    content.querySelector("#couleurCarte").value = card.couleurCarte;
+    let titreCarte = content.querySelector("#titreCarte");
+    titreCarte.value = card.titreCarte;
+
+    let descriptifCarte = content.querySelector("#descriptifCarte");
+    descriptifCarte.value = card.descriptifCarte;
+
+    let couleurCarte = content.querySelector("#couleurCarte");
+    couleurCarte.value = card.couleurCarte;
 
     let affectationSelect = content.querySelector("#affectationsCarte");
     for(let member of members)
     {
         let option = document.createElement("option");
-        option.value = member;
+        option.value = member.login;
+        option.textContent = member.prenom + ' ' + member.nom + ' (' + member.login + ')';
 
-        affectationSelect.appendChild(member);
+        affectationSelect.appendChild(option);
     }
 
+    let updateButton = content.querySelector('#update');
+    updateButton.addEventListener("click", async function()
+    {
+        let res = await fetch(urlBase + `/api/cartes`,
+            {
+                method: "PATCH",
+                body: JSON.stringify({
+                    idCarte: card.idCarte,
+                    titreCarte: titreCarte.value,
+                    descriptifCarte: descriptifCarte.value,
+                    couleurCarte: couleurCarte.value,
+                    affectationsCarte: getOptions(affectationSelect),
+                    idColonne: card.idColonne
+                })
+            });
+
+        closeCardView();
+
+        let div = document.createElement("div");
+        div.classList.add('alert');
+
+        if(!res.ok)
+        {
+            let message = await res.text();
+
+            div.classList.add('alert-danger');
+            div.textContent = 'Une erreur est survenue lors de la mise à jour du tableau : ' + message;
+        }
+        else
+        {
+            div.classList.add('alert-success');
+            div.textContent = 'Mise à jour du tableau réalisée avec succès !';
+
+            //cards[card.idCarte].update();
+        }
+
+        flashContainer.appendChild(div);
+    });
+
+    if (!isParticipant)
+    {
+        titreCarte.disabled = true;
+        descriptifCarte.disabled = true;
+        couleurCarte.disabled = true;
+        affectationSelect.disabled = true;
+
+        content.removeChild(updateButton);
+    }
+
+}
+
+function getOptions(select)
+{
+    let opts = [];
+    for(let option of select.options)
+    {
+        if(option.selected)
+        {
+            opts.push(option.value);
+        }
+
+    }
+    return opts;
 }
 
 function closeCardView()
@@ -80,10 +149,11 @@ function closeCardView()
         return;
     }
 
-    while(cardView.lastElementChild)
+    while(cardFrame.lastElementChild)
     {
-        cardView.removeChild(cardView.lastElementChild);
+        cardFrame.removeChild(cardFrame.lastElementChild);
     }
+
     loading.classList.remove("hidden");
     cardView.classList.add("hidden");
     opened = false;
@@ -91,11 +161,11 @@ function closeCardView()
 
 cardView.addEventListener("click", evt =>
 {
-   if(evt.target !== cardView && evt.target.id !== "close-card-view")
-   {
-       return;
-   }
-   closeCardView();
+    if(evt.target !== cardView && evt.target.id !== "close-card-view")
+    {
+        return;
+    }
+    closeCardView();
 });
 
 export {openCardView, closeCardView}

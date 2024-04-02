@@ -2,12 +2,9 @@ import {Column} from "./Column.js";
 import {Card, cards} from "./Card.js";
 import {openCardView} from "./cardView.js";
 
-const columnElements= document.querySelectorAll(".trello-main div.colonne.droppable");
-const memberElements= document.querySelectorAll("div#listeParticipants > ul > li");
-const participantCheck = document.querySelector("[data-dnd]");
-const wip= document.querySelector("div#wip ul");
-
-const members = [];
+const columnElements = document.querySelectorAll(".trello-main div.colonne.droppable");
+const memberElements = document.querySelectorAll("div#listeParticipants > ul > li");
+const wip = document.querySelector("div#wip ul");
 
 function updateWIP()
 {
@@ -16,10 +13,7 @@ function updateWIP()
     {
         html += '<li>' + member + '<ul>'
         const infos = getInfos(member);
-        Object.keys(infos).forEach(column =>
-        {
-            html += '<li>' + infos[column] + ' ' + column + '</li>'
-        });
+        Object.keys(infos).forEach(column => html += '<li>' + infos[column] + ' ' + column + '</li>');
         html += '</ul></li>'
     });
     wip.innerHTML = html;
@@ -66,6 +60,8 @@ function updateColumn(column, dragElement)
         card.column = column;
     }
 
+
+
     updateWIP();
 }
 
@@ -74,13 +70,16 @@ function initDragAndDrop()
     columnElements.forEach(columnElement =>
     {
         let title = columnElement.querySelector(".titre.icons_menu span").textContent;
-        let column = new Column(title, columnElement, dragElement => updateColumn(column, dragElement));
+        let id = columnElement.dataset.id;
+
+        let column = new Column(id, title, columnElement, dragElement => updateColumn(column, dragElement));
 
         const cardElements = columnElement.querySelectorAll(".trello-main div.carte");
         cardElements.forEach(cardElement =>
         {
             let id = cardElement.dataset.id;
             let card = new Card(id, column, cardElement);
+            card.setActive(isParticipant);
 
             cardElement.addEventListener("click", () => openCardView(id))
 
@@ -90,12 +89,4 @@ function initDragAndDrop()
     });
 }
 
-memberElements.forEach(memberElement => members.push(memberElement.textContent));
-
-let participant = participantCheck !== null && participantCheck.dataset.dnd === '1';
-if(participant)
-{
-    initDragAndDrop();
-}
-
-export {members}
+initDragAndDrop();
