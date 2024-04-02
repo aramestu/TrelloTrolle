@@ -68,11 +68,25 @@ function createContent(cardObj, result)
     couleurCarte.value = card.couleurCarte;
 
     let affectationSelect = content.querySelector("#affectationsCarte");
-    for(let member of board.members)
+
+    let members = board.members.slice();
+    members.push(board.owner);
+
+    let logins = cardObj.participants.map((participant) => participant.login);
+
+    for(let member of members)
     {
         let option = document.createElement("option");
         option.value = member.login;
         option.textContent = member.prenom + ' ' + member.nom + ' (' + member.login + ')';
+
+        console.log(member);
+        console.log(cardObj.participants);
+
+        if(logins.includes(member.login))
+        {
+            option.selected = true;
+        }
 
         affectationSelect.appendChild(option);
     }
@@ -100,12 +114,18 @@ function createContent(cardObj, result)
 
         closeCardView();
 
+        let participants = [];
+        for(let login of affectations)
+        {
+            participants.push(getBoardMember(login));
+        }
+
         if(res.ok)
         {
             cardObj.title = title;
             cardObj.description = desc;
             cardObj.color = color;
-            cardObj.participants = affectations;
+            cardObj.participants = participants;
             flashMessage('success', 'Mise à jour du tableau réalisée avec succès !');
             return;
         }
@@ -124,6 +144,24 @@ function createContent(cardObj, result)
         content.removeChild(updateButton);
     }
 
+}
+
+function getBoardMember(login)
+{
+    if(login === board.owner.login)
+    {
+        return board.owner;
+    }
+
+    for(let member of board.members)
+    {
+        if(login === member.login)
+        {
+            return member;
+        }
+
+    }
+    return undefined;
 }
 
 function getOptions(select)

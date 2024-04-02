@@ -5,7 +5,7 @@
 
 {% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
 
-{% block header_additions %}->
+{% block header_additions %}
     <script type="text/javascript">
         const isParticipant = {{ estParticipant ? 'true':'false' }};
         const urlBase = '{{ asset('.') }}';
@@ -133,12 +133,12 @@
                                 </div>
                             </li>
                         {% endfor %}
+                        {% if estProprietaire %}
+                            <li>
+                                <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                            </li>
+                        {% endif %}
                     </ul>
-                    {% if estProprietaire %}
-                        <li>
-                            <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
-                        </li>
-                    {% endif %}
                 </div>
                 <div id="wip" class="participants">
                     Travail en cours :
