@@ -1,0 +1,124 @@
+parameters:
+
+services:
+  #Twig
+  twig_loader:
+    class: Twig\Loader\FilesystemLoader
+    arguments: [ '%project_root%/src/vue/' ]
+  twig:
+    class: Twig\Environment
+    arguments:
+      $loader: '@twig_loader'
+      $options:
+        autoescape: 'html'
+        strict_variables: true
+
+  configuration_bdd:
+    class: App\Trellotrolle\Configuration\ConfigurationBaseDeDonnees
+
+  connexion_base_de_donnees:
+    class: App\Trellotrolle\Modele\Repository\ConnexionBaseDeDonnees
+    arguments: ['@configuration_bdd']
+
+  #Repositories
+  carte_repository:
+    class: App\Trellotrolle\Modele\Repository\CarteRepository
+    arguments: ['@container', '@connexion_base_de_donnees']
+
+  colonne_repository:
+    class: App\Trellotrolle\Modele\Repository\ColonneRepository
+    arguments: ['@container', '@connexion_base_de_donnees']
+
+  tableau_repository:
+    class: App\Trellotrolle\Modele\Repository\TableauRepository
+    arguments: ['@container', '@connexion_base_de_donnees']
+
+  utilisateur_repository:
+    class: App\Trellotrolle\Modele\Repository\UtilisateurRepository
+    arguments: ['@container', '@connexion_base_de_donnees']
+
+  #Lib
+  mot_de_passe:
+    class: App\Trellotrolle\Lib\MotDePasse
+
+  connexion_utilisateur_session:
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurSession
+
+  connexion_utilisateur_jwt:
+    class: App\Trellotrolle\Lib\ConnexionUtilisateurJWT
+
+  #Sercices
+  utilisateur_service:
+    class: App\Trellotrolle\Service\UtilisateurService
+    arguments: ['@utilisateur_repository', '@tableau_repository', '@mot_de_passe' ]
+
+  colonne_service:
+    class: App\Trellotrolle\Service\ColonneService
+    arguments: [ '@colonne_repository', '@tableau_service']
+
+  tableau_service:
+    class: App\Trellotrolle\Service\TableauService
+    arguments: [ '@tableau_repository', '@utilisateur_repository' ,'@carte_repository', '@colonne_repository', '@mot_de_passe']
+
+  carte_service:
+    class: App\Trellotrolle\Service\CarteService
+    arguments: [ '@carte_repository', '@colonne_service', '@tableau_service']
+
+  #Services
+  request_stack:
+    class: Symfony\Component\HttpFoundation\RequestStack
+
+  url_generator:
+    class: Symfony\Component\Routing\Generator\UrlGenerator
+    arguments:
+      routes: '@routes'
+      context: '@request_context'
+
+  url_helper:
+    class: Symfony\Component\HttpFoundation\UrlHelper
+    arguments:
+      requestStack: '@request_stack'
+      requestContext: '@request_context'
+
+  #Controleurs
+  controleur_generique:
+    class: App\Trellotrolle\Controleur\ControleurGenerique
+    arguments:
+      container: '@container'
+
+  controleur_base:
+    class: App\Trellotrolle\Controleur\ControleurBase
+    arguments:
+      container: '@container'
+
+  controleur_carte:
+    class: App\Trellotrolle\Controleur\ControleurCarte
+    arguments: ['@container', '@carte_service', '@colonne_service', '@tableau_service' ,'@connexion_utilisateur_session']
+
+  controleur_colonne:
+    class: App\Trellotrolle\Controleur\ControleurColonne
+    arguments: ['@container', '@connexion_utilisateur_session', '@colonne_service', '@tableau_service']
+
+  controleur_tableau:
+    class: App\Trellotrolle\Controleur\ControleurTableau
+    arguments: ['@container', '@tableau_service', '@connexion_utilisateur_session', '@colonne_service', '@carte_service', '@utilisateur_service']
+
+  controleur_utilisateur:
+    class: App\Trellotrolle\Controleur\ControleurUtilisateur
+    arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_session', '@connexion_utilisateur_jwt']
+
+  controleur_utilisateur_api:
+    class: App\Trellotrolle\Controleur\ControleurUtilisateurAPI
+    arguments: ['@container', '@utilisateur_service', '@connexion_utilisateur_jwt']
+
+  controleur_carte_api:
+    class: App\Trellotrolle\Controleur\ControleurCarteAPI
+    arguments: [ '@container', '@carte_service', '@tableau_service', '@colonne_service', '@connexion_utilisateur_jwt' ]
+
+  controleur_colonne_api:
+    class: App\Trellotrolle\Controleur\ControleurColonneAPI
+    arguments: [ '@container', '@colonne_service', '@connexion_utilisateur_jwt' ]
+
+  controleur_tableau_api:
+    class: App\Trellotrolle\Controleur\ControleurTableauAPI
+    arguments: [ '@container', '@tableau_service', '@utilisateur_service', '@connexion_utilisateur_jwt' ]

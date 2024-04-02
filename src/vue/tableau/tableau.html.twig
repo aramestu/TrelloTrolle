@@ -1,0 +1,185 @@
+{% extends "base.html.twig" %}
+
+{% set estProprietaire = estConnecte and tableau.estProprietaire(loginUtilisateurConnecte) %}
+{% set estParticipant = estConnecte and tableau.estParticipantOuProprietaire(loginUtilisateurConnecte) %}
+
+{% block page_title %}Tableau {{ tableau.titreTableau }}{% endblock %}
+
+{% block header_additions %}
+    <script type="text/javascript">
+        const isParticipant = {{ estParticipant ? 'true':'false' }};
+        const urlBase = '{{ asset('.') }}';
+        const boardCode = '{{ tableau.codeTableau }}';
+
+        const columnCreationRoute = '{{ route('creation_colonne', {idTableau: tableau.idTableau}) }}'
+        const columnModificationRoute = '{{ route('mise_a_jour_colonne', {idColonne: 'id'}) }}'
+        const columnDeletionRoute = '{{ route('supprimer_colonne', {idColonne: 'id'}) }}'
+
+        const cardCreationRoute = '{{ route('creation_carte', {idColonne: 'id'}) }}'
+        const cardDeletionRoute = '{{ route('supprimer_carte', {idCarte: 'id'}) }}'
+    </script>
+    <script type="module" src="{{ asset('../ressources/js/board/dynamicBoard.js') }}"></script>
+{% endblock %}
+
+{% block page_content %}
+    <template class="card-view-content">
+        <div class="view-content">
+            <div class="card-header">
+                <label>
+                    <input type="text" id="titreCarte" name="titreCarte" value="" placeholder="Titre de la carte..."
+                           minlength="1" maxlength="50">
+                </label>
+                <button id="close-card-view">
+                    <img src="{{ asset('../ressources/img/x.png') }}" alt="Fermer" width="24" height="24">
+                </button>
+            </div>
+            <p class="vertical">
+                <label for="descriptifCarte">Description de la carte&#42; :</label>
+                <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte"></textarea>
+            </p>
+            <p>
+                <label for="couleurCarte">Couleur de la carte&#42; :</label>
+                <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte">
+            </p>
+            <p class="vertical">
+                <label for="affectationsCarte">Membres affectés :</label>
+                <select multiple name="affectationsCarte[]" id="affectationsCarte"></select>
+            </p>
+            <button id="update">
+                Mettre à jour
+            </button>
+        </div>
+    </template>
+    <template id="column-template">
+        <div class="colonne droppable">
+            <div class="titre icons_menu">
+                <span></span>
+                <span class="actions">
+                    <a class="modify">
+                        <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer la colonne">
+                    </a>
+                    <a class="delete">
+                        <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Supprimer la colonne">
+                    </a>
+                </span>
+            </div>
+            <div class="corps"></div>
+            <a class="ajout-tableau">
+                <div>
+                    <div class="titre icons_menu btn-ajout">
+                        <span>Ajouter une carte</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </template>
+    <template id="card-template">
+        <div class="carte" style="background-color: white;">
+            <div class="titre icons_menu">
+                <span></span>
+                <span class="actions">
+                    <a class="delete">
+                        <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Supprimer la carte">
+                    </a>
+                </span>
+            </div>
+            <div class="corps"></div>
+            <div class="pied"></div>
+        </div>
+    </template>
+    <template id="column-creation">
+        <a class="ajout-tableau">
+            <div class="colonne">
+                <div class="titre icons_menu btn-ajout">
+                    <span>Ajouter une colonne</span>
+                </div>
+            </div>
+        </a>
+    </template>
+
+    <div class="trello-overlay">
+        <div class="card-view-background hidden">
+            <div class="card-frame">
+                <div class="loading">
+                    <img src="{{ asset('../ressources/img/loading.gif') }}" alt="Chargement..." width="32" height="32">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="trello-main">
+        <aside>
+            <div class="utilisateur icons_menu">
+                <span>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</span>
+            </div>
+            <div class="tableau">
+                <div class="icons_menu">
+                    <span>{{ tableau.titreTableau }}</span>
+                </div>
+                <div id="listeParticipants" class="participants">
+                    Membres :
+                    <ul>
+                        <li>{{ tableau.proprietaireTableau.prenom }} {{ tableau.proprietaireTableau.nom }}</li>
+                        {% for participant in tableau.participants %}
+                            <li>
+                                <div class="icons_menu_stick">
+                                    {{ participant.prenom }} {{ participant.nom }}
+                                    {% if estProprietaire %}
+                                        <span class="actions">
+                                            <a href="{{ route('supprimer_membre', {idTableau: tableau.idTableau, login: participant.login}) }}">
+                                                <img class="icon" src="{{ asset('../ressources/img/x.png') }}" alt="Retirer">
+                                            </a>
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                        {% if estProprietaire %}
+                            <li>
+                                <a href="{{ route('ajout_membre', {idTableau: tableau.idTableau}) }}">Ajouter un membre</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div id="wip" class="participants">
+                    Travail en cours :
+                    <ul>
+                        {% for participant in informationsAffectation %}
+                            <li>
+                                <div>{{ participant['infos'].prenom }} {{ participant['infos'].nom }}</div>
+                                <ul>
+                                    {% for colonne in associationColonneCarte['colonnes'] %}
+                                        {% if informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] is defined and informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] > 0 %}
+                                            <li>{{ informationsAffectation[participant['infos'].login]['colonnes'][colonne.idColonne] }} {{ colonne.titreColonne }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </li>
+                        {% endfor %}
+                        {% if informationsAffectation is empty %}
+                            <span><strong>Pas de travail en cours</strong></span>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </aside>
+        <article>
+            <div class="tableau">
+                <div class="titre icons_menu">
+                    {{ tableau.titreTableau }}
+                    {% if estParticipant %}
+                        <span class="actions">
+                            <a href="{{ route('mise_a_jour_tableau', {idTableau: tableau.idTableau}) }}">
+                                <img class="icon" src="{{ asset('../ressources/img/editer.png') }}" alt="Éditer le tableau">
+                            </a>
+                        </span>
+                    {% endif %}
+                </div>
+                <div class="corps">
+                    <div class="loading">
+                        <img src="{{ asset('../ressources/img/loading.gif') }}" alt="Chargement...">
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Mise à jour d'un tableau{% endblock %}
+
+{% block page_content %}
+    <div>
+        <form method="post" action="{{ route('mettre_a_jour_tableau') }}">
+            <fieldset>
+                <h3>Modification d'un tableau :</h3>
+                <p>
+                    <label for="nomTableau">Nom du tableau&#42;</label> :
+                    <input type="text" placeholder="Mon super tableau" name="nomTableau" id="nomTableau" minlength="3" maxlength="50" value='{{ tableau.titreTableau }}' required>
+                </p>
+                <input type='hidden' name='idTableau' value='{{ tableau.idTableau }}'>
+                <p>
+                    <input type="submit" value="Modifier le tableau">
+                </p>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}

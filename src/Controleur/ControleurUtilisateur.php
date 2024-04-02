@@ -2,373 +2,312 @@
 
 namespace App\Trellotrolle\Controleur;
 
-use App\Trellotrolle\Lib\ConnexionUtilisateur;
-use App\Trellotrolle\Lib\MessageFlash;
-use App\Trellotrolle\Lib\MotDePasse;
-use App\Trellotrolle\Modele\DataObject\Carte;
-use App\Trellotrolle\Modele\DataObject\Colonne;
-use App\Trellotrolle\Modele\DataObject\Tableau;
-use App\Trellotrolle\Modele\DataObject\Utilisateur;
-use App\Trellotrolle\Modele\HTTP\Cookie;
-use App\Trellotrolle\Modele\Repository\CarteRepository;
-use App\Trellotrolle\Modele\Repository\ColonneRepository;
-use App\Trellotrolle\Modele\Repository\TableauRepository;
-use App\Trellotrolle\Modele\Repository\UtilisateurRepository;
 
+use App\Trellotrolle\Lib\ConnexionUtilisateurInterface;
+use App\Trellotrolle\Lib\MessageFlash;
+use App\Trellotrolle\Service\Exception\ServiceException;
+use App\Trellotrolle\Service\UtilisateurServiceInterface;
+use Exception;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
+
+/**
+ * Classe ControleurUtilisateur
+ *
+ * Cette classe est responsable de la gestion des utilisateurs dans l'application.
+ * Elle contient des méthodes pour afficher les détails d'un utilisateur, créer un nouvel utilisateur,
+ * mettre à jour les informations d'un utilisateur, supprimer un utilisateur, se connecter et se déconnecter,
+ * et récupérer un compte utilisateur.
+ *
+ * @package App\Trellotrolle\Controleur
+ */
 class ControleurUtilisateur extends ControleurGenerique
 {
-    public static function afficherErreur($messageErreur = "", $controleur = ""): void
+
+    /**
+     * Constructeur de la classe.
+     *
+     * @param ContainerInterface $container L'interface du conteneur de dépendances.
+     * @param UtilisateurServiceInterface $serviceUtilisateur Le service Utilisateur.
+     * @param ConnexionUtilisateurInterface $connexionUtilisateurSession L'interface de connexion utilisateur en session.
+     * @param ConnexionUtilisateurInterface $connexionUtilisateurJWT L'interface de connexion utilisateur JWT.
+     */
+    public function __construct(ContainerInterface                             $container,
+                                private readonly UtilisateurServiceInterface   $serviceUtilisateur,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurSession,
+                                private readonly ConnexionUtilisateurInterface $connexionUtilisateurJWT,
+    )
     {
-        parent::afficherErreur($messageErreur, "utilisateur");
+        parent::__construct($container);
     }
 
-    public static function afficherDetail(): void
+    /**
+     * Méthode afficherErreur
+     *
+     * Cette méthode affiche une erreur en utilisant la méthode afficherErreur de la classe parente.
+     *
+     * @param string $messageErreur Le message d'erreur à afficher.
+     * @param string $controleur Le nom du contrôleur.
+     * @return Response La réponse HTTP contenant le corps de la vue d'erreur rendue.
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    public function afficherErreur(string $messageErreur = "", string $controleur = ""): Response
     {
-        if(!ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        $utilisateur = (new UtilisateurRepository())->recupererParClePrimaire(ConnexionUtilisateur::getLoginUtilisateurConnecte());
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "utilisateur" => $utilisateur,
-            "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}",
-            "cheminVueBody" => "utilisateur/detail.php"
-        ]);
+        return parent::afficherErreur($messageErreur, "utilisateur");
     }
 
-    public static function afficherFormulaireCreation(): void
+    /**
+     * Méthode afficherDetail
+     *
+     * Cette méthode affiche les détails d'un utilisateur.
+     *
+     * @return Response La réponse HTTP contenant la vue des détails de l'utilisateur.
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[Route(path: '/utilisateur/details', name: 'detail_utilisateur', methods: ["GET"])]
+    public function afficherDetail(): Response
     {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
+        try {
+            $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+        } catch (ServiceException $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("connexion");
         }
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Création d'un utilisateur",
-            "cheminVueBody" => "utilisateur/formulaireCreation.php"
-        ]);
+        return self::afficherTwig("utilisateur/detail.html.twig", ["utilisateur" => $utilisateur, "pagetitle" => "Détail de l'utilisateur {$utilisateur->getLogin()}"]);
     }
 
-    public static function creerDepuisFormulaire(): void
+    /**
+     * Affiche le formulaire de création d'utilisateur.
+     *
+     * @return Response La réponse HTTP contenant le formulaire de création d'utilisateur.
+     *
+     * @throws SyntaxError En cas d'erreur de syntaxe dans le template Twig.
+     * @throws RuntimeError En cas d'erreur d'exécution dans le template Twig.
+     * @throws LoaderError En cas d'erreur de chargement du template Twig.
+     */
+    #[Route(path: 'utilisateur/inscription', name: 'inscription', methods: ["GET"])]
+    public function afficherFormulaireCreation(): Response
     {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
+        if (self::estConnecte()) {
+            return $this->rediriger("mes_tableaux");
         }
-        if (ControleurUtilisateur::issetAndNotNull(["login", "prenom", "nom", "mdp", "mdp2", "email"])) {
-            if ($_REQUEST["mdp"] !== $_REQUEST["mdp2"]) {
-                MessageFlash::ajouter("warning", "Mots de passe distincts.");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireCreation");
-            }
-
-            if (!filter_var($_REQUEST["email"], FILTER_VALIDATE_EMAIL)) {
-                MessageFlash::ajouter("warning", "Email non valide");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireCreation");
-            }
-
-            $utilisateurRepository = new UtilisateurRepository();
-
-            $checkUtilisateur = $utilisateurRepository->recupererParClePrimaire($_REQUEST["login"]);
-            if($checkUtilisateur) {
-                MessageFlash::ajouter("warning", "Le login est déjà pris.");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireCreation");
-            }
-
-            $tableauRepository = new TableauRepository();
-            $colonneRepository = new ColonneRepository();
-            $carteRepository = new CarteRepository();
-
-            $mdpHache = MotDePasse::hacher($_REQUEST["mdp"]);
-            $idTableau = $tableauRepository->getNextIdTableau();
-            $codeTableau = hash("sha256", $_REQUEST["login"].$idTableau);
-            $tableauInitial = "Mon tableau";
-
-            $idColonne1 = $colonneRepository->getNextIdColonne();
-            $colonne1 = "TODO";
-
-            $colonne2 = "DOING";
-            $idColonne2 = $idColonne1 + 1;
-
-            $colonne3 = "DONE";
-            $idColonne3 = $idColonne1 + 2;
-
-            $carteInitiale = "Exemple";
-            $descriptifInitial = "Exemple de carte";
-            $idCarte1 = $carteRepository->getNextIdCarte();
-            $idCarte2 = $idCarte1 + 1;
-            $idCarte3 = $idCarte1 + 2;
-
-            $tableau = new Tableau(
-                new Utilisateur(
-                    $_REQUEST["login"],
-                    $_REQUEST["nom"],
-                    $_REQUEST["prenom"],
-                    $_REQUEST["email"],
-                    $mdpHache,
-                    $_REQUEST["mdp"],
-                ),
-                $idTableau,
-                $codeTableau,
-                $tableauInitial,
-                [],
-            );
-
-            $carte1 = new Carte(
-                new Colonne(
-                    $tableau,
-                    $idColonne1,
-                    $colonne1,
-                ),
-                $idCarte1,
-                $carteInitiale,
-                $descriptifInitial,
-                "#FFFFFF",
-                []
-            );
-
-            $carte2 = new Carte(
-                new Colonne(
-                    $tableau,
-                    $idColonne2,
-                    $colonne2,
-                ),
-                $idCarte2,
-                $carteInitiale,
-                $descriptifInitial,
-                "#FFFFFF",
-                []
-            );
-
-            $carte3 = new Carte(
-                new Colonne(
-                    $tableau,
-                    $idColonne3,
-                    $colonne3,
-                ),
-                $idCarte3,
-                $carteInitiale,
-                $descriptifInitial,
-                "#FFFFFF",
-                []
-            );
-
-            $succesSauvegarde = $carteRepository->ajouter($carte1) && $carteRepository->ajouter($carte2) && $carteRepository->ajouter($carte3);
-            if ($succesSauvegarde) {
-                Cookie::enregistrer("login", $_REQUEST["login"]);
-                Cookie::enregistrer("mdp", $_REQUEST["mdp"]);
-                MessageFlash::ajouter("success", "L'utilisateur a bien été créé !");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
-            }
-            else {
-                MessageFlash::ajouter("warning", "Une erreur est survenue lors de la création de l'utilisateur.");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireCreation");
-            }
-        } else {
-            MessageFlash::ajouter("danger", "Login, nom, prenom, email ou mot de passe manquant.");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireCreation");
-        }
+        return self::afficherTwig("utilisateur/formulaireCreation.html.twig");
     }
 
-    public static function afficherFormulaireMiseAJour(): void
+    /**
+     * Méthode pour créer un utilisateur depuis un formulaire d'inscription.
+     *
+     * @return Response La réponse HTTP de la création de l'utilisateur.
+     */
+    #[Route(path: '/inscription', name: 'inscrire', methods: ["POST"])]
+    public function creerDepuisFormulaire(): Response
     {
-        if(!ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
+        if ($this->connexionUtilisateurSession->estConnecte() || $this->connexionUtilisateurJWT->estConnecte()) {
+            return $this->rediriger("mes_tableaux");
         }
-        $login = ConnexionUtilisateur::getLoginUtilisateurConnecte();
-        $repository = new UtilisateurRepository();
-        $utilisateur = $repository->recupererParClePrimaire($login);
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Mise à jour du profil",
-            "cheminVueBody" => "utilisateur/formulaireMiseAJour.php",
-            "utilisateur" => $utilisateur,
-        ]);
+        try {
+            $this->serviceUtilisateur->creerUtilisateur($_POST["login"], $_POST["nom"], $_POST["prenom"], $_POST["email"], $_POST["mdp"], $_POST["mdp2"]);
+        } catch (Exception $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("inscription");
+        }
+
+        MessageFlash::ajouter("success", "L'utilisateur a bien été crée!");
+        return $this->rediriger("connexion");
     }
 
-    public static function mettreAJour(): void
+    /**
+     * Vérifie si l'utilisateur est connecté.
+     *
+     * @return bool Retourne true si l'utilisateur est connecté, sinon false.
+     */
+    private function estConnecte(): bool
     {
-        if(!ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        if (ControleurUtilisateur::issetAndNotNull(["login", "prenom", "nom", "mdp", "mdp2", "email"])) {
-            $login = $_REQUEST['login'];
-            $repository = new UtilisateurRepository();
-
-            /**
-             * @var Utilisateur $utilisateur
-             */
-            $utilisateur = $repository->recupererParClePrimaire($login);
-
-            if(!$utilisateur) {
-                MessageFlash::ajouter("danger", "L'utilisateur n'existe pas");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireMiseAJour");
-            }
-
-            if (!filter_var($_REQUEST["email"], FILTER_VALIDATE_EMAIL)) {
-                MessageFlash::ajouter("warning", "Email non valide");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireMiseAJour");
-            }
-
-            if (!(MotDePasse::verifier($_REQUEST["mdpAncien"], $utilisateur->getMdpHache()))) {
-                MessageFlash::ajouter("warning", "Ancien mot de passe erroné.");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireMiseAJour");
-            }
-
-            if ($_REQUEST["mdp"] !== $_REQUEST["mdp2"]) {
-                MessageFlash::ajouter("warning", "Mots de passe distincts.");
-                ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireMiseAJour");
-            }
-
-            $utilisateur->setNom($_REQUEST["nom"]);
-            $utilisateur->setPrenom($_REQUEST["prenom"]);
-            $utilisateur->setEmail($_REQUEST["email"]);
-            $utilisateur->setMdpHache(MotDePasse::hacher($_REQUEST["mdp"]));
-            $utilisateur->setMdp($_REQUEST["mdp"]);
-
-            $repository->mettreAJour($utilisateur);
-
-            $carteRepository = new CarteRepository();
-            $cartes = $carteRepository->recupererCartesUtilisateur($login);
-            foreach ($cartes as $carte) {
-                $participants = $carte->getAffectationsCarte();
-                $participants = array_filter($participants, function ($u) use ($login) {return $u->getLogin() !== $login;});
-                $participants[] = $utilisateur;
-                $carte->setAffectationsCarte($participants);
-                $carteRepository->mettreAJour($carte);
-            }
-
-            $tableauRepository = new TableauRepository();
-            $tableaux = $tableauRepository->recupererTableauxParticipeUtilisateur($login);
-            foreach ($tableaux as $tableau) {
-                $participants = $tableau->getParticipants();
-                $participants = array_filter($participants, function ($u) use ($login) {return $u->getLogin() !== $login;});
-                $participants[] = $utilisateur;
-                $tableau->setParticipants($participants);
-                $tableauRepository->mettreAJour($tableau);
-            }
-
-            Cookie::enregistrer("mdp", $_REQUEST["mdp"]);
-
-            MessageFlash::ajouter("success", "L'utilisateur a bien été modifié !");
-            ControleurUtilisateur::redirection("tableau", "afficherListeMesTableaux");
-        } else {
-            MessageFlash::ajouter("danger", "Login, nom, prenom, email ou mot de passe manquant.");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireMiseAJour");
-        }
+        return $this->connexionUtilisateurSession->estConnecte();
     }
 
-    public static function supprimer(): void
+    /**
+     * Affiche le formulaire de mise à jour d'un utilisateur.
+     *
+     * @param string $login Le login de l'utilisateur.
+     * @return Response La réponse HTTP contenant le formulaire de mise à jour.
+     *
+     * @throws RuntimeError En cas d'erreur d'exécution du template Twig.
+     * @throws SyntaxError En cas d'erreur de syntaxe du template Twig.
+     * @throws LoaderError En cas d'erreur de chargement du template Twig.
+     */
+    #[Route(path: '/utilisateur/{login}/mise-a-jour', name: 'mise_a_jour_utilisateur', methods: ["GET"])]
+    public function afficherFormulaireMiseAJour(string $login): Response
     {
-        if(!ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherFormulaireConnexion");
+        if (!$this->estConnecte()) {
+            return $this->rediriger("connexion");
         }
-        if (!ControleurUtilisateur::issetAndNotNull(["login"])) {
-            MessageFlash::ajouter("warning", "Login manquant");
-            ControleurUtilisateur::redirection("utilisateur", "afficherDetail");
+        try {
+            $utilisateur = $this->serviceUtilisateur->getUtilisateur($this->connexionUtilisateurSession->getIdUtilisateurConnecte());
+        } catch (Exception $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("accueil");
         }
-        $login = $_REQUEST["login"];
+        return self::afficherTwig("utilisateur/formulaireMiseAJour.html.twig", ["utilisateur" => $utilisateur]);
+    }
 
-        $carteRepository = new CarteRepository();
-        $cartes = $carteRepository->recupererCartesUtilisateur($login);
-        foreach ($cartes as $carte) {
-            $participants = $carte->getAffectationsCarte();
-            $participants = array_filter($participants, function ($u) use ($login) {return $u->getLogin() !== $login;});
-            $carte->setAffectationsCarte($participants);
-            $carteRepository->mettreAJour($carte);
+    /**
+     * Met à jour les informations d'un utilisateur.
+     *
+     * @return Response La réponse HTTP.
+     */
+    #[Route(path: '/utilisateur/mise-a-jour', name: 'mettre_a_jour_utilisateur', methods: ["POST"])]
+    public function mettreAJour(): Response
+    {
+        if (!$this->estConnecte()) {
+            return $this->rediriger("connexion");
         }
+        $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
+        $nom = $_POST["nom"] ?? null;
+        $prenom = $_POST["prenom"] ?? null;
+        $email = $_POST["email"] ?? null;
+        $mdpAncien = $_POST["mdpAncien"] ?? null;
+        $mdpNouveau = $_POST["mdp"] ?? null;
+        $mdpNouveau2 = $_POST["mdp2"] ?? null;
 
-        $tableauRepository = new TableauRepository();
-        $tableaux = $tableauRepository->recupererTableauxParticipeUtilisateur($login);
-        foreach ($tableaux as $tableau) {
-            $participants = $tableau->getParticipants();
-            $participants = array_filter($participants, function ($u) use ($login) {return $u->getLogin() !== $login;});
-            $tableau->setParticipants($participants);
-            $tableauRepository->mettreAJour($tableau);
+        try {
+            $this->serviceUtilisateur->modifierUtilisateur($login, $nom, $prenom, $email, $mdpAncien, $mdpNouveau, $mdpNouveau2);
+        } catch (Exception $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("mise_a_jour_utilisateur", ["login" => $login]);
         }
-        $repository = new UtilisateurRepository();
-        $repository->supprimer($login);
-        Cookie::supprimer("login");
-        Cookie::supprimer("mdp");
-        ConnexionUtilisateur::deconnecter();
+        MessageFlash::ajouter("success", "Utilisateur mis à jour");
+        return $this->rediriger("accueil");
+    }
+
+    /**
+     * Méthode supprimer
+     *
+     * Cette méthode supprime un utilisateur.
+     *
+     * @param string $login Le login de l'utilisateur à supprimer
+     * @return Response La réponse HTTP de la suppression de l'utilisateur
+     */
+    #[Route(path: '/supprimer', name: 'supprimer', methods: ["GET"])]
+    public function supprimer(string $login): Response
+    {
+        if (!$this->estConnecte()) {
+            return $this->rediriger("connexion");
+        }
+        try {
+            $login = $this->connexionUtilisateurSession->getIdUtilisateurConnecte();
+            $this->serviceUtilisateur->supprimer($login);
+            $this->connexionUtilisateurSession->deconnecter();
+            $this->connexionUtilisateurJWT->deconnecter();
+        } catch (Exception $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("detail_utilisateur");
+        }
         MessageFlash::ajouter("success", "Votre compte a bien été supprimé !");
-        ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
+        return $this->rediriger("connexion");
     }
 
-    public static function afficherFormulaireConnexion(): void
+    /**
+     * Affiche le formulaire de connexion.
+     *
+     * @return Response
+     * @throws SyntaxError
+     * @throws RuntimeError
+     * @throws LoaderError
+     */
+    #[Route(path: '/connexion', name: 'connexion', methods: ["GET"])]
+    public function afficherFormulaireConnexion(): Response
     {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
+        if ($this->estConnecte()) {
+            return $this->rediriger("mes_tableaux");
         }
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Formulaire de connexion",
-            "cheminVueBody" => "utilisateur/formulaireConnexion.php"
-        ]);
+        return $this->afficherTwig("utilisateur/formulaireConnexion.html.twig", ["pagetitle" => "Page de connexion"]);
     }
 
-    public static function connecter(): void
+    /**
+     * Méthode pour se connecter à l'application.
+     *
+     * @return Response La réponse HTTP de la connexion.
+     */
+    #[Route(path: '/connexion', name: 'connecter', methods: ["POST"])]
+    public function connecter(): Response
     {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
+        if ($this->estConnecte()) {
+            return $this->rediriger("mes_tableaux");
         }
-        if (!ControleurUtilisateur::issetAndNotNull(["login", "mdp"])) {
-            MessageFlash::ajouter("danger", "Login ou mot de passe manquant.");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
+        try {
+            $login = $_POST["login"];
+            $mdp = $_POST["mdp"];
+            $this->serviceUtilisateur->verifierIdentifiantUtilisateur($login, $mdp);
+            $this->connexionUtilisateurSession->connecter($login);
+            $this->connexionUtilisateurJWT->connecter($login);
+        } catch (Exception $e) {
+            MessageFlash::ajouter("warning", $e->getMessage());
+            return $this->rediriger("connexion");
         }
-        $utilisateurRepository = new UtilisateurRepository();
-        /** @var Utilisateur $utilisateur */
-        $utilisateur = $utilisateurRepository->recupererParClePrimaire($_REQUEST["login"]);
-
-        if ($utilisateur == null) {
-            MessageFlash::ajouter("warning", "Login inconnu.");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-
-        if (!MotDePasse::verifier($_REQUEST["mdp"], $utilisateur->getMdpHache())) {
-            MessageFlash::ajouter("warning", "Mot de passe incorrect.");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-
-        ConnexionUtilisateur::connecter($utilisateur->getLogin());
-        Cookie::enregistrer("login", $_REQUEST["login"]);
-        Cookie::enregistrer("mdp", $_REQUEST["mdp"]);
-        MessageFlash::ajouter("success", "Connexion effectuée.");
-        ControleurUtilisateur::redirection("tableau", "afficherListeMesTableaux");
+        MessageFlash::ajouter("success", "Connexion effectué !");
+        return $this->rediriger("mes_tableaux");
     }
 
-    public static function deconnecter(): void
+    /**
+     * Méthode deconnexion
+     *
+     * Cette méthode permet de déconnecter un utilisateur.
+     * Si l'utilisateur n'est pas connecté, un message d'erreur est ajouté aux messages flash et l'utilisateur est redirigé vers la page de connexion.
+     * Sinon, la méthode déconnecte l'utilisateur des deux connexions (session et JWT), ajoute un message de succès aux messages flash et redirige l'utilisateur vers la page d'accueil.
+     *
+     * @return Response La réponse HTTP de la déconnexion
+     */
+    #[Route(path: '/deconnexion', name: 'deconnecter', methods: ["GET"])]
+    public function deconnecter(): Response
     {
-        if (!ConnexionUtilisateur::estConnecte()) {
+        if (!$this->estConnecte()) {
             MessageFlash::ajouter("danger", "Utilisateur non connecté.");
-            ControleurUtilisateur::redirection("base", "accueil");
+            return $this->rediriger("connexion");
         }
-        ConnexionUtilisateur::deconnecter();
+        $this->connexionUtilisateurSession->deconnecter();
+        $this->connexionUtilisateurJWT->deconnecter();
         MessageFlash::ajouter("success", "L'utilisateur a bien été déconnecté.");
-        ControleurUtilisateur::redirection("base", "accueil");
+        return $this->rediriger("accueil");
     }
 
-    public static function afficherFormulaireRecuperationCompte(): void {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
+    /**
+     * Affiche le formulaire de récupération de compte utilisateur.
+     *
+     * @return Response La réponse HTTP contenant le formulaire de récupération de compte.
+     *
+     * @throws RuntimeError En cas d'erreur d'exécution de Twig.
+     * @throws SyntaxError En cas d'erreur de syntaxe dans le template Twig.
+     * @throws LoaderError En cas d'erreur de chargement du template Twig.
+     */
+    #[Route(path: '/utilisateur/back-up', name: 'recuperation_compte', methods: ["GET"])]
+    public function afficherFormulaireRecuperationCompte(): Response
+    {
+        if ($this->estConnecte()) {
+            return $this->rediriger("mes_tableaux");
         }
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resetCompte.php"
-        ]);
+        return $this->afficherTwig("utilisateur/resetCompte.html.twig", ["pagetitle" => "Récupérer mon compte"]);
     }
 
-    public static function recupererCompte(): void {
-        if(ConnexionUtilisateur::estConnecte()) {
-            ControleurTableau::redirection("utilisateur", "afficherListeMesTableaux");
-        }
-        if (!ControleurUtilisateur::issetAndNotNull(["email"])) {
-            MessageFlash::ajouter("warning", "Adresse email manquante");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        $repository = new UtilisateurRepository();
-        $utilisateurs = $repository->recupererUtilisateursParEmail($_REQUEST["email"]);
-        if(empty($utilisateurs)) {
-            MessageFlash::ajouter("warning", "Aucun compte associé à cette adresse email");
-            ControleurUtilisateur::redirection("utilisateur", "afficherFormulaireConnexion");
-        }
-        ControleurUtilisateur::afficherVue('vueGenerale.php', [
-            "pagetitle" => "Récupérer mon compte",
-            "cheminVueBody" => "utilisateur/resultatResetCompte.php",
-            "utilisateurs" => $utilisateurs
-        ]);
+    /**
+     * Méthode de la classe ControleurUtilisateur qui permet de récupérer un compte utilisateur.
+     *
+     * @return Response La réponse HTTP générée par la méthode.
+     * @throws RuntimeError En cas d'erreur d'exécution de Twig.
+     * @throws SyntaxError En cas d'erreur de syntaxe dans le template Twig.
+     * @throws LoaderError En cas d'erreur de chargement du template Twig.
+     */
+    #[Route(path: '/utilisateur/back-up', name: 'recuperer_compte', methods: ["POST"])]
+    public function recupererCompte(): Response
+    {
+        return $this->afficherTwig("utilisateur/resultatResetCompte.html.twig");
     }
 }

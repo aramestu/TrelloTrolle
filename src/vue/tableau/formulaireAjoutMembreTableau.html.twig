@@ -1,0 +1,21 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Ajout d'un membre{% endblock %}
+
+{% block page_content %}
+    <div>
+        <form method="post" action="{{ route('ajouter_membre') }}">
+            <fieldset>
+                <h3>Ajout d'un membre au tableau {{ tableau.titreTableau }} :</h3>
+                <p>
+                    <label for="login">Membre à ajouter&#42; :</label>
+                    <input type="text" name="login" id="login" required/>
+                </p>
+                <input type='hidden' name='idTableau' value='{{ tableau.idTableau }}'>
+                <p>
+                    <input type="submit" value="Ajouter">
+                </p>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}

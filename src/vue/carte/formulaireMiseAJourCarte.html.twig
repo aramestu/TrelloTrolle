@@ -1,0 +1,58 @@
+{% extends "base.html.twig" %}
+
+{% block page_title %}Modification d'une carte{% endblock %}
+
+{% set affectations = carte.affectationsCarte|map(u => u.login) %}
+{% set proprietaire = tableau.proprietaireTableau %}
+
+{% block page_content %}
+    <div>
+        <form method="post" action="{{ route('mettre_a_jour_carte', {idCarte: carte.idCarte}) }}">
+            <fieldset>
+                <h3>Modification d'une carte :</h3>
+                <p>
+                    <label for="titreCarte">Titre de la carte&#42;</label> :
+                    <input type="text" placeholder="Ma super tâche" name="titreCarte" id="titreCarte"
+                           value="{{ carte.titreCarte }}" minlength="1" maxlength="50" required>
+                </p>
+                <p>
+                    <label for="descriptifCarte">Description de la carte&#42;</label> :
+                    <div>
+                        <textarea placeholder="Description de la tâche..." name="descriptifCarte" id="descriptifCarte" required>{{ carte.descriptifCarte }}</textarea>
+                    </div>
+                </p>
+                <p>
+                    <label for="couleurCarte">Couleur de la carte&#42;</label> :
+                    <input type="color" value="#FFFFFF" name="couleurCarte" id="couleurCarte" required>
+                </p>
+                <p>
+                    <label for="idColonne">Colonne de la carte&#42;</label> :
+                    <select name="idColonne" id="idColonne">
+                        {% for optColonne in colonnes %}
+                            <option {{ (optColonne.idColonne == colonne.idColonne) ? "selected" : "" }}
+                                    value="{{ optColonne.idColonne }}">{{ optColonne.titreColonne }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <p>
+                    <label for="affectationsCarte">Membres affectés :</label>
+                    <div>
+                        <select multiple name="affectationsCarte[]" id="affectationsCarte">
+                            <option value="{{ proprietaire.login }}" {{ (proprietaire.login in affectations) ? 'selected':'' }}>
+                                {{ proprietaire.prenom }} {{ proprietaire.nom }} ({{ proprietaire.login }})
+                            </option>
+                            {% for membre in tableau.participants %}
+                                <option value="{{ membre.login }}" {{ (membre.login in affectations) ? 'selected':'' }}>
+                                    {{ membre.prenom }} {{ membre.nom }} ({{ membre.login }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </p>
+                <p>
+                    <input type="submit" value="Modifier la carte">
+                </p>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
