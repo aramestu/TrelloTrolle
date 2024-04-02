@@ -85,7 +85,9 @@ class ControleurCarte extends ControleurGenerique
         $couleurCarte = $_POST["couleurCarte"] ?? null;
         $affectationsCarte = $_POST["affectationsCarte"] ?? null;
         try{
-            $tableau = $this->carteService->creerCarte($idColonne, $titreCarte, $descriptifCarte, $couleurCarte, $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $affectationsCarte);
+            $this->carteService->creerCarte($idColonne, $titreCarte, $descriptifCarte, $couleurCarte, $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $affectationsCarte);
+            $colonne = $this->colonneService->getColonne($idColonne);
+            $tableau = $this->tableauService->getByIdTableau($colonne->getTableau()->getIdTableau());
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
 
@@ -122,7 +124,10 @@ class ControleurCarte extends ControleurGenerique
             return $this->rediriger("connexion");
         }
         try{
-            $tableau = $this->carteService->mettreAJourCarte($idCarte, $_POST["idColonne"],$_POST["titreCarte"],$_POST["descriptifCarte"],$_POST["couleurCarte"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $_POST["affectationsCarte"]);
+            $carte = $this->carteService->mettreAJourCarte($idCarte, $_POST["idColonne"],$_POST["titreCarte"],$_POST["descriptifCarte"],$_POST["couleurCarte"], $this->connexionUtilisateurSession->getIdUtilisateurConnecte(), $_POST["affectationsCarte"]);
+            $colonne = $carte->getColonne();
+            $idTableau = $colonne->getTableau()->getIdTableau();
+            $tableau = $this->tableauService->getByIdTableau($idTableau);
         }catch (\Exception $e){
             MessageFlash::ajouter("warning", $e->getMessage());
             return $this->rediriger("mise_a_jour_carte", ["idCarte" => $idCarte]);

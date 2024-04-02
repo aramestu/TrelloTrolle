@@ -45,6 +45,11 @@ class ColonneRepository extends AbstractRepository implements ColonneRepositoryI
         return Colonne::construireDepuisTableau($objetFormatTableau);
     }
 
+    public function lastInsertId(): false|string
+    {
+        return $this->connexionBaseDeDonnees->getPdo()->lastInsertId();
+    }
+
     public function recupererColonnesTableau(int $idTableau): array {
         return $this->recupererPlusieursParOrdonne("idtableau", $idTableau, ["idcolonne"]);
     }

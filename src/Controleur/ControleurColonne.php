@@ -58,7 +58,6 @@ class ControleurColonne extends ControleurGenerique
             }
             return $this->rediriger("afficher_tableau", ['codeTableau' => $tableau->getCodeTableau()]);
         }
-
     }
 
     #[Route(path: '/colonne/creation', name:'creation_colonne', methods:["GET"])]

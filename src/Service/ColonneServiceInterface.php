@@ -3,6 +3,7 @@
 namespace App\Trellotrolle\Service;
 
 use App\Trellotrolle\Modele\DataObject\Colonne;
+use App\Trellotrolle\Modele\DataObject\Tableau;
 use App\Trellotrolle\Service\Exception\ServiceException;
 use Exception;
 
@@ -22,12 +23,12 @@ interface ColonneServiceInterface
      * @throws ServiceException
      * @throws Exception
      */
-    public function creerColonne(?int $idTableau, ?string $nomColonne, ?string $loginUtilisateurConnecte): void;
+    public function creerColonne(?int $idTableau, ?string $nomColonne, ?string $loginUtilisateurConnecte): int;
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJour(?int $idColonne, ?string $nomColonne, ?string $loginUtilisateurConnecte): void;
+    public function mettreAJour(?int $idColonne, ?string $nomColonne, ?string $loginUtilisateurConnecte): Colonne;
 
     /**
      * @throws ServiceException

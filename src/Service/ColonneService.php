@@ -85,7 +85,7 @@ class ColonneService implements ColonneServiceInterface
      * @throws ServiceException
      * @throws Exception
      */
-    public function creerColonne(?int $idTableau, ?string $nomColonne, ?string $loginUtilisateurConnecte): void{
+    public function creerColonne(?int $idTableau, ?string $nomColonne, ?string $loginUtilisateurConnecte): int{
         $this->verifierNomColonneCorrect($nomColonne);
         $this->verifierIdTableau($idTableau);
 
@@ -97,12 +97,15 @@ class ColonneService implements ColonneServiceInterface
 
         $colonne = Colonne::create(1, $nomColonne, $tableau);
         $this->colonneRepository->ajouter($colonne);
+        $idColonne = $this->colonneRepository->lastInsertId();
+
+        return $idColonne;
     }
 
     /**
      * @throws ServiceException
      */
-    public function mettreAJour(?int $idColonne, ?string $nomColonne, ?string $loginUtilisateurConnecte): void{
+    public function mettreAJour(?int $idColonne, ?string $nomColonne, ?string $loginUtilisateurConnecte): Colonne{
         $this->verifierNomColonneCorrect($nomColonne);
         $this->verifierIdColonneCorrect($idColonne);
 
@@ -116,6 +119,8 @@ class ColonneService implements ColonneServiceInterface
 
         $colonne->setTitreColonne($nomColonne);
         $this->colonneRepository->mettreAJour($colonne);
+
+        return $colonne;
     }
 
     /**
