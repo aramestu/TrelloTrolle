@@ -3,7 +3,8 @@ lang: fr
 ---
 # SAE4A - Trello-Trollé
 
-lien : https://webinfo.iutmontp.univ-montp2.fr/~lemoinem/trello-trolle/web/
+Nécessite une verion de PHP supérieur à 8.2
+L'hébéregement sur les serveurs du BUT était impossible, il faut donc le lancer en localhost après avoit installer les différentes librairies via le composer.json.
 
 Liste des fonctionnalités améliorées : 
 * Changement de la base de données
@@ -14,13 +15,3 @@ Liste des fonctionnalités améliorées :
 * Remplacement des vues php par des vues twig
 * Refactor de la librairie de mot de passe
 * Ajout du tableau dynamique
-
-
-Répartition du travail : 
-
-    - Mathias   20%
-    - Norman    25%
-    - Kilian    20%
-    - Lenn      Abandon
-    - Thibaut   25%
-    - Clément   10%
